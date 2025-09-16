@@ -821,7 +821,7 @@ if selection == "Unmatched Topic Analysis":
     
         # 2) merge by key (new replaces old on same key)
         by_key = {}
-        for it in (base if mode == "merge" else []):
+        for it in (current if mode == "merge" else []):
             k = it.get(dedupe_key)
             if k is not None:
                 by_key[k] = it
