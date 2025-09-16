@@ -773,17 +773,18 @@ if selection == "Unmatched Topic Analysis":
         else:
             st.session_state.topicsbert = []
     
-    try:
-        if 'discarded' not in st.session_state:
+    if 'discarded' not in st.session_state:
+        st.session_state.discarded = []
+        try:
             if os.path.exists('Model_training/discarded_topics.json'):
-                with open('Online_Extraction/discarded_topics.json', 'r') as f:
+                with open('Model_training/discarded_topics.json', 'r') as f:
                     discarded_topics = json.load(f)
                 if not isinstance(discarded_topics, list):
                     discarded_topics = [discarded_topics]
                 st.session_state.discarded = discarded_topics
-    except Exception:
-        discarded_topics = []
-        st.session_state.discarded = []
+        except Exception as e:
+            discarded_topics = []
+        
     st.title('Unmatched Topics Analysis')
 
     for topic in st.session_state.unmatched:
