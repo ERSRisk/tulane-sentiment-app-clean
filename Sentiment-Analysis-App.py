@@ -799,8 +799,8 @@ if selection == "Unmatched Topic Analysis":
         assets = requests.get(f"https://api.github.com/repos/{owner}/{repo}/releases/{rel['id']}/assets", headers=h, timeout=60).json()
         name = os.path.basename(asset_path)
         for a in assets:
-        if a.get("name") == name:
-            requests.delete(f"{base}/releases/assets/{a['id']}", headers=h, timeout=60)
+            if a.get("name") == name:
+                requests.delete(f"{base}/releases/assets/{a['id']}", headers=h, timeout=60)
         with open(asset_path, "rb") as f:
             up = requests.post(
                 f"{upload_url}?name={name}",
