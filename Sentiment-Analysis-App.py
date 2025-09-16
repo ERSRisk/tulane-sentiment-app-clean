@@ -766,6 +766,82 @@ if selection == "Unmatched Topic Analysis":
         if r_put.status_code not in (200, 201):
             raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
         return r_put.json()
+        
+    def fetch_release(owner, repo, tag:str, asset_path:str, token:str):
+        headers = {'Authorization': f'token {token}',
+                  'Accept': 'application/vnd.github+json'}
+        r = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', headers=headers, timeout=60)
+        if r.status_code == 404:
+            r = requests.post(f'https://api.github.com/repos/{owner}/{repo}/releases', headers = headers, timeout = 60, json={
+            "tag_name": tag, "name": tag, "draft": False, "prerelease": False
+        })
+        r.raise_for_status()
+        rel = r.json()
+        upload_url = rel['upload_url'].split('{', 1)[0]
+        assets = requests.get(f"https://api.github/com/repos/{owner}/{repo}/releases/{rel['id']}/assets", headers=h, timeout=60).json()
+        a = next((x for x in assets if x.get("name") == asset_name), None)
+        if not a:
+            return []
+        
+        url = a.get('browser_download_url')
+        b = requests.get(url, headers = headers, timeout = 120)
+        b.raise_for_status()
+        content = b.content
+        return json.loads(content.decode('utf-8'))
+
+    def upload_asset_to_release(owner, repo, tag:str, asset_path:str, token:str):
+        headers = {'Authorization': f'token {token}',
+                  'Accept': 'application/vnd.github+json'}
+        r = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', headers=headers, timeout=60)
+        r.raise_for_status()
+        rel = r.json()
+        upload_url = rel["upload_url"].split("{", 1)[0]
+        assets = requests.get(f"https://api.github.com/repos/{owner}/{repo}/releases/{rel['id']}/assets", headers=h, timeout=60).json()
+        name = os.path.basename(asset_path)
+        for a in assets:
+        if a.get("name") == name:
+            requests.delete(f"{base}/releases/assets/{a['id']}", headers=h, timeout=60)
+        with open(asset_path, "rb") as f:
+            up = requests.post(
+                f"{upload_url}?name={name}",
+                headers={"Authorization": f"token {token}", "Content-Type": "application/octet-stream"},
+                data=f.read(), timeout=300
+            )
+        up.raise_for_status()
+        return up.json()
+    def upsert_single_big_json(owner_repo: str, tag: str, asset_name: str,
+                           new_items: list, dedupe_key: str, token: str):
+        current = fetch_release(owner_repo, tag, asset_name, token)
+        if not isinstance(current, list):
+            current = []
+    
+        # 2) merge by key (new replaces old on same key)
+        by_key = {}
+        for it in current:
+            k = it.get(dedupe_key)
+            if k is not None:
+                by_key[k] = it
+        for it in new_items:
+            k = it.get(dedupe_key)
+            if k is not None:
+                by_key[k] = it
+    
+        merged = list(by_key.values())
+    
+        # 3) write to a temp gz and upload (same asset name → old is deleted then replaced)
+        with tempfile.TemporaryDirectory() as td:
+            path = os.path.join(td, asset_name)  # e.g., "unmatched_topics.json.gz"
+            raw = json.dumps(merged, ensure_ascii=False).encode("utf-8")
+            if asset_name.endswith(".gz"):
+                with gzip.open(path, "wb") as f:
+                    f.write(raw)
+            else:
+                with open(path, "wb") as f:
+                    f.write(raw)
+            return upload_asset_to_release(owner_repo, tag, path, token)
+        
+        
+            
     if 'unmatched' not in st.session_state:
         if os.path.exists('Model_training/unmatched_topics.json'):
             with open('Model_training/unmatched_topics.json', 'r') as f:
