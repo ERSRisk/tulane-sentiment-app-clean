@@ -844,11 +844,11 @@ if selection == "Unmatched Topic Analysis":
         
             
     if 'unmatched' not in st.session_state:
-        if os.path.exists('Model_training/unmatched_topics.json'):
-            with open('Model_training/unmatched_topics.json', 'r') as f:
-                st.session_state.unmatched = json.load(f)
-        else:
-            st.session_state.unmatched = []
+        st.session_state.unmatched = fetch_release(
+            "ERSRisk", "tulane-sentiment-app-clean",
+            "unmatched-topics", "unmatched_topics.json",
+            st.secrets['all_my_api_keys']['GITHUB_TOKEN']
+            ) or []
 
     if 'topicsbert' not in st.session_state:
         if os.path.exists('Model_training/topics_BERT.json'):
@@ -858,13 +858,11 @@ if selection == "Unmatched Topic Analysis":
             st.session_state.topicsbert = []
     
     if 'discarded' not in st.session_state:
-        st.session_state.discarded = []
-        if 'discarded' not in st.session_state:
-            st.session_state.discarded = fetch_release(
-                "ERSRisk", "tulane-sentiment-app-clean",
-                "discarded-topics", "discarded_topics.json",
-                st.secrets['all_my_api_keys']['GITHUB_TOKEN']
-                ) or []
+        st.session_state.discarded = fetch_release(
+            "ERSRisk", "tulane-sentiment-app-clean",
+            "discarded-topics", "discarded_topics.json",
+            st.secrets['all_my_api_keys']['GITHUB_TOKEN']
+            ) or []
         
     st.title('Unmatched Topics Analysis')
 
