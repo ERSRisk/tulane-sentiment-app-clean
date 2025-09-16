@@ -868,6 +868,20 @@ if selection == "Unmatched Topic Analysis":
             ) or []
         
     st.title('Unmatched Topics Analysis')
+    PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
+    total = len(st.session_state.unmatched)
+    max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
+
+    if 'page_num' not in st.session_state:
+        st.session_state.page_num = 1
+    st.session_state.page_num = st.sidebar.number_input(
+        'Page', min_value = 1, max_value = max_page, value = st.session_state.page_num, step =1
+    )
+
+    start = (st.session_state.page_num - 1) * PAGE_SIZE
+    end = start + PAGE_SIZE
+    st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
+    page_df = st.session_state.unmatched.iloc[start:end]
 
     for topic in st.session_state.unmatched:
         skip_key = f"skip_{topic['topic']}"
