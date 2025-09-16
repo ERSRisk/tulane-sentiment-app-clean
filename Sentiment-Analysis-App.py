@@ -768,7 +768,7 @@ if selection == "Unmatched Topic Analysis":
             raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
         return r_put.json()
         
-    def fetch_release(owner, repo, tag:str, asset_path:str, token:str):
+    def fetch_release(owner, repo, tag:str, asset_name:str, token:str):
         headers = {'Authorization': f'token {token}',
                   'Accept': 'application/vnd.github+json'}
         r = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', headers=headers, timeout=60)
@@ -801,7 +801,7 @@ if selection == "Unmatched Topic Analysis":
         name = os.path.basename(asset_path)
         for a in assets:
             if a.get("name") == name:
-                requests.delete(f"{base}/releases/assets/{a['id']}", headers=h, timeout=60)
+                requests.delete(f"https://api.github.com/repos/{owner}/{repo}/releases/assets/{a['id']}", headers=headers, timeout=60)
         with open(asset_path, "rb") as f:
             up = requests.post(
                 f"{upload_url}?name={name}",
@@ -909,8 +909,8 @@ if selection == "Unmatched Topic Analysis":
                             'documents': topic['documents']
                         }
                         st.session_state.topicsbert.append(new_topic)
-                        resp = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/topics_bert.json', branch = 'main')
+                        resp = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_new_{radio_key}"):
@@ -937,8 +937,8 @@ if selection == "Unmatched Topic Analysis":
                                     t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
                                     new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
-                                resp1 = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/topics_bert.json', branch = 'main')
+                                resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
@@ -963,7 +963,7 @@ if selection == "Unmatched Topic Analysis":
                     repo =  'tulane-sentiment-app-clean',
                     tag="discarded-topics",                     # release to hold the ONE file
                     asset_name="discarded_topics.json",      # SINGLE canonical asset name
-                    new_items=st.session_state.unmatched,       # your new/edited items
+                    new_items=st.session_state.discarded,       # your new/edited items
                     dedupe_key="topic",
                     token=st.secrets['all_my_api_keys']['GITHUB_TOKEN']
                 )
@@ -977,7 +977,7 @@ if selection == "Unmatched Topic Analysis":
                 repo="tulane-sentiment-app-clean",
                 tag="unmatched-topics",
                 asset_name="unmatched_topics.json",
-                new_items=unmatched_json,
+                new_items=st.session_state.unmatched,
                 dedupe_key="topic",
                 token=st.secrets['all_my_api_keys']['GITHUB_TOKEN']
             )
