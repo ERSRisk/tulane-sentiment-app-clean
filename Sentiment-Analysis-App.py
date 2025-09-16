@@ -778,7 +778,7 @@ if selection == "Unmatched Topic Analysis":
         r.raise_for_status()
         rel = r.json()
         upload_url = rel['upload_url'].split('{', 1)[0]
-        assets = requests.get(f"https://api.github/com/repos/{owner}/{repo}/releases/{rel['id']}/assets", headers=h, timeout=60).json()
+        assets = requests.get(f"https://api.github/com/repos/{owner}/{repo}/releases/{rel['id']}/assets", headers=headers, timeout=60).json()
         a = next((x for x in assets if x.get("name") == asset_name), None)
         if not a:
             return []
