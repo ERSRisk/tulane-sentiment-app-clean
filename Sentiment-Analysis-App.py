@@ -881,7 +881,7 @@ if selection == "Unmatched Topic Analysis":
     start = (st.session_state.page_num - 1) * PAGE_SIZE
     end = start + PAGE_SIZE
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
-    page_df = st.session_state.unmatched.iloc[start:end]
+    page_df = st.session_state.unmatched[start:end]
 
     for topic in st.session_state.unmatched:
         skip_key = f"skip_{topic['topic']}"
