@@ -762,7 +762,7 @@ if selection == "Unmatched Topic Analysis":
     if 'unmatched' not in st.session_state:
         if os.path.exists('Model_training/unmatched_topics.json'):
             with open('Model_training/unmatched_topics.json', 'r') as f:
-                st.session_state.umatched = json.load(f)
+                st.session_state.unmatched = json.load(f)
         else:
             st.session_state.unmatched = []
 
