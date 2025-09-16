@@ -957,8 +957,14 @@ if selection == "Unmatched Topic Analysis":
                 'documents': topic['documents']
             }
             st.session_state.discarded.append(discarded_topic)
-            resp2 = push_file_to_github('Model_training/discarded_topics.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/discarded_topics.json', branch = 'main')
+            resp2 = upsert_single_big_json(
+                    owner_repo="ERSRisk/tulane-sentiment-app-clean",
+                    tag="discarded-topics",                     # release to hold the ONE file
+                    asset_name="discarded_topics.json",      # SINGLE canonical asset name
+                    new_items=st.session_state.unmatched,       # your new/edited items
+                    dedupe_key="topic",
+                    token=st.secrets['all_my_api_keys']['GITHUB_TOKEN']
+                )
 
             unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
             resp3 = push_file_to_github('Model_training/unmatched_topics.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
