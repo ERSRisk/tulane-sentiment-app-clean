@@ -839,7 +839,7 @@ if selection == "Unmatched Topic Analysis":
             else:
                 with open(path, "wb") as f:
                     f.write(raw)
-            return upload_asset_to_release(owner_repo, tag, path, token)
+            return upload_asset_to_release(owner, repo, tag, path, token)
         
         
             
