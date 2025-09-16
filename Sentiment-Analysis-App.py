@@ -880,7 +880,7 @@ if selection == "Unmatched Topic Analysis":
 
     start = (st.session_state.page_num - 1) * PAGE_SIZE
     end = start + PAGE_SIZE
-    st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
+    st.caption(f"Showing {start + 1} to {min(end, total)} of {total} topics")
     page_df = st.session_state.unmatched[start:end]
 
     for topic in st.session_state.unmatched:
