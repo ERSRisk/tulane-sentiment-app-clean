@@ -758,7 +758,7 @@ if selection == "Unmatched Topic Analysis":
         if r_put.status_code not in (200, 201):
             raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
         return r_put.json()
-    if 'unmatched' not in st.session.state:
+    if 'unmatched' not in st.session_state:
         if os.path.exists('Model_training/unmatched_topics.json'):
             with open('Model_training/unmatched_topics.json', 'r') as f:
                 st.session_state.umatched = json.load(f)
