@@ -823,7 +823,7 @@ if selection == "Unmatched Topic Analysis":
                             'documents': topic['documents']
                         }
                         st.session_state.topicsbert.append(new_topic)
-                        resp = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                        resp = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_bert.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
@@ -851,7 +851,7 @@ if selection == "Unmatched Topic Analysis":
                                     t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
                                     new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
-                                resp1 = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                resp1 = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_bert.json', branch = 'main')
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
@@ -872,11 +872,11 @@ if selection == "Unmatched Topic Analysis":
                 'documents': topic['documents']
             }
             st.session_state.discarded.append(discarded_topic)
-            resp2 = push_file_to_github('Model_training/discarded_topics.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+            resp2 = push_file_to_github('Model_training/discarded_topics.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/discarded_topics.json', branch = 'main')
 
             unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
-            resp3 = push_file_to_github('Model_training/unmatched_topics.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+            resp3 = push_file_to_github('Model_training/unmatched_topics.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/unmatched_topics.json', branch = 'main')
 
             st.success(f"Topic {topic['topic']} discarded successfully!")
