@@ -811,14 +811,17 @@ if selection == "Unmatched Topic Analysis":
         up.raise_for_status()
         return up.json()
     def upsert_single_big_json(owner, repo, tag: str, asset_name: str,
-                           new_items: list, dedupe_key: str, token: str):
-        current = fetch_release(owner, repo, tag, asset_name, token)
-        if not isinstance(current, list):
+                           new_items: list, dedupe_key: str, token: str, mode = 'merge'):
+        if mode == 'replace':
             current = []
+        else:
+            current = fetch_release(owner, repo, tag, asset_name, token)
+            if not isinstance(current, list):
+                current = []
     
         # 2) merge by key (new replaces old on same key)
         by_key = {}
-        for it in current:
+        for it in (base if mode == "merge" else []):
             k = it.get(dedupe_key)
             if k is not None:
                 by_key[k] = it
@@ -974,7 +977,8 @@ if selection == "Unmatched Topic Analysis":
                 asset_name="unmatched_topics.json",
                 new_items=st.session_state.unmatched,
                 dedupe_key="topic",
-                token=st.secrets['all_my_api_keys']['GITHUB_TOKEN']
+                token=st.secrets['all_my_api_keys']['GITHUB_TOKEN'],
+                mode = 'replace'
             )
 
             st.success(f"Topic {topic['topic']} discarded successfully!")
