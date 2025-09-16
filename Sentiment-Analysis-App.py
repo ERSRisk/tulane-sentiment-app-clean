@@ -809,9 +809,9 @@ if selection == "Unmatched Topic Analysis":
             )
         up.raise_for_status()
         return up.json()
-    def upsert_single_big_json(owner_repo: str, tag: str, asset_name: str,
+    def upsert_single_big_json(owner, repo, tag: str, asset_name: str,
                            new_items: list, dedupe_key: str, token: str):
-        current = fetch_release(owner_repo, tag, asset_name, token)
+        current = fetch_release(owner, repo, tag, asset_name, token)
         if not isinstance(current, list):
             current = []
     
