@@ -859,15 +859,12 @@ if selection == "Unmatched Topic Analysis":
     
     if 'discarded' not in st.session_state:
         st.session_state.discarded = []
-        try:
-            if os.path.exists('Model_training/discarded_topics.json'):
-                with open('Model_training/discarded_topics.json', 'r') as f:
-                    discarded_topics = json.load(f)
-                if not isinstance(discarded_topics, list):
-                    discarded_topics = [discarded_topics]
-                st.session_state.discarded = discarded_topics
-        except Exception as e:
-            discarded_topics = []
+        if 'discarded' not in st.session_state:
+            st.session_state.discarded = fetch_release(
+                "ERSRisk", "tulane-sentiment-app-clean",
+                "discarded-topics", "discarded_topics.json",
+                st.secrets['all_my_api_keys']['GITHUB_TOKEN']
+                ) or []
         
     st.title('Unmatched Topics Analysis')
 
