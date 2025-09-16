@@ -736,9 +736,16 @@ if selection == "X Sentiment":
 if selection == "Unmatched Topic Analysis":
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
         token = st.secrets['all_my_api_keys']['GITHUB_TOKEN']
-
-        with open(local_path, "rb") as f:
-            content_b64 = base64.b64encode(f.read()).decode("utf-8")
+        try:
+            with open(local_path, "rb") as f:
+                content_b64 = base64.b64encode(f.read()).decode("utf-8")
+        except Exception as e:
+            default_bytes = b"[]\n" if local_path.lower().endswith(".json") else b""
+            with open(local_path, 'wb') as f:
+                f.write(default_bytes)
+            content_bytes = default_bytes
+            content_b64 = base64.b64encode(content_bytes).decode("utf-8")
+                
 
         api_base = f"https://api.github.com/repos/{repo}/contents/{dest_path}"
         headers = {"Authorization": f"token {token}", "Accept":"application/vnd.github+json"}
