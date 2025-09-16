@@ -1234,7 +1234,7 @@ if selection == "Article Risk Review":
 
                                 st.session_state.change_log.to_csv(change_log_path, index = False)
                                 try:
-                                    resp = push_file_to_github(change_log_path, repo = 'tulane-sentiment-app-clean',
+                                    resp = push_file_to_github(change_log_path, repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/BERTopic_changes.csv', branch = 'main')
                                     changes = pd.read_csv('Model_training/BERTopic_changes.csv')
                                     res = pd.read_csv('BERTopic_results.csv')
