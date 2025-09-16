@@ -733,23 +733,59 @@ if selection == "X Sentiment":
         # Full cleaned table
         st.write(df_filtered.drop(columns=["is_sport"]))
 if selection == "Unmatched Topic Analysis":
-    with open('Model_training/unmatched_topics.json', 'r') as f:
-        unmatched = json.load(f)
+    def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
+        token = st.secrets['all_my_api_keys']['GITHUB_TOKEN']
 
-    with open('Model_training/topics_BERT.json', 'r') as f:
-        saved_topics = json.load(f)
+        with open(local_path, "rb") as f:
+            content_b64 = base64.b64encode(f.read()).decode("utf-8")
 
+        api_base = f"https://api.github.com/repos/{repo}/contents/{dest_path}"
+        headers = {"Authorization": f"token {token}", "Accept":"application/vnd.github+json"}
+
+        sha = None
+        r_get = requests.get(api_base, headers = headers, params = {"ref":branch})
+        if r_get.status_code == 200:
+            sha = r_get.json()['sha']
+        payload = {
+            "message": f"Update {dest_path} via Streamlit at {time.strftime('%Y-%m-%d %H:%M:%S')}",
+            "content": content_b64,
+            "branch": branch,
+        }
+        if sha:
+            payload["sha"] = sha
+
+        r_put = requests.put(api_base, headers = headers, data = json.dumps(payload))
+        if r_put.status_code not in (200, 201):
+            raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
+        return r_put.json()
+    if 'unmatched' not in st.session.state:
+        if os.path.exists('Model_training/unmatched_topics.json'):
+            with open('Model_training/unmatched_topics.json', 'r') as f:
+                st.session_state.umatched = json.load(f)
+        else:
+            st.session_state.unmatched = []
+
+    if 'topicsbert' not in st.session_state:
+        if os.path.exists('Model_training/topics_BERT.json'):
+            with open('Model_training/topics_BERT.json', 'r') as f:
+                st.session_state.topicsbert = json.load(f)
+        else:
+            st.session_state.topicsbert = []
+    
     try:
-        with open('Model_training/discarded_topics', 'r') as f:
-            discarded_topics = json.load(f)
-            if not isinstance(discarded_topics, list):
-                discarded_topics = [discarded_topics]
-    except FileNotFoundError:
+        if 'discarded' not in st.session_state:
+            if os.path.exists('Model_training/discarded_topics.json'):
+                with open('Online_Extraction/discarded_topics.json', 'r') as f:
+                    discarded_topics = json.load(f)
+                if not isinstance(discarded_topics, list):
+                    discarded_topics = [discarded_topics]
+                st.session_state.discarded = discarded_topics
+    except Exception:
         discarded_topics = []
-
+        st.session_state.discarded = []
     st.title('Unmatched Topics Analysis')
 
-    for topic in unmatched:
+    for topic in st.session_state.unmatched:
         skip_key = f"skip_{topic['topic']}"
         if st.session_state.get(skip_key):
             continue
@@ -786,9 +822,9 @@ if selection == "Unmatched Topic Analysis":
                             'keywords': topic['keywords'],
                             'documents': topic['documents']
                         }
-                        saved_topics.append(new_topic)
-                        with open('topics_BERT.json', 'w') as f:
-                            json.dump(saved_topics, f)
+                        st.session_state.topicsbert.append(new_topic)
+                        resp = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                              dest_path = 'Model_training/topics_bert.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_new_{radio_key}"):
@@ -803,8 +839,8 @@ if selection == "Unmatched Topic Analysis":
                 with col1:
                     if st.button("Yes, merge topic", key=f"merge_{radio_key}"):
                         st.session_state['confirm_merge'] = False
-                        existing_topic = st.selectbox("Select existing topic to merge with:", ['--Select a topic--'] + [t['name'] for t in saved_topics], index = 0, key=f"existing_topic_{radio_key}")
-                        for t in saved_topics:
+                        existing_topic = st.selectbox("Select existing topic to merge with:", ['--Select a topic--'] + [t['name'] for t in st.session_state.topicsbert],index = 0, key=f"existing_topic_{radio_key}")
+                        for t in st.session_state.topicsbert:
                             if t['name'] == existing_topic:
                                 if isinstance(t['documents'], str):
                                     t['documents'] = [t['documents']]
@@ -815,8 +851,8 @@ if selection == "Unmatched Topic Analysis":
                                     t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
                                     new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
-                                with open('topics_BERT.json', 'w') as f:
-                                    json.dump(saved_topics, f)
+                                resp1 = push_file_to_github('Model_training/topics_bert.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                              dest_path = 'Model_training/topics_bert.json', branch = 'main')
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
@@ -835,13 +871,13 @@ if selection == "Unmatched Topic Analysis":
                 'keywords': topic['keywords'],
                 'documents': topic['documents']
             }
-            discarded_topics.append(discarded_topic)
-            with open('Model_training/discarded_topics', 'w') as f:
-                json.dump(discarded_topic, f)
+            st.session_state.discarded.append(discarded_topic)
+            resp2 = push_file_to_github('Model_training/discarded_topics.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                              dest_path = 'Model_training/discarded_topics.json', branch = 'main')
 
-            unmatched_json = [t for t in unmatched if t['topic'] != topic['topic']]
-            with open('Model_training/unmatched_topics.json', 'w') as f:
-                json.dump(unmatched_json, f)
+            unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+            resp3 = push_file_to_github('Model_training/unmatched_topics.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                              dest_path = 'Model_training/unmatched_topics.json', branch = 'main')
 
             st.success(f"Topic {topic['topic']} discarded successfully!")
 
