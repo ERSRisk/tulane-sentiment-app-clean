@@ -1233,7 +1233,6 @@ if selection == "Article Risk Review":
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
-                st.markdown("**Topic:** " + article['Topic_name'])
                 w = {
                 'Recency': 0.15,
                 'Source_Accuracy': 0.10,
@@ -1256,6 +1255,7 @@ if selection == "Article Risk Review":
                 )
                 article['Risk_Score_y'] = (num / weight_sum)
                 st.metric('Risk Score', article['Risk_Score_y'])
+                st.markdown("**Topic:** " + article['Topic_name'])
     
                 # --- Quick review toggle ---
                 c1, c2 = st.columns([1, 3])
@@ -1293,6 +1293,7 @@ if selection == "Article Risk Review":
                 ]
                 
                 st.markdown("**Predicted Risks:** " + (", ".join(matched_risks) if matched_risks else "No Risk"))
+                
                 
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
                 with tab1:
