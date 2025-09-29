@@ -1233,7 +1233,7 @@ if selection == "Article Risk Review":
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
-                st.metric("Topic", article['Topic_name'])
+                st.markdown("**Topic:**" + article['Topic_name'])
                 w = {
                 'Recency': 0.15,
                 'Source_Accuracy': 0.10,
