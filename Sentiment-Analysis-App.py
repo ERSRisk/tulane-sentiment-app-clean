@@ -1184,6 +1184,17 @@ if selection == "Article Risk Review":
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
     page_df = filtered_df.iloc[start:end]
 
+    with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
+        name_map = {int(t['topic']): t['name'] for t in json.load(f)}
+
+    def coerce_topic_scalar(x):
+        v = pd.to_numeric(x, errors = 'coerce')
+        if pd.isna(v):
+            return -1
+        try:
+            return int(v)
+        except Exception as e:
+            return e
 
     for idx in page_df.index:
         article= st.session_state.articles.loc[idx]
@@ -1214,13 +1225,11 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
         
         if title:
-            with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
-                name_map = {int(t['topic']): t['name'] for t in json.load(f)}
-            article['Topic'] = pd.to_numeric(article['Topic'], errors = 'coerce')
-            if pd.isna(article['Topic']):
-                article['Topic'] = -1
+           
+            tid = coerce_topic_scalar(article.get('Topic'))
+            article['Topic'] = tid
             
-            article['Topic_name'] = article['Topic'].map(name_map).fillna('Unlabeled Topic')
+            article['Topic_name'] = name_map.get(tid, 'Unlabeled Topic')
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
