@@ -1216,8 +1216,10 @@ if selection == "Article Risk Review":
         if title:
             with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
                 name_map = {int(t['topic']): t['name'] for t in json.load(f)}
-            article['Topic'] = pd.Series(article['Topic'], index = article.index)
-            article['Topic'] = pd.to_numeric(article['Topic'], errors = 'coerce').fillna(-1).astype(int)
+            article['Topic'] = pd.to_numeric(article['Topic'], errors = 'coerce')
+            if pd.isna(article['Topic']):
+                article['Topic'] = -1
+            
             article['Topic_name'] = article['Topic'].map(name_map).fillna('Unlabeled Topic')
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
