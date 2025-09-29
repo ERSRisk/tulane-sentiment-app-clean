@@ -1214,10 +1214,13 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
         
         if title:
+            with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
+                name_map = {int(t['topic']: t['name']) for t in json.load(f)}
+            article['Topic_name'] = df['Topic'].map(name_map).fillna('Unlabeled Topic')
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
-                st.metric("Topic", article['Topic'])
+                st.metric("Topic", article['Topic_name'])
                 w = {
                 'Recency': 0.15,
                 'Source_Accuracy': 0.10,
