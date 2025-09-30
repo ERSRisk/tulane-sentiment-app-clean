@@ -1256,7 +1256,8 @@ if selection == "Article Risk Review":
                 article['Risk_Score_y'] = (num / weight_sum)
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.metric('Risk Score', article['Risk_Score_y'])
+                    st.markdown('**Risk Score** ')
+                    st.markdown(article['Risk_Score_y'])
                 with col2:
                     st.markdown("**Topic:** ")
                     st.markdown(article['Topic_name'])
