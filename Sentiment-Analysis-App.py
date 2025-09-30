@@ -1254,8 +1254,11 @@ if selection == "Article Risk Review":
                     float(article['Frequency_Score']) * w['Frequency_Score']
                 )
                 article['Risk_Score_y'] = (num / weight_sum)
-                st.metric('Risk Score', article['Risk_Score_y'])
-                st.markdown("**Topic:** " + article['Topic_name'])
+                col1, col2 = st.columns(1,2)
+                with col1:
+                    st.metric('Risk Score', article['Risk_Score_y'])
+                with col2:
+                    st.metric("Topic", article['Topic_name'])
     
                 # --- Quick review toggle ---
                 c1, c2 = st.columns([1, 3])
