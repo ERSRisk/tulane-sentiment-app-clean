@@ -1263,7 +1263,7 @@ if selection == "Article Risk Review":
                     st.markdown(article['Topic_name'])
     
                 # --- Quick review toggle ---
-                c1, c2 = st.columns([1, 3])
+                c1, c2 = st.columns(2)
                 with c1:
                     if not reviewed:
                         if st.button("Mark as reviewed", key=f"mark_{idx}"):
