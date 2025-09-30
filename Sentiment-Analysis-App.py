@@ -1254,7 +1254,7 @@ if selection == "Article Risk Review":
                     float(article['Frequency_Score']) * w['Frequency_Score']
                 )
                 article['Risk_Score_y'] = (num / weight_sum)
-                col1, col2 = st.columns(2)
+                col1, col2, col3 = st.columns(3)
                 with col1:
                     st.metric('Risk Score', article['Risk_Score_y'])
                 with col2:
