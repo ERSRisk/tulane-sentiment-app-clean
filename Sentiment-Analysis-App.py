@@ -1258,7 +1258,8 @@ if selection == "Article Risk Review":
                 with col1:
                     st.metric('Risk Score', article['Risk_Score_y'])
                 with col2:
-                    st.metric("Topic", article['Topic_name'])
+                    st.markdown("**Topic:** ")
+                    st.markdown(article['Topic_name'])
     
                 # --- Quick review toggle ---
                 c1, c2 = st.columns([1, 3])
