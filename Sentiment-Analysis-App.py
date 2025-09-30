@@ -1035,7 +1035,7 @@ if selection == "Article Risk Review":
         load_hidden_topics.clear()
 
     hidden_mtime = hidden_file.stat().st_mtime if hidden_file.exists() else 0.0
-    hidden_topic_ids  set(load_hidden_topics(str(hidden_file), hidden_mtime))
+    hidden_topic_ids = set(load_hidden_topics(str(hidden_file), hidden_mtime))
 
     def get_csv_from_release(owner, repo, tag, asset) -> pd.DataFrame:
         token = st.secrets['all_my_api_keys']['GITHUB_TOKEN']
