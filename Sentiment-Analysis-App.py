@@ -1254,7 +1254,7 @@ if selection == "Article Risk Review":
                     float(article['Frequency_Score']) * w['Frequency_Score']
                 )
                 article['Risk_Score_y'] = (num / weight_sum)
-                col1, col2, col3 = st.columns(3)
+                col1, col2 = st.columns(2)
                 with col1:
                     st.metric('Risk Score', article['Risk_Score_y'])
                 with col2:
@@ -1289,6 +1289,8 @@ if selection == "Article Risk Review":
                             st.session_state.change_log.to_csv(change_log_path, index=False)
                             st.info("Review mark removed")
                             st.rerun()
+                with c2:
+                    st.write('test')
 
                 matched_risks = [
                     opt for opt in all_possible_risks
