@@ -1217,7 +1217,7 @@ if selection == "Article Risk Review":
     st.sidebar.markdown('Hidden topics')
     to_unhide = st.sidebar.multiselect(
         'Unhide selected',
-        options = sorted(hidden_topic_ids)
+        options = sorted(hidden_topic_ids),
         format_func = lambda tid: f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}"
     )
     cola, colb = st.sidebar.columns(2)
