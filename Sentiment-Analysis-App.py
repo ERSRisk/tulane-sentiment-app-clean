@@ -1334,7 +1334,7 @@ if selection == "Article Risk Review":
                             st.info("Review mark removed")
                             st.rerun()
                 with c2:
-                    if st.button('Hide this topic', key = f'hide_topic_{tid}'):
+                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{idx}'):
                         if tid != -1:
                             hidden_topic_ids.add(int(tid))
                             save_hidden_topics(hidden_topic_ids)
