@@ -1011,6 +1011,32 @@ if selection == "Article Risk Review":
     TAG = 'BERTopic_results'
     ASSET = 'BERTopic_results2.csv.gz'
 
+    hidden_file = Path('Model_training/hidden_topics.json')
+
+    def atomic_write_json(path: Path, data: dict):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + '.tmp')
+        with open(tmp, 'w', encoding = 'utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
+
+    @st.cache_data
+    def load_hidden_topics(path:str, file_mtime:float) -> list[int]:
+        p = Path(path)
+        if not p.exists():
+            return[]
+        with open(p, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return [int(t) for t in (data.get('hidden_topic_ids', []) if isinstance(data, dict) else data)]
+
+    def save_hidden_topics(hidden_ids:set[int]):
+        payload = {'hidden_topic_ids': sorted(int(x) for x in hidden_ids)}
+        atomic_write_json(hidden_file, payload)
+        load_hidden_topics.clear()
+
+    hidden_mtime = hidden_file.stat().st_mtime if hidden_file.exists() else 0.0
+    hidden_topic_ids  set(load_hidden_topics(str(hidden_file), hidden_mtime))
+
     def get_csv_from_release(owner, repo, tag, asset) -> pd.DataFrame:
         token = st.secrets['all_my_api_keys']['GITHUB_TOKEN']
         headers = {"Accept": "application/vnd.github+json",
@@ -1187,6 +1213,20 @@ if selection == "Article Risk Review":
     with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
         name_map = {int(t['topic']): t['name'] for t in json.load(f)}
 
+    hidden_names = [f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}" for tid in sorted(hidden_topic_ids)]
+    st.sidebar.markdown('Hidden topics')
+    to_unhide = st.sidebar.multiselect(
+        'Unhide selected',
+        options = sorted(hidden_topic_ids)
+        format_func = lambda tid: f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}"
+    )
+    cola, colb = st.sidebar.columns(2)
+    with cola:
+        if st.button('Unhide', key='unhide_btn', disabled = not to_unhide):
+            hidden_topics_ids.difference_update(to_unhide)
+            save_hidden_topics(hidden_topic_ids)
+            st.rerun()
+
     def coerce_topic_scalar(x):
         v = pd.to_numeric(x, errors = 'coerce')
         if pd.isna(v):
@@ -1230,6 +1270,8 @@ if selection == "Article Risk Review":
             article['Topic'] = tid
             
             article['Topic_name'] = name_map.get(tid, 'Unlabeled Topic')
+            if tid in hidden_topic_ids:
+                continue
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
@@ -1292,7 +1334,12 @@ if selection == "Article Risk Review":
                             st.info("Review mark removed")
                             st.rerun()
                 with c2:
-                    st.write('test')
+                    if st.button('Hide this topic', key = f'hide_topic_{tid}'):
+                        if tid != -1:
+                            hidden_topic_ids.add(int(tid))
+                            save_hidden_topics(hidden_topic_ids)
+                            st.success(f"Hid topic {tid} - {article['Topic_name']}")
+                            st.rerun()
 
                 matched_risks = [
                     opt for opt in all_possible_risks
