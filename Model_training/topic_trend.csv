@@ -74,7 +74,7 @@ week,Topic_Name,article_count
 2019-12-17,Baseball Games,1
 2020-06-16,Higher Education,1
 2020-06-16,Immigration Courts/Law,1
-2020-08-04,Cell Biology and Genetics,11
+2020-08-04,Cell Biology and Genetics,12
 2020-08-04,Unlabeled Topic,9
 2020-08-04,Russia-Ukraine War and Peace Negotiations,2
 2020-08-04,Brazilian Politics/Bolsonaro Coup Attempt,1
@@ -473,7 +473,7 @@ week,Topic_Name,article_count
 2025-05-27,Summer Weather Forecast,1
 2025-05-27,Venezuelan Politics and Crime,1
 2025-05-27,Wildfires,1
-2025-06-03,Cell Biology and Genetics,41
+2025-06-03,Cell Biology and Genetics,42
 2025-06-03,Higher Education,13
 2025-06-03,Unlabeled Topic,12
 2025-06-03,NFL Football,6
@@ -901,11 +901,11 @@ week,Topic_Name,article_count
 2025-08-05,Restaurants and Food,1
 2025-08-05,Scams and Data Breaches,1
 2025-08-05,Tariffs and Trade,1
-2025-08-12,Unlabeled Topic,7364
+2025-08-12,Unlabeled Topic,7363
 2025-08-12,Cell Biology and Genetics,374
 2025-08-12,Electric Vehicles/Cars,48
 2025-08-12,Immigration Courts/Law,45
-2025-08-12,Indian Politics/BJP,34
+2025-08-12,Indian Politics/BJP,35
 2025-08-12,Children's Television Programming,21
 2025-08-12,Baseball Games,19
 2025-08-12,DC Crime and Policing,18
@@ -1101,7 +1101,7 @@ week,Topic_Name,article_count
 2025-08-26,COVID-19 Vaccines,3
 2025-08-26,Qatar and Hamas's Relationship with Israel,1
 2025-08-26,UK Immigration and Asylum,1
-2025-09-02,Cell Biology and Genetics,2217
+2025-09-02,Cell Biology and Genetics,2218
 2025-09-02,Unlabeled Topic,831
 2025-09-02,Electric Vehicles/Cars,239
 2025-09-02,Spanish Language/General,160
@@ -1377,70 +1377,71 @@ week,Topic_Name,article_count
 2025-09-23,COVID-19 Vaccines,5
 2025-09-23,Film/Movies,4
 2025-09-23,UK Immigration and Asylum,2
-2025-09-30,Cell Biology and Genetics,524
-2025-09-30,Unlabeled Topic,271
-2025-09-30,DC Crime and Policing,74
-2025-09-30,Baseball Games,37
-2025-09-30,Unemployment and Labor Market,36
-2025-09-30,Indian Politics/BJP,34
-2025-09-30,Footwear and Skincare Products,33
-2025-09-30,NFL Football,28
-2025-09-30,Electric Vehicles/Cars,24
-2025-09-30,Stock Market Analysis,21
-2025-09-30,Communal Tensions in India,20
-2025-09-30,Men's Racing Championships,20
-2025-09-30,TikTok and China,20
-2025-09-30,Brazilian Politics/Bolsonaro Coup Attempt,19
-2025-09-30,Research Grants & Funding,19
-2025-09-30,Smartphones,18
-2025-09-30,Higher Education,17
-2025-09-30,Financial Markets,16
-2025-09-30,Gaza Humanitarian Crisis,16
-2025-09-30,Wildfires,16
-2025-09-30,NYC Politics,14
-2025-09-30,Robinson/Kirk Shooting (Utah),14
-2025-09-30,African Energy,13
-2025-09-30,Federal Reserve/Banking,13
-2025-09-30,Immigration Courts/Law,13
-2025-09-30,India's Oil Trade and Tariffs,13
-2025-09-30,Canada-US-Mexico Trade,12
-2025-09-30,Gaza-Israel Conflict,12
-2025-09-30,Spanish Language/General,12
-2025-09-30,Restaurants and Food,11
-2025-09-30,Summer Weather Forecast,11
-2025-09-30,Tariffs and Trade,11
-2025-09-30,City Planning and Housing,10
-2025-09-30,Korean Workers/Immigration Raids,10
-2025-09-30,Political Violence and Assassination,10
-2025-09-30,UK Politics,10
-2025-09-30,Venezuelan Politics and Crime,10
-2025-09-30,AI and Technology Tools,9
-2025-09-30,Inflation and Interest Rates,9
-2025-09-30,Pets and Animal Art,9
-2025-09-30,AI in Healthcare,8
-2025-09-30,Children's Television Programming,8
-2025-09-30,Community Events,8
-2025-09-30,Energy Sources,8
-2025-09-30,Federal Reserve Interest Rate Policy,8
-2025-09-30,Hamas-Israel Conflict,8
-2025-09-30,Jeffrey Epstein Files,8
-2025-09-30,Royal Visits and UK Politics,8
-2025-09-30,"Russia, Ukraine, and International Relations",8
-2025-09-30,Texas Redistricting,8
-2025-09-30,War in Ukraine,8
-2025-09-30,Arrests and Drug Charges,7
-2025-09-30,Bloomberg/Financial News,7
-2025-09-30,Jimmy Kimmel / Late Night TV,7
-2025-09-30,Nepal Protests,7
-2025-09-30,Pakistan Floods,7
+2025-09-30,Cell Biology and Genetics,895
+2025-09-30,Unlabeled Topic,448
+2025-09-30,DC Crime and Policing,76
+2025-09-30,Baseball Games,75
+2025-09-30,Electric Vehicles/Cars,56
+2025-09-30,Footwear and Skincare Products,52
+2025-09-30,Indian Politics/BJP,51
+2025-09-30,NFL Football,50
+2025-09-30,Higher Education,47
+2025-09-30,Smartphones,46
+2025-09-30,City Planning and Housing,40
+2025-09-30,Unemployment and Labor Market,39
+2025-09-30,Wildfires,39
+2025-09-30,Men's Racing Championships,38
+2025-09-30,Stock Market Analysis,37
+2025-09-30,Federal Reserve/Banking,36
+2025-09-30,Brazilian Politics/Bolsonaro Coup Attempt,35
+2025-09-30,Research Grants & Funding,35
+2025-09-30,TikTok and China,29
+2025-09-30,Gaza Humanitarian Crisis,28
+2025-09-30,Immigration Courts/Law,27
+2025-09-30,Summer Weather Forecast,27
+2025-09-30,Robinson/Kirk Shooting (Utah),26
+2025-09-30,Venezuelan Politics and Crime,25
+2025-09-30,Communal Tensions in India,24
+2025-09-30,India's Oil Trade and Tariffs,24
+2025-09-30,Pakistan Floods,24
+2025-09-30,War in Ukraine,24
+2025-09-30,Gaza-Israel Conflict,23
+2025-09-30,NYC Politics,22
+2025-09-30,African Energy,21
+2025-09-30,"Russia, Ukraine, and International Relations",21
+2025-09-30,Children's Television Programming,20
+2025-09-30,Federal Reserve Interest Rate Policy,20
+2025-09-30,Jeffrey Epstein Files,20
+2025-09-30,Energy Sources,19
+2025-09-30,Korean Workers/Immigration Raids,19
+2025-09-30,Restaurants and Food,18
+2025-09-30,Financial Markets,17
+2025-09-30,Political Violence and Assassination,17
+2025-09-30,Spanish Language/General,17
+2025-09-30,Inflation and Interest Rates,16
+2025-09-30,Tariffs and Trade,16
+2025-09-30,UK Politics,15
+2025-09-30,Bloomberg/Financial News,14
+2025-09-30,Canada-US-Mexico Trade,14
+2025-09-30,Hamas-Israel Conflict,14
+2025-09-30,Royal Visits and UK Politics,14
+2025-09-30,AI in Healthcare,13
+2025-09-30,Community Events,13
+2025-09-30,Jimmy Kimmel / Late Night TV,13
+2025-09-30,Music,13
+2025-09-30,Pets and Animal Art,13
+2025-09-30,Texas Redistricting,13
+2025-09-30,AI and Technology Tools,12
+2025-09-30,Scams and Data Breaches,12
+2025-09-30,Nepal Protests,11
+2025-09-30,LSU Tigers Football,10
+2025-09-30,Arrests and Drug Charges,9
+2025-09-30,Russian drone incursions into Poland/NATO airspace,9
+2025-09-30,Oracle Stock Surge,7
+2025-09-30,Pharmaceutical Drugs and Clinical Trials,7
 2025-09-30,Qatar and Hamas's Relationship with Israel,7
-2025-09-30,Scams and Data Breaches,7
 2025-09-30,Russia-Ukraine War and Peace Negotiations,6
-2025-09-30,Russian drone incursions into Poland/NATO airspace,6
-2025-09-30,Oracle Stock Surge,5
-2025-09-30,Pharmaceutical Drugs and Clinical Trials,5
-2025-09-30,LSU Tigers Football,4
-2025-09-30,Music,4
-2025-09-30,Sudanese Humanitarian Crisis,3
-2025-09-30,COVID-19 Vaccines,1
-2025-09-30,Government Shutdown,1
+2025-09-30,Government Shutdown,4
+2025-09-30,Sudanese Humanitarian Crisis,4
+2025-09-30,COVID-19 Vaccines,3
+2025-09-30,Film/Movies,1
