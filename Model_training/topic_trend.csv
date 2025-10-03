@@ -593,8 +593,8 @@ week,Topic_Name,article_count
 2025-06-24,Indian Politics/BJP,20
 2025-06-24,Men's Racing Championships,15
 2025-06-24,Pets and Animal Art,15
+2025-06-24,Baseball Games,14
 2025-06-24,Electric Vehicles/Cars,14
-2025-06-24,Baseball Games,13
 2025-06-24,Hamas-Israel Conflict,13
 2025-06-24,COVID-19 Vaccines,12
 2025-06-24,City Planning and Housing,12
@@ -1101,7 +1101,7 @@ week,Topic_Name,article_count
 2025-08-26,COVID-19 Vaccines,3
 2025-08-26,Qatar and Hamas's Relationship with Israel,1
 2025-08-26,UK Immigration and Asylum,1
-2025-09-02,Cell Biology and Genetics,2218
+2025-09-02,Cell Biology and Genetics,2219
 2025-09-02,Unlabeled Topic,831
 2025-09-02,Electric Vehicles/Cars,239
 2025-09-02,Spanish Language/General,160
@@ -1377,71 +1377,72 @@ week,Topic_Name,article_count
 2025-09-23,COVID-19 Vaccines,5
 2025-09-23,Film/Movies,4
 2025-09-23,UK Immigration and Asylum,2
-2025-09-30,Cell Biology and Genetics,895
-2025-09-30,Unlabeled Topic,448
-2025-09-30,DC Crime and Policing,76
-2025-09-30,Baseball Games,75
-2025-09-30,Electric Vehicles/Cars,56
-2025-09-30,Footwear and Skincare Products,52
-2025-09-30,Indian Politics/BJP,51
-2025-09-30,NFL Football,50
-2025-09-30,Higher Education,47
-2025-09-30,Smartphones,46
-2025-09-30,City Planning and Housing,40
-2025-09-30,Unemployment and Labor Market,39
-2025-09-30,Wildfires,39
-2025-09-30,Men's Racing Championships,38
-2025-09-30,Stock Market Analysis,37
-2025-09-30,Federal Reserve/Banking,36
-2025-09-30,Brazilian Politics/Bolsonaro Coup Attempt,35
-2025-09-30,Research Grants & Funding,35
-2025-09-30,TikTok and China,29
-2025-09-30,Gaza Humanitarian Crisis,28
-2025-09-30,Immigration Courts/Law,27
-2025-09-30,Summer Weather Forecast,27
-2025-09-30,Robinson/Kirk Shooting (Utah),26
-2025-09-30,Venezuelan Politics and Crime,25
-2025-09-30,Communal Tensions in India,24
-2025-09-30,India's Oil Trade and Tariffs,24
-2025-09-30,Pakistan Floods,24
-2025-09-30,War in Ukraine,24
-2025-09-30,Gaza-Israel Conflict,23
-2025-09-30,NYC Politics,22
-2025-09-30,African Energy,21
-2025-09-30,"Russia, Ukraine, and International Relations",21
-2025-09-30,Children's Television Programming,20
-2025-09-30,Federal Reserve Interest Rate Policy,20
-2025-09-30,Jeffrey Epstein Files,20
-2025-09-30,Energy Sources,19
-2025-09-30,Korean Workers/Immigration Raids,19
-2025-09-30,Restaurants and Food,18
+2025-09-30,Cell Biology and Genetics,1223
+2025-09-30,Unlabeled Topic,561
+2025-09-30,Electric Vehicles/Cars,110
+2025-09-30,Baseball Games,99
+2025-09-30,DC Crime and Policing,80
+2025-09-30,Indian Politics/BJP,69
+2025-09-30,Men's Racing Championships,62
+2025-09-30,Smartphones,61
+2025-09-30,Higher Education,59
+2025-09-30,Footwear and Skincare Products,58
+2025-09-30,Wildfires,57
+2025-09-30,NFL Football,56
+2025-09-30,Federal Reserve/Banking,54
+2025-09-30,City Planning and Housing,51
+2025-09-30,Stock Market Analysis,51
+2025-09-30,Research Grants & Funding,49
+2025-09-30,Unemployment and Labor Market,45
+2025-09-30,Gaza Humanitarian Crisis,41
+2025-09-30,Brazilian Politics/Bolsonaro Coup Attempt,40
+2025-09-30,TikTok and China,39
+2025-09-30,Gaza-Israel Conflict,35
+2025-09-30,"Russia, Ukraine, and International Relations",35
+2025-09-30,Summer Weather Forecast,35
+2025-09-30,Venezuelan Politics and Crime,35
+2025-09-30,Immigration Courts/Law,34
+2025-09-30,NYC Politics,34
+2025-09-30,Pakistan Floods,32
+2025-09-30,Korean Workers/Immigration Raids,31
+2025-09-30,India's Oil Trade and Tariffs,30
+2025-09-30,Jeffrey Epstein Files,30
+2025-09-30,War in Ukraine,30
+2025-09-30,Children's Television Programming,29
+2025-09-30,Energy Sources,29
+2025-09-30,Communal Tensions in India,28
+2025-09-30,Robinson/Kirk Shooting (Utah),28
+2025-09-30,African Energy,27
+2025-09-30,Community Events,27
+2025-09-30,Restaurants and Food,25
+2025-09-30,Political Violence and Assassination,23
+2025-09-30,Inflation and Interest Rates,22
+2025-09-30,Bloomberg/Financial News,21
+2025-09-30,Federal Reserve Interest Rate Policy,21
+2025-09-30,Hamas-Israel Conflict,21
+2025-09-30,Scams and Data Breaches,21
+2025-09-30,AI and Technology Tools,20
+2025-09-30,Canada-US-Mexico Trade,20
+2025-09-30,Pets and Animal Art,20
+2025-09-30,Spanish Language/General,20
+2025-09-30,Tariffs and Trade,20
+2025-09-30,UK Politics,20
+2025-09-30,Music,18
+2025-09-30,Royal Visits and UK Politics,18
 2025-09-30,Financial Markets,17
-2025-09-30,Political Violence and Assassination,17
-2025-09-30,Spanish Language/General,17
-2025-09-30,Inflation and Interest Rates,16
-2025-09-30,Tariffs and Trade,16
-2025-09-30,UK Politics,15
-2025-09-30,Bloomberg/Financial News,14
-2025-09-30,Canada-US-Mexico Trade,14
-2025-09-30,Hamas-Israel Conflict,14
-2025-09-30,Royal Visits and UK Politics,14
-2025-09-30,AI in Healthcare,13
-2025-09-30,Community Events,13
-2025-09-30,Jimmy Kimmel / Late Night TV,13
-2025-09-30,Music,13
-2025-09-30,Pets and Animal Art,13
-2025-09-30,Texas Redistricting,13
-2025-09-30,AI and Technology Tools,12
-2025-09-30,Scams and Data Breaches,12
-2025-09-30,Nepal Protests,11
-2025-09-30,LSU Tigers Football,10
-2025-09-30,Arrests and Drug Charges,9
-2025-09-30,Russian drone incursions into Poland/NATO airspace,9
-2025-09-30,Oracle Stock Surge,7
-2025-09-30,Pharmaceutical Drugs and Clinical Trials,7
+2025-09-30,Texas Redistricting,17
+2025-09-30,AI in Healthcare,15
+2025-09-30,Jimmy Kimmel / Late Night TV,15
+2025-09-30,Oracle Stock Surge,14
+2025-09-30,Arrests and Drug Charges,13
+2025-09-30,Nepal Protests,13
+2025-09-30,LSU Tigers Football,12
+2025-09-30,Russian drone incursions into Poland/NATO airspace,12
+2025-09-30,Pharmaceutical Drugs and Clinical Trials,8
+2025-09-30,COVID-19 Vaccines,7
 2025-09-30,Qatar and Hamas's Relationship with Israel,7
+2025-09-30,Sudanese Humanitarian Crisis,7
 2025-09-30,Russia-Ukraine War and Peace Negotiations,6
 2025-09-30,Government Shutdown,4
-2025-09-30,Sudanese Humanitarian Crisis,4
-2025-09-30,COVID-19 Vaccines,3
 2025-09-30,Film/Movies,1
+2025-09-30,UK Immigration and Asylum,1
