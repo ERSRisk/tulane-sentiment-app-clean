@@ -1082,7 +1082,7 @@ if selection == "Article Risk Review":
                     join_keys = ['Link'] if 'Link' in results_df.columns and 'Link' in changes_df.columns else ['Title','Link']
                     review_cols = list({*join_keys, 'Reviewed', 'Reviewed_at', 'Changed_at'})
                     agg = {'Reviewed':'max','Reviewed_at':'max','Changed_at':'max'}
-                    review_map = (changes_df[review_cols]..dropna(subset=join_keys).groupby(join_keys, as_index = False).agg(agg)
+                    review_map = (changes_df[review_cols].dropna(subset=join_keys).groupby(join_keys, as_index = False).agg(agg)
                                  .rename(columns = {'Changed_at': 'Last_changed_at'}))
                 else:
                     changes_df = None
