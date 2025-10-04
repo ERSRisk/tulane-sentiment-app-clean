@@ -1061,6 +1061,16 @@ if selection == "Article Risk Review":
         if use_changes:
             try:
                 changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
+                for df in (changes_df, results_df):
+                    if 'Link' in df.columns:
+                        df['Link'] = df['Link'].astype(str).str.strip()
+                        df['Title'] = norm(df['Title'])
+                        df['Content'] = norm(df['Content'])
+                if 'Reviewed' not in changes_df.columns:
+                    changes_df['Reviewed'] = 0
+                    changes_df['Reviewed'] = pd.to_numeric(changes_df['Reviewed'], errors='coerce').fillna(0).astype(int)
+
+
                 if not changes_df.empty and required_keys.issubset(changes_df.columns):
                     if 'Changed_at' in changes_df.columns:
                         changes_df['Changed_at'] = pd.to_datetime(changes_df['Changed_at'], errors = 'coerce')
@@ -1069,21 +1079,18 @@ if selection == "Article Risk Review":
                     if 'Reviewed_at' not in changes_df.columns:
                         changes_df['Reviewed_at'] = pd.NaT
 
-                    review_cols = ['Title', 'Content', 'Reviewed', 'Reviewed_at', 'Changed_at']
-                    agg = {
-                        'Reviewed': 'max',
-                        'Reviewed_at': 'max',
-                        'Changed_at': 'max'
-                    }
-                    review_map = (changes_df[review_cols].groupby(['Title', 'Content'], as_index = False).agg(agg)
+                    join_keys = ['Link'] if 'Link' in results_df.columns and 'Link' in changes_df.columns else ['Title','Link']
+                    review_cols = list({*join_keys, 'Reviewed', 'Reviewed_at', 'Changed_at'})
+                    agg = {'Reviewed':'max','Reviewed_at':'max','Changed_at':'max'}
+                    review_map = (changes_df[review_cols]..dropna(subset=join_keys).groupby(join_keys, as_index = False).agg(agg)
                                  .rename(columns = {'Changed_at': 'Last_changed_at'}))
                 else:
                     changes_df = None
             except Exception as e:
                 changes_df = None
         if changes_df is not None:
-            base = results_df.drop_duplicates(subset = ['Title', 'Content'], keep = 'first')
-            merged_df = base.merge(review_map, on = ['Title', 'Content'], how = 'left')
+            base = results_df.drop_duplicates(subset = join_keys, keep = 'first')
+            merged_df = base.merge(review_map, on = join_keys, how = 'left')
             merged_df['Reviewed'] = merged_df['Reviewed'].fillna(0).astype(int)
             st.session_state.articles = merged_df
         else:
