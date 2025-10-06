@@ -830,7 +830,6 @@ if selection == "Unmatched Topic Analysis":
             k = it.get(dedupe_key)
             if k is not None:
                 by_key[k] = it
-    
         merged = list(by_key.values())
     
         # 3) write to a temp gz and upload (same asset name → old is deleted then replaced)
@@ -846,7 +845,13 @@ if selection == "Unmatched Topic Analysis":
             return upload_asset_to_release(owner, repo, tag, path, token)
         
         
-            
+    def next_topic_id(existing_ids: Iterable[Any], start: int = 0) -> int:
+        ints = [x for x in existing_ids]
+        return(max(ints + 1) if ints else start)
+
+    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
+        topics_json= json.load(f)
+        
     if 'unmatched' not in st.session_state:
         st.session_state.unmatched = fetch_release(
             "ERSRisk", "tulane-sentiment-app-clean",
@@ -915,8 +920,10 @@ if selection == "Unmatched Topic Analysis":
                 with col1:
                     if st.button("Yes, create new topic", key=f"create_new_{radio_key}"):
                         st.session_state['confirm_new'] = False
+                        saved_ids = [t.get('topic') for t in topics_json if 'topic' in t]
+                        next_id = next_topic_id(saved_ids, start = 0)
                         new_topic = {
-                            'topic': topic['topic'],
+                            'topic': next_id,
                             'name': topic['name'],
                             'keywords': topic['keywords'],
                             'documents': topic['documents']
