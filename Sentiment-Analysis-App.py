@@ -1176,11 +1176,24 @@ if selection == "Article Risk Review":
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
-        filtered_df = st.session_state.change_log.drop_duplicates(subset = ['Title'])
-        filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors='coerce', utc=True)
+        keys = ['Link'] if ('Link' in base_df.columns and 'Link' in st.session_state.change_log.columns) else ['Title']
+        ch = st.session_state.change_log.copy()
+    
+        # ensure types
+        ch['Reviewed'] = pd.to_numeric(ch.get('Reviewed', 0), errors='coerce').fillna(0).astype(int)
+        if 'Changed_at' in ch.columns:
+            ch['Changed_at'] = pd.to_datetime(ch['Changed_at'], errors='coerce')
+    
+        # keep last action per key, then only those with Reviewed==1
+        last = (ch.sort_values('Changed_at').drop_duplicates(keys, keep='last'))
+        last = last[last['Reviewed'] == 1]
+    
+        # merge onto articles so schema/index are consistent for rendering
+        keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at','Published'] if c in last.columns]
+        filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner')
 
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date) + pd.Timedelta(days = 1) - pd.Timedelta(microseconds = 1)
+    start_date = pd.to_datetime(start_date).tz_localize(LOCAL_TZ).tz_convert('UTC')
+    end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(LOCAL_TZ).tz_convert('UTC')
     filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce')
     filtered_df = filtered_df[filtered_df['Published'].between(start_date, end_date, inclusive = 'both')]
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
