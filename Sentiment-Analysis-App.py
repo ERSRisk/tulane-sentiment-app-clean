@@ -849,9 +849,6 @@ if selection == "Unmatched Topic Analysis":
     def next_topic_id(existing_ids: Iterable[Any], start: int = 0) -> int:
         ints = [x for x in existing_ids]
         return (max(ints) + 1) if ints else start
-
-    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
-        topics_json= json.load(f)
         
     if 'unmatched' not in st.session_state:
         st.session_state.unmatched = fetch_release(
@@ -921,7 +918,7 @@ if selection == "Unmatched Topic Analysis":
                 with col1:
                     if st.button("Yes, create new topic", key=f"create_new_{radio_key}"):
                         st.session_state['confirm_new'] = False
-                        saved_ids = [t.get('topic') for t in topics_json if 'topic' in t]
+                        saved_ids = [t.get('topic') for t in st.session_state.topics_bert if 'topic' in t]
                         next_id = next_topic_id(saved_ids, start = 0)
                         new_topic = {
                             'topic': next_id,
