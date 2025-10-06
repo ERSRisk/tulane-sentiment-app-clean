@@ -1176,7 +1176,7 @@ if selection == "Article Risk Review":
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
-        st.DataFrame(filtered_df)
+        st.dataframe(filtered_df)
 
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date) + pd.Timedelta(days = 1) - pd.Timedelta(microseconds = 1)
