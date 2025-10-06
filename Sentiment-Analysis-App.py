@@ -1391,7 +1391,7 @@ if selection == "Article Risk Review":
 
                     with tab2:
                         options = [0.0, 1.0,2.0,3.0,4.0,5.0]
-                        with st.form(f"manual_edit_form_{idx}"):
+                        with st.form(f"manual_edit_form_{article}"):
                             raw = risks_data.get('new_risks', risks_data) if isinstance(risks_data, dict) else risks_data
                             categories = {}
                             if isinstance(raw, list):
@@ -1433,7 +1433,7 @@ if selection == "Article Risk Review":
                                     options = pairs,
                                     index = default_index,
                                     format_func=lambda pr: f"{pr[0]} ▸ {pr[1]}",
-                                    key = f"edit_c_{idx}"
+                                    key = f"edit_c_{article}"
                                 )
                                 selected_risks = [choice[1]]
                             col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
@@ -1453,7 +1453,7 @@ if selection == "Article Risk Review":
                                 upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{idx}")
 
                             st.markdown('Please provide a reason for the changes made to the risk labels:')
-                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{idx}")
+                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{article}")
                             submitted =  st.form_submit_button("Update Risk Labels")
                             if submitted:
                                 new_row = article.copy()
