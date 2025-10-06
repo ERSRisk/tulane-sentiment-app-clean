@@ -1191,8 +1191,10 @@ if selection == "Article Risk Review":
     
         # merge onto articles so schema/index are consistent for rendering
         keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at'] if c in last.columns]
-        filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner')
-        filtered_df['Reviewed'] = 1
+        filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner', suffixes = ('', '_chg'))
+        if 'Reviewed_chg' in filtered_df.columns:
+            filtered_df['Reviewed'] = filtered_df['Reviewed_chg'].fillna(filtered_df.get('Reviewed', 0)).astype(int)
+            filtered_df.drop(columns = [c for c in ['Reviewed_chg'] if c in filtered_df.columns], inplace = True)
 
     start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
@@ -1260,12 +1262,8 @@ if selection == "Article Risk Review":
         except Exception as e:
             return e
 
-    for idx in page_df.index:
-        article= st.session_state.articles.loc[idx]
-        idx = article.name
-        if pd.isna(article.get('Title')) or pd.isna(article.get('Content')):
-            continue
-        reviewed = bool(article.get('Reviewed', 0))
+    for _, article in page_df.iterrows():
+        reviewed = bool(int(article.get('Reviewed', 0)))
         badge = "✅ Reviewed" if reviewed else "Not reviewed"
         title = str(article.get("Title", ""))[:100]
     
