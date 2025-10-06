@@ -927,6 +927,10 @@ if selection == "Unmatched Topic Analysis":
                             'documents': topic['documents']
                         }
                         st.session_state.topicsbert.append(new_topic)
+                        local_path = 'Model_training/topics_BERT.json'
+                        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                        with open(local_path, 'w', encoding='utf-8') as f:
+                            json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
                         resp = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
