@@ -25,7 +25,6 @@ import base64
 import io
 import os
 import tempfile
-from zoneinfo import ZoneInfo
 
 
 
@@ -1177,28 +1176,10 @@ if selection == "Article Risk Review":
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
-        keys = ['Link'] if ('Link' in base_df.columns and 'Link' in st.session_state.change_log.columns) else ['Title']
-        ch = st.session_state.change_log.copy()
-    
-        # ensure types
-        ch['Reviewed'] = pd.to_numeric(ch.get('Reviewed', 0), errors='coerce').fillna(0).astype(int)
-        if 'Changed_at' in ch.columns:
-            ch['Changed_at'] = pd.to_datetime(ch['Changed_at'], errors='coerce')
-    
-        # keep last action per key, then only those with Reviewed==1
-        last = (ch.sort_values('Changed_at').drop_duplicates(keys, keep='last'))
-        last = last[last['Reviewed'] == 1]
-    
-        # merge onto articles so schema/index are consistent for rendering
-        keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at'] if c in last.columns]
-        filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner', suffixes = ('', '_chg'))
-        if 'Reviewed_chg' in filtered_df.columns:
-            filtered_df['Reviewed'] = filtered_df['Reviewed_chg'].fillna(filtered_df.get('Reviewed', 0)).astype(int)
-            filtered_df.drop(columns = [c for c in ['Reviewed_chg'] if c in filtered_df.columns], inplace = True)
-
-    start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
-    end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
-    filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce', utc = True)
+        filtered_df = st.session_state.change_log.drop_duplicates(subset = ['Title'])
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date) + pd.Timedelta(days = 1) - pd.Timedelta(microseconds = 1)
+    filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce')
     filtered_df = filtered_df[filtered_df['Published'].between(start_date, end_date, inclusive = 'both')]
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
 
@@ -1262,8 +1243,12 @@ if selection == "Article Risk Review":
         except Exception as e:
             return e
 
-    for _, article in page_df.iterrows():
-        reviewed = bool(int(article.get('Reviewed', 0)))
+    for idx in page_df.index:
+        article= st.session_state.articles.loc[idx]
+        idx = article.name
+        if pd.isna(article.get('Title')) or pd.isna(article.get('Content')):
+            continue
+        reviewed = bool(article.get('Reviewed', 0))
         badge = "✅ Reviewed" if reviewed else "Not reviewed"
         title = str(article.get("Title", ""))[:100]
     
@@ -1330,7 +1315,7 @@ if selection == "Article Risk Review":
                 c1, c2 = st.columns(2)
                 with c1:
                     if not reviewed:
-                        if st.button("Mark as reviewed", key=f"mark_{article}"):
+                        if st.button("Mark as reviewed", key=f"mark_{idx}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 1
                             new_row['Reviewed_at'] = pd.Timestamp.utcnow()
@@ -1343,7 +1328,7 @@ if selection == "Article Risk Review":
                             st.success("Marked reviewed ✅")
                             st.rerun()
                     else:
-                        if st.button("Unmark reviewed", key=f"unmark_{article}"):
+                        if st.button("Unmark reviewed", key=f"unmark_{idx}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 0
                             new_row['Reviewed_at'] = pd.NaT
@@ -1356,7 +1341,7 @@ if selection == "Article Risk Review":
                             st.info("Review mark removed")
                             st.rerun()
                 with c2:
-                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{article}'):
+                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{idx}'):
                         if tid != -1:
                             hidden_topic_ids.add(int(tid))
                             save_hidden_topics(hidden_topic_ids)
@@ -1391,7 +1376,7 @@ if selection == "Article Risk Review":
 
                     with tab2:
                         options = [0.0, 1.0,2.0,3.0,4.0,5.0]
-                        with st.form(f"manual_edit_form_{article}"):
+                        with st.form(f"manual_edit_form_{idx}"):
                             raw = risks_data.get('new_risks', risks_data) if isinstance(risks_data, dict) else risks_data
                             categories = {}
                             if isinstance(raw, list):
@@ -1433,27 +1418,27 @@ if selection == "Article Risk Review":
                                     options = pairs,
                                     index = default_index,
                                     format_func=lambda pr: f"{pr[0]} ▸ {pr[1]}",
-                                    key = f"edit_c_{article}"
+                                    key = f"edit_c_{idx}"
                                 )
                                 selected_risks = [choice[1]]
                             col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
                             with col1:
-                                upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{article}")
+                                upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{idx}")
                             with col2:
-                                upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{article}")
+                                upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{idx}")
                             with col3:
-                                upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{article}")
+                                upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{idx}")
                             with col4:
-                                upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{article}")
+                                upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{idx}")
                             with col5:
-                                upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{article}")
+                                upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{idx}")
                             with col6:
-                                upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{article}")
+                                upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{idx}")
                             with col7:
-                                upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{article}")
+                                upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{idx}")
 
                             st.markdown('Please provide a reason for the changes made to the risk labels:')
-                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{article}")
+                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{idx}")
                             submitted =  st.form_submit_button("Update Risk Labels")
                             if submitted:
                                 new_row = article.copy()
