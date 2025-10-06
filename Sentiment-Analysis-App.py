@@ -1330,7 +1330,7 @@ if selection == "Article Risk Review":
                 c1, c2 = st.columns(2)
                 with c1:
                     if not reviewed:
-                        if st.button("Mark as reviewed", key=f"mark_{idx}"):
+                        if st.button("Mark as reviewed", key=f"mark_{article}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 1
                             new_row['Reviewed_at'] = pd.Timestamp.utcnow()
@@ -1343,7 +1343,7 @@ if selection == "Article Risk Review":
                             st.success("Marked reviewed ✅")
                             st.rerun()
                     else:
-                        if st.button("Unmark reviewed", key=f"unmark_{idx}"):
+                        if st.button("Unmark reviewed", key=f"unmark_{article}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 0
                             new_row['Reviewed_at'] = pd.NaT
@@ -1356,7 +1356,7 @@ if selection == "Article Risk Review":
                             st.info("Review mark removed")
                             st.rerun()
                 with c2:
-                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{idx}'):
+                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{article}'):
                         if tid != -1:
                             hidden_topic_ids.add(int(tid))
                             save_hidden_topics(hidden_topic_ids)
