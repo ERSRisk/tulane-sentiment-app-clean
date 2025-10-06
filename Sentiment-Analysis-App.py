@@ -848,7 +848,7 @@ if selection == "Unmatched Topic Analysis":
         
     def next_topic_id(existing_ids: Iterable[Any], start: int = 0) -> int:
         ints = [x for x in existing_ids]
-        return(max(ints + 1) if ints else start)
+        return (max(ints) + 1) if ints else start
 
     with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
         topics_json= json.load(f)
