@@ -1190,7 +1190,7 @@ if selection == "Article Risk Review":
         last = last[last['Reviewed'] == 1]
     
         # merge onto articles so schema/index are consistent for rendering
-        keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at','Published'] if c in last.columns]
+        keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at'] if c in last.columns]
         filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner')
 
     start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
