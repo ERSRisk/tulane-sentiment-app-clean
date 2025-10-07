@@ -934,6 +934,8 @@ if selection == "Unmatched Topic Analysis":
                             json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
                         resp = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
+                        resp5 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_new_{radio_key}"):
