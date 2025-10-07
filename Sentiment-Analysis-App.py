@@ -858,8 +858,8 @@ if selection == "Unmatched Topic Analysis":
             ) or []
 
     if 'topicsbert' not in st.session_state:
-        if os.path.exists('Model_training/topic_BERT.json'):
-            with open('Model_training/topic_BERT.json', 'r') as f:
+        if os.path.exists('Model_training/topics_BERT.json'):
+            with open('Model_training/topics_BERT.json', 'r') as f:
                 st.session_state.topicsbert = json.load(f)
         else:
             st.session_state.topicsbert = []
@@ -928,12 +928,12 @@ if selection == "Unmatched Topic Analysis":
                             'source': 'Streamlit'
                         }
                         st.session_state.topicsbert.append(new_topic)
-                        local_path = 'Model_training/topic_BERT.json'
+                        local_path = 'Model_training/topics_BERT.json'
                         os.makedirs(os.path.dirname(local_path), exist_ok=True)
                         with open(local_path, 'w', encoding='utf-8') as f:
                             json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
-                        resp = push_file_to_github('Model_training/topic_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/topic_BERT.json', branch = 'main')
+                        resp = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_new_{radio_key}"):
@@ -960,8 +960,8 @@ if selection == "Unmatched Topic Analysis":
                                     t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
                                     new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
-                                resp1 = push_file_to_github('Model_training/topic_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/topic_BERT.json', branch = 'main')
+                                resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
@@ -1246,7 +1246,7 @@ if selection == "Article Risk Review":
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
     page_df = filtered_df.iloc[start:end]
 
-    with open('Model_training/topic_BERT.json', 'r', encoding = 'utf-8') as f:
+    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
         name_map = {int(t['topic']): t['name'] for t in json.load(f)['topics']}
 
     hidden_names = [f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}" for tid in sorted(hidden_topic_ids)]
