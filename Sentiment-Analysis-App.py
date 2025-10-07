@@ -924,7 +924,8 @@ if selection == "Unmatched Topic Analysis":
                             'topic': next_id,
                             'name': topic['name'],
                             'keywords': topic['keywords'],
-                            'documents': topic['documents']
+                            'documents': topic['documents'],
+                            'source': 'Streamlit'
                         }
                         st.session_state.topicsbert.append(new_topic)
                         local_path = 'Model_training/topic_BERT.json'
