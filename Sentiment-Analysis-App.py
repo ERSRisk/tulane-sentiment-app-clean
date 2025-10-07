@@ -965,7 +965,7 @@ if selection == "Unmatched Topic Analysis":
                     if st.button("Yes, merge topic", key=f"merge_{radio_key}"):
                         st.session_state['confirm_merge'] = False
                         existing_topic = st.selectbox("Select existing topic to merge with:", ['--Select a topic--'] + [t['name'] for t in st.session_state.topicsbert['topics']],index = 0, key=f"existing_topic_{radio_key}")
-                        for t in st.session_state.topicsbert:
+                        for t in st.session_state.topicsbert['topics']:
                             if t['name'] == existing_topic:
                                 if isinstance(t['documents'], str):
                                     t['documents'] = [t['documents']]
