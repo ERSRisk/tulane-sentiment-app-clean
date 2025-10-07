@@ -980,7 +980,7 @@ if selection == "Unmatched Topic Analysis":
                                     json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
                                 resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
-                                 unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+                                unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
                                 st.session_state.unmatched = unmatched_json
                                 
                                 # Update the single canonical unmatched file (no Contents API!)
