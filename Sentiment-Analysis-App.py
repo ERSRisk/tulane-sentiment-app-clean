@@ -1245,7 +1245,7 @@ if selection == "Article Risk Review":
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
     page_df = filtered_df.iloc[start:end]
 
-    with open('Model_training/topics_bert.json', 'r', encoding = 'utf-8') as f:
+    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
         name_map = {int(t['topic']): t['name'] for t in json.load(f)}
 
     hidden_names = [f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}" for tid in sorted(hidden_topic_ids)]
