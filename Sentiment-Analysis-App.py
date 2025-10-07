@@ -1246,7 +1246,7 @@ if selection == "Article Risk Review":
     page_df = filtered_df.iloc[start:end]
 
     with open('Model_training/topic_BERT.json', 'r', encoding = 'utf-8') as f:
-        name_map = {int(t['topic']): t['name'] for t in json.load(f)}
+        name_map = {int(t['topic']): t['name'] for t in json.load(f)['topics']}
 
     hidden_names = [f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}" for tid in sorted(hidden_topic_ids)]
     st.sidebar.markdown('Hidden topics')
