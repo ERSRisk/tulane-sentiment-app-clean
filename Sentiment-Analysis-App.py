@@ -976,8 +976,24 @@ if selection == "Unmatched Topic Analysis":
                                     t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
                                     new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
+                                with open('Model_training/topics_BERT.json', 'w', encoding='utf-8') as f:
+                                    json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
                                 resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
+                                 unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+                                st.session_state.unmatched = unmatched_json
+                                
+                                # Update the single canonical unmatched file (no Contents API!)
+                                resp6 = upsert_single_big_json(
+                                    owner="ERSRisk",
+                                    repo="tulane-sentiment-app-clean",
+                                    tag="unmatched-topics",
+                                    asset_name="unmatched_topics.json",
+                                    new_items=st.session_state.unmatched,
+                                    dedupe_key="topic",
+                                    token=st.secrets['all_my_api_keys']['GITHUB_TOKEN'],
+                                    mode = 'replace'
+                                )
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
