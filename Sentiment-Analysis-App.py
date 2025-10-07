@@ -927,7 +927,7 @@ if selection == "Unmatched Topic Analysis":
                             'documents': topic['documents'],
                             'source': 'Streamlit'
                         }
-                        st.session_state.topicsbert.append(new_topic)
+                        st.session_state.topicsbert['topics'].append(new_topic)
                         local_path = 'Model_training/topics_BERT.json'
                         os.makedirs(os.path.dirname(local_path), exist_ok=True)
                         with open(local_path, 'w', encoding='utf-8') as f:
