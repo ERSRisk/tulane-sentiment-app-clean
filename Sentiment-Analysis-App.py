@@ -936,6 +936,20 @@ if selection == "Unmatched Topic Analysis":
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         resp5 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
                                                                dest_path = 'Model_training/topics_BERT.json', branch = 'main')
+                        unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+                        st.session_state.unmatched = unmatched_json
+                        
+                        # Update the single canonical unmatched file (no Contents API!)
+                        resp6 = upsert_single_big_json(
+                            owner="ERSRisk",
+                            repo="tulane-sentiment-app-clean",
+                            tag="unmatched-topics",
+                            asset_name="unmatched_topics.json",
+                            new_items=st.session_state.unmatched,
+                            dedupe_key="topic",
+                            token=st.secrets['all_my_api_keys']['GITHUB_TOKEN'],
+                            mode = 'replace'
+                        )
                         st.success(f"New topic {topic['topic']} created successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_new_{radio_key}"):
