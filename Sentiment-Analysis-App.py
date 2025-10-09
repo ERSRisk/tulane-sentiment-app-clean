@@ -972,7 +972,7 @@ if selection == "Unmatched Topic Analysis":
                                 t['documents'].extend(topic['documents'])
 
                             # Ensure keywords are lists
-                                t['keywords'] = [k.strip() for k in t['keywords'].split(',')]
+                                t['keywords'] = [str(k).strip() for k in t['keywords'] if str(k).strip()]
                                 new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
                                 t['keywords'].extend(new_keywords)
                                 with open('Model_training/topics_BERT.json', 'w', encoding='utf-8') as f:
