@@ -1242,7 +1242,7 @@ if selection == "Article Risk Review":
     end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce', utc = True)
     filtered_df = filtered_df[filtered_df['Published'].between(start_date, end_date, inclusive = 'both')]
-    filtered_df = filtered_df.sort_values('Risk_Score_y', ascending = False, na_position = 'last')
+    filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
 
     with open('Model_training/risks.json', 'r') as f:
         risks_data = json.load(f)
