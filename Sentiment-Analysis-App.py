@@ -1,33 +1,18 @@
-import streamlit as st
-import requests
-from google import genai
-import pandas as pd
-import re
-from datetime import timedelta, datetime
-from streamlit_tags import st_tags
-import plotly.express as px
-from newspaper import Article
-from google.genai.errors import ClientError
-import random
-import time
-import asyncio
-from lxml.html.clean import Cleaner
-from dateutil import parser
-from textblob import TextBlob
-import tweepy
-import nest_asyncio
-import json
-import re
-import altair as alt
-import matplotlib.pyplot as plt
-import base64
-import io
-import os
-import tempfile
+import os, io, json, time, random, base64, tempfile, gzip
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Iterable, Any
 from zoneinfo import ZoneInfo
-import gzip
-import toml
+import re
+
+# --- third-party
+import requests
+import pandas as pd
+import streamlit as st
+import altair as alt
+import pdfplumber
+import docx
+from sentence_transformers import SentenceTransformer, util
 
 tt = os.getenv('STREAMLIT_SECRETS')
 if tt:
