@@ -15,6 +15,31 @@ import pdfplumber
 import docx
 from sentence_transformers import SentenceTransformer, util
 
+def _github_token() -> str:
+    # Secret Manager can add a trailing newline; strip it
+    tok = os.getenv("GITHUB_TOKEN", "").strip()
+    return tok
+
+def _assert_github_ok(show=True):
+    tok = _github_token()
+    if not tok:
+        if show: st.error("GITHUB_TOKEN is missing in Cloud Run environment.")
+        return False
+    try:
+        r = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"token {tok}", "Accept": "application/vnd.github+json"},
+            timeout=15,
+        )
+        if r.status_code == 200:
+            if show: st.caption(f"GitHub auth OK as **{r.json().get('login','?')}**")
+            return True
+        else:
+            if show: st.error(f"GitHub auth failed ({r.status_code}): {r.text[:200]}")
+            return False
+    except Exception as e:
+        if show: st.error(f"GitHub /user check failed: {e}")
+        return False
 tt = os.getenv('STREAMLIT_SECRETS')
 if tt:
     try:
@@ -396,27 +421,44 @@ if selection == "Article Risk Review":
 
     hidden_mtime = hidden_file.stat().st_mtime if hidden_file.exists() else 0.0
     hidden_topic_ids = set(load_hidden_topics(str(hidden_file), hidden_mtime))
-    @st.cache_data(show_spinner = False, ttl = 1800)
-    def get_csv_from_release(owner, repo, tag, asset, usecols = None) -> pd.DataFrame:
-        token = os.getenv('GITHUB_TOKEN')
-        headers = {"Accept": "application/vnd.github+json",
-                  'Authorization': f'token {token}'}
-        rel = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', headers = headers, timeout = 60)
-        rel.raise_for_status()
+    @st.cache_data(show_spinner=True, ttl=1800)
+    def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
+        token = _github_token()
+        if not token:
+        raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
+
+        headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {token}",
+        }
+        rel = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}",
+        headers=headers, timeout=60
+        )
+        if rel.status_code != 200:
+        # show the real reason (401, 404, permissions)
+            raise RuntimeError(f"Release lookup {rel.status_code}: {rel.text[:300]}")
+
         rel_json = rel.json()
-        asset = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
-        if not asset:
-            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'")
-        url = asset['browser_download_url']
-        r = requests.get(url, headers = headers, timeout = 60)
-        r.raise_for_status()
-        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory = False, dtype=str, usecols = usecols)
+        asset_obj = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
+        if not asset_obj:
+            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'.")
+
+        url = asset_obj['browser_download_url']
+        r = requests.get(url, headers={"Authorization": f"token {token}", "Accept": "application/octet-stream"}, timeout=120)
+        if r.status_code != 200:
+            raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
+        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
      
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
-        results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols = usecols)
+        try:
+            results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols=usecols)
+        except Exception as e:
+            st.error(f"Failed to load BERTopic results: {e}")
+            st.stop()
         numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
