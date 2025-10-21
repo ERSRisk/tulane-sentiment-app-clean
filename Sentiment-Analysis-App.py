@@ -70,7 +70,7 @@ if st.session_state.current_tab != selection:
 
 if selection == "Unmatched Topic Analysis":
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
-        token = get_secrets('all_my_api_keys.GITHUB_TOKEN')
+        token = os.getenv('GITHUB_TOKEN')
         try:
             with open(local_path, "rb") as f:
                 content_b64 = base64.b64encode(f.read()).decode("utf-8")
@@ -186,7 +186,7 @@ if selection == "Unmatched Topic Analysis":
         st.session_state.unmatched = fetch_release(
             "ERSRisk", "tulane-sentiment-app-clean",
             "unmatched-topics", "unmatched_topics.json",
-            get_secrets('all_my_api_keys.GITHUB_TOKEN')
+            os.getenv('GITHUB_TOKEN')
             ) or []
 
     if 'topicsbert' not in st.session_state:
@@ -200,7 +200,7 @@ if selection == "Unmatched Topic Analysis":
         st.session_state.discarded = fetch_release(
             "ERSRisk", "tulane-sentiment-app-clean",
             "discarded-topics", "discarded_topics.json",
-            get_secrets('all_my_api_keys.GITHUB_TOKEN')
+            os.getenv('GITHUB_TOKEN')
             ) or []
         
     st.title('Unmatched Topics Analysis')
@@ -279,7 +279,7 @@ if selection == "Unmatched Topic Analysis":
                             asset_name="unmatched_topics.json",
                             new_items=st.session_state.unmatched,
                             dedupe_key="topic",
-                            token=get_secrets('all_my_api_keys.GITHUB_TOKEN'),
+                            token=os.getenv('GITHUB_TOKEN'),
                             mode = 'replace'
                         )
                         st.success(f"New topic {topic['topic']} created successfully!")
@@ -322,7 +322,7 @@ if selection == "Unmatched Topic Analysis":
                                     asset_name="unmatched_topics.json",
                                     new_items=st.session_state.unmatched,
                                     dedupe_key="topic",
-                                    token=get_secrets('all_my_api_keys.GITHUB_TOKEN'),
+                                    token=os.getenv('GITHUB_TOKEN'),
                                     mode = 'replace'
                                 )
                                 st.success(f"Topic {topic['topic']} merged successfully!")
@@ -351,7 +351,7 @@ if selection == "Unmatched Topic Analysis":
                     asset_name="discarded_topics.json",      # SINGLE canonical asset name
                     new_items=st.session_state.discarded,       # your new/edited items
                     dedupe_key="topic",
-                    token=get_secrets('all_my_api_keys.GITHUB_TOKEN')
+                    token=os.getenv('GITHUB_TOKEN')
                 )
 
             unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
@@ -365,7 +365,7 @@ if selection == "Unmatched Topic Analysis":
                 asset_name="unmatched_topics.json",
                 new_items=st.session_state.unmatched,
                 dedupe_key="topic",
-                token=get_secrets('all_my_api_keys.GITHUB_TOKEN'),
+                token=os.getenv('GITHUB_TOKEN'),
                 mode = 'replace'
             )
 
@@ -412,7 +412,7 @@ if selection == "Article Risk Review":
     hidden_topic_ids = set(load_hidden_topics(str(hidden_file), hidden_mtime))
     @st.cache_data(show_spinner = False, ttl = 1800)
     def get_csv_from_release(owner, repo, tag, asset, usecols = None) -> pd.DataFrame:
-        token = get_secrets('all_my_api_keys.GITHUB_TOKEN')
+        token = os.getenv('GITHUB_TOKEN')
         headers = {"Accept": "application/vnd.github+json",
                   'Authorization': f'token {token}'}
         rel = requests.get(f'https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}', headers = headers, timeout = 60)
@@ -500,7 +500,7 @@ if selection == "Article Risk Review":
 
     ##adding to push changes to the Github repo
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
-        token = get_secrets('all_my_api_keys.GITHUB_TOKEN')
+        token = os.getenv('GITHUB_TOKEN')
 
         with open(local_path, "rb") as f:
             content_b64 = base64.b64encode(f.read()).decode("utf-8")
