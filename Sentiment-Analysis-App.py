@@ -26,6 +26,7 @@ import os
 import tempfile
 from typing import Iterable, Any
 from zoneinfo import ZoneInfo
+import gzip
 
 
 
@@ -387,8 +388,8 @@ if selection == "Article Risk Review":
 
     hidden_mtime = hidden_file.stat().st_mtime if hidden_file.exists() else 0.0
     hidden_topic_ids = set(load_hidden_topics(str(hidden_file), hidden_mtime))
-
-    def get_csv_from_release(owner, repo, tag, asset) -> pd.DataFrame:
+    @st.cache_data(show_spinner = False, ttl = 1800)
+    def get_csv_from_release(owner, repo, tag, asset, usecols = None) -> pd.DataFrame:
         token = st.secrets['all_my_api_keys']['GITHUB_TOKEN']
         headers = {"Accept": "application/vnd.github+json",
                   'Authorization': f'token {token}'}
@@ -401,11 +402,13 @@ if selection == "Article Risk Review":
         url = asset['browser_download_url']
         r = requests.get(url, headers = headers, timeout = 60)
         r.raise_for_status()
-        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory = False, dtype=str)
+        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory = False, dtype=str, usecols = usecols)
      
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
-        results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Reviewed', 'Recency', 'Source_Accuracy',
+                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
+        results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols = usecols)
         numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
