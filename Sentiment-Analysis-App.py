@@ -409,6 +409,7 @@ if selection == "Article Risk Review":
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
         results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols = usecols)
+        results_df = results_df[results_df['University label'] == 1]
         numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
