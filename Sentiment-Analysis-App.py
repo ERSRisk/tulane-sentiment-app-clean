@@ -406,7 +406,7 @@ if selection == "Article Risk Review":
      
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
-        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Reviewed', 'Recency', 'Source_Accuracy',
+        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
         results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols = usecols)
         numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
