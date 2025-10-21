@@ -13,7 +13,6 @@ import streamlit as st
 import altair as alt
 import pdfplumber
 import docx
-from sentence_transformers import SentenceTransformer, util
 
 def _github_token() -> str:
     # Secret Manager can add a trailing newline; strip it
