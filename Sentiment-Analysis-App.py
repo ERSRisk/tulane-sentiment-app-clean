@@ -3,7 +3,7 @@ import requests
 from google import genai
 import pandas as pd
 import re
-from datetime import timedelta
+from datetime import timedelta, datetime
 from streamlit_tags import st_tags
 import plotly.express as px
 from newspaper import Article
@@ -13,7 +13,6 @@ import time
 import asyncio
 from lxml.html.clean import Cleaner
 from dateutil import parser
-import datetime
 from textblob import TextBlob
 import tweepy
 import nest_asyncio
@@ -398,21 +397,24 @@ if selection == "Article Risk Review":
         rel_json = rel.json()
         asset = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
         if not asset:
-            raise RuntimeError(f"Asset '{asset_name}' not found in release '{tag}'")
+            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'")
         url = asset['browser_download_url']
         r = requests.get(url, headers = headers, timeout = 60)
         r.raise_for_status()
-        return pd.read_csv(io.BytesIO(r.content), compression="gzip")
+        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory = False, dtype=str)
      
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
         results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
 
         if use_changes:
             try:
                 changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
+                def norm(s: pd.Series) -> pd.Series:
+                    return s.astype(str).str.replace(r's+', ' ', regex = True).str.strip()
                 for df in (changes_df, results_df):
                     if 'Link' in df.columns:
                         df['Link'] = df['Link'].astype(str).str.strip()
@@ -467,6 +469,9 @@ if selection == "Article Risk Review":
                     'Change reason']
             st.session_state.change_log = pd.DataFrame(columns = base_cols + new_cols)
             st.session_state.change_log.to_csv(change_log_path, index = False)
+    for c in numeric_cols:
+        if c in st.session_state.articles.columns:
+            st.session_state.articles[c] = pd.to_numeric(st.session_state.articles[c], errors = 'coerce')
 
     ##adding to push changes to the Github repo
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
@@ -601,7 +606,7 @@ if selection == "Article Risk Review":
     cola, colb = st.sidebar.columns(2)
     with cola:
         if st.button('Unhide', key='unhide_btn', disabled = not to_unhide):
-            hidden_topics_ids.difference_update(to_unhide)
+            hidden_topic_ids.difference_update(to_unhide)
             save_hidden_topics(hidden_topic_ids)
             st.rerun()
 
@@ -682,7 +687,7 @@ if selection == "Article Risk Review":
                 c1, c2 = st.columns(2)
                 with c1:
                     if not reviewed:
-                        if st.button("Mark as reviewed", key=f"mark_{article}"):
+                        if st.button("Mark as reviewed", key=f"mark_{article.get('Link')}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 1
                             new_row['Reviewed_at'] = pd.Timestamp.utcnow()
