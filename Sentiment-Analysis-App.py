@@ -39,7 +39,7 @@ try:
 except Exception:
     APP_SECRETS = {}
 
-def secret(path, default = None):
+def secrets(path, default = None):
     cur = APP_SECRETS
     for part in path.split('.'):
         if isinstance(cur, dict):
