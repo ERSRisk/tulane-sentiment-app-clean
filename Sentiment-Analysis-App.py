@@ -425,7 +425,7 @@ if selection == "Article Risk Review":
     def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
         token = _github_token()
         if not token:
-        raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
+            raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
 
         headers = {
         "Accept": "application/vnd.github+json",
