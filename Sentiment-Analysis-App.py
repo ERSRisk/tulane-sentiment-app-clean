@@ -28,6 +28,10 @@ from typing import Iterable, Any
 from zoneinfo import ZoneInfo
 import gzip
 
+if "STREAMLIT_SECRETS" in os.environ():
+    secrets_text = os.environ['STREAMLIT_SECRETS']
+    secrets_dict = toml.loads(secrets_text)
+    st.secrets.update(secrets_dict)
 
 
 st.set_page_config(page_title="Tulane Risk Dashboard")
