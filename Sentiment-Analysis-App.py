@@ -409,7 +409,6 @@ if selection == "Article Risk Review":
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
         results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols = usecols)
-        results_df = results_df[results_df['University label'] == 1]
         numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
@@ -532,7 +531,7 @@ if selection == "Article Risk Review":
     base_df = st.session_state.articles
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    filtered_df = base_df[base_df['University Label'] == 1]
+    filtered_df = base_df[base_df['University Label'].astype(str) == "1"].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
     filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
     if status_choice == 'Unreviewed only':
@@ -691,7 +690,8 @@ if selection == "Article Risk Review":
                 c1, c2 = st.columns(2)
                 with c1:
                     if not reviewed:
-                        if st.button("Mark as reviewed", key=f"mark_{article.get('Link')}"):
+                        row_id = hash(article.get('Link'))
+                        if st.button("Mark as reviewed", key=f"mark_{row_id}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 1
                             new_row['Reviewed_at'] = pd.Timestamp.utcnow()
@@ -704,7 +704,7 @@ if selection == "Article Risk Review":
                             st.success("Marked reviewed ✅")
                             st.rerun()
                     else:
-                        if st.button("Unmark reviewed", key=f"unmark_{article}"):
+                        if st.button("Unmark reviewed", key=f"unmark_{row_id}"):
                             new_row = article.to_dict()
                             new_row['Reviewed'] = 0
                             new_row['Reviewed_at'] = pd.NaT
@@ -717,7 +717,7 @@ if selection == "Article Risk Review":
                             st.info("Review mark removed")
                             st.rerun()
                 with c2:
-                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{article}'):
+                    if st.button('Hide this topic', key = f'hide_topic_{tid}_{row_id}'):
                         if tid != -1:
                             hidden_topic_ids.add(int(tid))
                             save_hidden_topics(hidden_topic_ids)
@@ -752,7 +752,7 @@ if selection == "Article Risk Review":
 
                     with tab2:
                         options = [0.0, 1.0,2.0,3.0,4.0,5.0]
-                        with st.form(f"manual_edit_form_{article}"):
+                        with st.form(f"manual_edit_form_{row_id}"):
                             raw = risks_data.get('new_risks', risks_data) if isinstance(risks_data, dict) else risks_data
                             categories = {}
                             if isinstance(raw, list):
@@ -794,27 +794,27 @@ if selection == "Article Risk Review":
                                     options = pairs,
                                     index = default_index,
                                     format_func=lambda pr: f"{pr[0]} ▸ {pr[1]}",
-                                    key = f"edit_c_{article}"
+                                    key = f"edit_c_{row_id}"
                                 )
                                 selected_risks = [choice[1]]
                             col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
                             with col1:
-                                upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{article}")
+                                upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{row_id}")
                             with col2:
-                                upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{article}")
+                                upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{row_id}")
                             with col3:
-                                upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{article}")
+                                upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{row_id}")
                             with col4:
-                                upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{article}")
+                                upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{row_id}")
                             with col5:
-                                upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{article}")
+                                upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{row_id}")
                             with col6:
-                                upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{article}")
+                                upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{row_id}")
                             with col7:
-                                upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{article}")
+                                upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{row_id}")
 
                             st.markdown('Please provide a reason for the changes made to the risk labels:')
-                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{article}")
+                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{row_id}")
                             submitted =  st.form_submit_button("Update Risk Labels")
                             if submitted:
                                 new_row = article.copy()
