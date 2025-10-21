@@ -196,7 +196,7 @@ if selection == "Unmatched Topic Analysis":
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} topics")
     page_df = st.session_state.unmatched[start:end]
 
-    for topic in st.session_state.unmatched:
+    for topic in page_df:
         skip_key = f"skip_{topic['topic']}"
         if st.session_state.get(skip_key):
             continue
