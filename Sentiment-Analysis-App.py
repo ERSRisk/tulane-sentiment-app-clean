@@ -1,4 +1,5 @@
-import os, io, json, time, random, base64, tempfile
+import os, io, json, time, random, base64
+import tempfile
 import gzip
 from datetime import datetime, timedelta
 from pathlib import Path
