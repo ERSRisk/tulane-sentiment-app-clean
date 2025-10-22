@@ -580,7 +580,7 @@ if selection == "Article Risk Review":
     base_df = st.session_state.articles
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    filtered_df = base_df[base_df['University Label'].astype(str) == "1"].copy()
+    filtered_df = base_df[base_df['University Label'] == 1].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
     filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
     if status_choice == 'Unreviewed only':
