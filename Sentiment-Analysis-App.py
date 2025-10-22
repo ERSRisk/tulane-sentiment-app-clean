@@ -466,7 +466,7 @@ if selection == "Article Risk Review":
             try:
                 changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
                 def norm(s: pd.Series) -> pd.Series:
-                    return s.astype(str).str.replace(r's+', ' ', regex = True).str.strip()
+                    return s.astype(str).str.replace(r'\s+', ' ', regex = True).str.strip()
                 for df in (changes_df, results_df):
                     if 'Link' in df.columns:
                         df['Link'] = df['Link'].astype(str).str.strip()
@@ -619,8 +619,9 @@ if selection == "Article Risk Review":
         all_possible_risks.append("No Risk")
     all_possible_risks = [r for r in all_possible_risks if isinstance(r, str)]
     filter_risks = all_possible_risks[:]
+    default_risks = [r for r in risk_options if r.strip().lower() != 'no risk']
 
-    filtered_risks = st.multiselect("Select Risks to Filter Articles", options = all_possible_risks, default=filter_risks, key="risk_filter")
+    filtered_risks = st.multiselect("Select Risks to Filter Articles", options = all_possible_risks, default=default_risks, key="risk_filter")
 
     def match_any(predicted, selected):
         if not isinstance(predicted, list) or not predicted:
