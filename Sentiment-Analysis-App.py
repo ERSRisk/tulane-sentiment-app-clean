@@ -1,5 +1,4 @@
-import os, io, json, time, random, base64
-import tempfile
+import os, io, json, time, random, base64, tempfile
 import gzip
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -14,6 +13,7 @@ import streamlit as st
 import altair as alt
 import pdfplumber
 import docx
+from sentence_transformers import SentenceTransformer, util
 
 def _github_token() -> str:
     # Secret Manager can add a trailing newline; strip it
@@ -91,7 +91,7 @@ if selection == "Unmatched Topic Analysis":
                 f.write(default_bytes)
             content_bytes = default_bytes
             content_b64 = base64.b64encode(content_bytes).decode("utf-8")
-                
+
 
         api_base = f"https://api.github.com/repos/{repo}/contents/{dest_path}"
         headers = {"Authorization": f"token {token}", "Accept":"application/vnd.github+json"}
@@ -112,7 +112,7 @@ if selection == "Unmatched Topic Analysis":
         if r_put.status_code not in (200, 201):
             raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
         return r_put.json()
-        
+
     def fetch_release(owner, repo, tag:str, asset_name:str, token:str):
         headers = {'Authorization': f'token {token}',
                   'Accept': 'application/vnd.github+json'}
@@ -128,7 +128,7 @@ if selection == "Unmatched Topic Analysis":
         a = next((x for x in assets if x.get("name") == asset_name), None)
         if not a:
             return []
-        
+
         url = a.get('browser_download_url')
         b = requests.get(url, headers = headers, timeout = 120)
         b.raise_for_status()
@@ -163,7 +163,7 @@ if selection == "Unmatched Topic Analysis":
             current = fetch_release(owner, repo, tag, asset_name, token)
             if not isinstance(current, list):
                 current = []
-    
+
         # 2) merge by key (new replaces old on same key)
         by_key = {}
         for it in (current if mode == "merge" else []):
@@ -175,7 +175,7 @@ if selection == "Unmatched Topic Analysis":
             if k is not None:
                 by_key[k] = it
         merged = list(by_key.values())
-    
+
         # 3) write to a temp gz and upload (same asset name → old is deleted then replaced)
         with tempfile.TemporaryDirectory() as td:
             path = os.path.join(td, asset_name)  # e.g., "unmatched_topics.json.gz"
@@ -187,12 +187,12 @@ if selection == "Unmatched Topic Analysis":
                 with open(path, "wb") as f:
                     f.write(raw)
             return upload_asset_to_release(owner, repo, tag, path, token)
-        
-        
+
+
     def next_topic_id(existing_ids: Iterable[Any], start: int = 0) -> int:
         ints = [x for x in existing_ids]
         return (max(ints) + 1) if ints else start
-        
+
     if 'unmatched' not in st.session_state:
         st.session_state.unmatched = fetch_release(
             "ERSRisk", "tulane-sentiment-app-clean",
@@ -206,14 +206,14 @@ if selection == "Unmatched Topic Analysis":
                 st.session_state.topicsbert = json.load(f)
         else:
             st.session_state.topicsbert = []
-    
+
     if 'discarded' not in st.session_state:
         st.session_state.discarded = fetch_release(
             "ERSRisk", "tulane-sentiment-app-clean",
             "discarded-topics", "discarded_topics.json",
             os.getenv('GITHUB_TOKEN')
             ) or []
-        
+
     st.title('Unmatched Topics Analysis')
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(st.session_state.unmatched)
@@ -281,7 +281,7 @@ if selection == "Unmatched Topic Analysis":
                                                                dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
                         st.session_state.unmatched = unmatched_json
-                        
+
                         # Update the single canonical unmatched file (no Contents API!)
                         resp6 = upsert_single_big_json(
                             owner="ERSRisk",
@@ -324,7 +324,7 @@ if selection == "Unmatched Topic Analysis":
                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                                 unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
                                 st.session_state.unmatched = unmatched_json
-                                
+
                                 # Update the single canonical unmatched file (no Contents API!)
                                 resp6 = upsert_single_big_json(
                                     owner="ERSRisk",
@@ -367,7 +367,7 @@ if selection == "Unmatched Topic Analysis":
 
             unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
             st.session_state.unmatched = unmatched_json
-            
+
             # Update the single canonical unmatched file (no Contents API!)
             resp3 = upsert_single_big_json(
                 owner="ERSRisk",
@@ -383,33 +383,19 @@ if selection == "Unmatched Topic Analysis":
             st.success(f"Topic {topic['topic']} discarded successfully!")
 
 if selection == "Article Risk Review":
+    import streamlit as st
+    import pandas as pd
+    import json
+    from datetime import datetime
+    from datetime import timedelta
+    import os
+    from pathlib import Path
     import ast
     OWNER = 'ERSRisk'
     REPO = 'Tulane-Sentiment-Analysis'
     TAG = 'BERTopic_results'
     ASSET = 'BERTopic_results2.csv.gz'
-    numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability', 'University Label']
-    def parse_predicted_list(raw):
-        if isinstance(raw, list):
-            return [str(x) for x in raw]
-        if isinstance(raw, str):
-            s = raw.strip()
-            # Try Python-list literal first
-            if (s.startswith('[') and s.endswith(']')) or (s.startswith('(') and s.endswith(')')):
-                try:
-                    vals = ast.literal_eval(s)
-                    return [str(x) for x in vals] if isinstance(vals, (list, tuple)) else [str(vals)]
-                except Exception:
-                    pass
-            # Try simple CSV/semicolon fallbacks
-            if ';' in s:
-                return [p.strip() for p in s.split(';') if p.strip()]
-            if ',' in s:
-                return [p.strip() for p in s.split(',') if p.strip()]
-            # Single token
-            if s and s.lower() not in ('none', 'no risk'):
-                return [s]
-        return ["No Risk"]
+
     hidden_file = Path('Model_training/hidden_topics.json')
 
     def atomic_write_json(path: Path, data: dict):
@@ -435,7 +421,7 @@ if selection == "Article Risk Review":
 
     hidden_mtime = hidden_file.stat().st_mtime if hidden_file.exists() else 0.0
     hidden_topic_ids = set(load_hidden_topics(str(hidden_file), hidden_mtime))
-    @st.cache_data(show_spinner=True, ttl=0)
+    @st.cache_data(show_spinner=True, ttl=1800)
     def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
         token = _github_token()
         if not token:
@@ -463,7 +449,7 @@ if selection == "Article Risk Review":
         if r.status_code != 200:
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
-     
+
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
@@ -473,7 +459,7 @@ if selection == "Article Risk Review":
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
             st.stop()
-        
+        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
 
@@ -481,7 +467,7 @@ if selection == "Article Risk Review":
             try:
                 changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
                 def norm(s: pd.Series) -> pd.Series:
-                    return s.astype(str).str.replace(r'\s+', ' ', regex = True).str.strip()
+                    return s.astype(str).str.replace(r's+', ' ', regex = True).str.strip()
                 for df in (changes_df, results_df):
                     if 'Link' in df.columns:
                         df['Link'] = df['Link'].astype(str).str.strip()
@@ -585,7 +571,7 @@ if selection == "Article Risk Review":
         if col not in st.session_state.articles.columns:
             st.session_state.articles[col] = None
 
-    
+
 
     status_choice = st.sidebar.radio(
         'Review status',
@@ -595,46 +581,24 @@ if selection == "Article Risk Review":
     base_df = st.session_state.articles
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    for col in ['University Label']:
-        if col in st.session_state.articles.columns:
-            st.session_state.articles[col] = (
-            pd.to_numeric(st.session_state.articles[col], errors='coerce')
-            .fillna(0).astype(int)
-        )
-
-    base_df = st.session_state.articles
-    risk_col = next((c for c in [
-    '_RiskList', 'Top_Risks', 'Predicted_Risks', 'Predicted_Risks_Upd',
-    'Risk_item', 'Predicted_Risk_Single'
-] if c in base_df.columns), None)
-
-    filtered_df = base_df[base_df['University Label'] == 1]
-
-# Only apply the "not No Risk" filter if we actually have a risk column
-    if risk_col:
-    # Build a boolean mask: keep rows that are not pure "No Risk"
-        def _has_real_risk(s):
-            lst = parse_predicted_list(s)
-            return any(x.strip().lower() != 'no risk' for x in lst)
-        filtered_df = filtered_df[filtered_df[risk_col].map(_has_real_risk)]
-    else:
-        st.info("No risk column present; showing all rows with University Label == 1.")
+    filtered_df = base_df[base_df['University Label'].astype(str) == "1"].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
+    filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
         keys = ['Link'] if ('Link' in base_df.columns and 'Link' in st.session_state.change_log.columns) else ['Title']
         ch = st.session_state.change_log.copy()
-    
+
         # ensure types
         ch['Reviewed'] = pd.to_numeric(ch.get('Reviewed', 0), errors='coerce').fillna(0).astype(int)
         if 'Changed_at' in ch.columns:
             ch['Changed_at'] = pd.to_datetime(ch['Changed_at'], errors='coerce')
-    
+
         # keep last action per key, then only those with Reviewed==1
         last = (ch.sort_values('Changed_at').drop_duplicates(keys, keep='last'))
         last = last[last['Reviewed'] == 1]
-    
+
         # merge onto articles so schema/index are consistent for rendering
         keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at'] if c in last.columns]
         filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner', suffixes = ('', '_chg'))
@@ -712,22 +676,31 @@ if selection == "Article Risk Review":
         reviewed = bool(int(article.get('Reviewed', 0)))
         badge = "✅ Reviewed" if reviewed else "Not reviewed"
         title = str(article.get("Title", ""))[:100]
-    
-        
-        raw = article.get(risk_col, "[]")
-        
-        predicted = parse_predicted_list(raw)
+
+
+        raw = article.get("_RiskList", "[]")
+        if isinstance(raw, list):
+            predicted = raw
+        elif isinstance(raw, str):
+            s = raw.strip()
+            if s.lower() in ("", "none", "no risk"):
+                predicted = ["No Risk"]
+            else:
+                parts = [r.strip() for r in s.split(';') if r.strip()]
+                predicted = parts if parts else ["No Risk"]   # keep all phrases if you ever have "a; b"
+        else:
+            predicted = ["No Risk"]
 
         if not match_any(predicted, filtered_risks):
             continue
 
         title = str(article.get("Title", ""))[:100]
-        
+
         if title:
-           
+
             tid = coerce_topic_scalar(article.get('Topic'))
             article['Topic'] = tid
-            
+
             article['Topic_name'] = name_map.get(tid, 'Unlabeled Topic')
             if tid in hidden_topic_ids:
                 continue
@@ -762,7 +735,7 @@ if selection == "Article Risk Review":
                 with col2:
                     st.markdown("**Topic:** ")
                     st.markdown(article['Topic_name'])
-    
+
                 # --- Quick review toggle ---
                 c1, c2 = st.columns(2)
                 with c1:
@@ -805,10 +778,10 @@ if selection == "Article Risk Review":
                     opt for opt in all_possible_risks
                     if any(opt.lower() == str(p).lower() for p in predicted if isinstance(p, str))
                 ]
-                
+
                 st.markdown("**Predicted Risks:** " + (", ".join(matched_risks) if matched_risks else "No Risk"))
-                
-                
+
+
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
                 with tab1:
                     col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
@@ -925,7 +898,7 @@ if selection == "Article Risk Review":
                                     Change_timestamp = 'Changed_at'
                                     changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
 
-                                    
+
                                     st.success('Saved changes')
                                 except Exception as e:
                                     st.error(f"Github failed to push: {e}")
