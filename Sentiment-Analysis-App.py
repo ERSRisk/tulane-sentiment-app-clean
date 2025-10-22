@@ -619,7 +619,7 @@ if selection == "Article Risk Review":
         all_possible_risks.append("No Risk")
     all_possible_risks = [r for r in all_possible_risks if isinstance(r, str)]
     filter_risks = all_possible_risks[:]
-    default_risks = [r for r in risk_options if r.strip().lower() != 'no risk']
+    default_risks = [r for r in filter_risks if r.strip().lower() != 'no risk']
 
     filtered_risks = st.multiselect("Select Risks to Filter Articles", options = all_possible_risks, default=default_risks, key="risk_filter")
 
