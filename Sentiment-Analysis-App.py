@@ -382,19 +382,33 @@ if selection == "Unmatched Topic Analysis":
             st.success(f"Topic {topic['topic']} discarded successfully!")
 
 if selection == "Article Risk Review":
-    import streamlit as st
-    import pandas as pd
-    import json
-    from datetime import datetime
-    from datetime import timedelta
-    import os
-    from pathlib import Path
     import ast
     OWNER = 'ERSRisk'
     REPO = 'Tulane-Sentiment-Analysis'
     TAG = 'BERTopic_results'
     ASSET = 'BERTopic_results2.csv.gz'
-
+    numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability', 'University Label']
+    def parse_predicted_list(raw):
+        if isinstance(raw, list):
+            return [str(x) for x in raw]
+        if isinstance(raw, str):
+            s = raw.strip()
+            # Try Python-list literal first
+            if (s.startswith('[') and s.endswith(']')) or (s.startswith('(') and s.endswith(')')):
+                try:
+                    vals = ast.literal_eval(s)
+                    return [str(x) for x in vals] if isinstance(vals, (list, tuple)) else [str(vals)]
+                except Exception:
+                    pass
+            # Try simple CSV/semicolon fallbacks
+            if ';' in s:
+                return [p.strip() for p in s.split(';') if p.strip()]
+            if ',' in s:
+                return [p.strip() for p in s.split(',') if p.strip()]
+            # Single token
+            if s and s.lower() not in ('none', 'no risk'):
+                return [s]
+        return ["No Risk"]
     hidden_file = Path('Model_training/hidden_topics.json')
 
     def atomic_write_json(path: Path, data: dict):
@@ -458,7 +472,7 @@ if selection == "Article Risk Review":
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
             st.stop()
-        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability', 'University Label']
+        
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
 
@@ -588,21 +602,20 @@ if selection == "Article Risk Review":
         )
 
     base_df = st.session_state.articles
-    risk_col = (
-    '_RiskList' if '_RiskList' in base_df.columns else
-    'Risk_item' if 'Risk_item' in base_df.columns else
-    'Predicted_Risk_Single' if 'Predicted_Risk_Single' in base_df.columns else
-    None
-)
+    risk_col = next((c for c in [
+    '_RiskList', 'Top_Risks', 'Predicted_Risks', 'Predicted_Risks_Upd',
+    'Risk_item', 'Predicted_Risk_Single'
+] if c in base_df.columns), None)
 
     filtered_df = base_df[base_df['University Label'] == 1]
 
 # Only apply the "not No Risk" filter if we actually have a risk column
     if risk_col:
-        filtered_df[risk_col] = filtered_df[risk_col].astype(str)
-        filtered_df = filtered_df[
-        filtered_df[risk_col].str.strip().str.lower() != 'no risk'
-    ]
+    # Build a boolean mask: keep rows that are not pure "No Risk"
+        def _has_real_risk(s):
+            lst = parse_predicted_list(s)
+            return any(x.strip().lower() != 'no risk' for x in lst)
+        filtered_df = filtered_df[filtered_df[risk_col].map(_has_real_risk)]
     else:
         st.info("No risk column present; showing all rows with University Label == 1.")
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
@@ -701,18 +714,9 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
     
         
-        raw = article.get("_RiskList", "[]")
-        if isinstance(raw, list):
-            predicted = raw
-        elif isinstance(raw, str):
-            s = raw.strip()
-            if s.lower() in ("", "none", "no risk"):
-                predicted = ["No Risk"]
-            else:
-                parts = [r.strip() for r in s.split(';') if r.strip()]
-                predicted = parts if parts else ["No Risk"]   # keep all phrases if you ever have "a; b"
-        else:
-            predicted = ["No Risk"]
+        raw = article.get(risk_col, "[]")
+        
+        predicted = parse_predicted_list(raw)
 
         if not match_any(predicted, filtered_risks):
             continue
