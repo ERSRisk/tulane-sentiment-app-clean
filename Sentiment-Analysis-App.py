@@ -588,9 +588,24 @@ if selection == "Article Risk Review":
         )
 
     base_df = st.session_state.articles
+    risk_col = (
+    '_RiskList' if '_RiskList' in base_df.columns else
+    'Risk_item' if 'Risk_item' in base_df.columns else
+    'Predicted_Risk_Single' if 'Predicted_Risk_Single' in base_df.columns else
+    None
+)
+
     filtered_df = base_df[base_df['University Label'] == 1]
+
+# Only apply the "not No Risk" filter if we actually have a risk column
+    if risk_col:
+        filtered_df[risk_col] = filtered_df[risk_col].astype(str)
+        filtered_df = filtered_df[
+        filtered_df[risk_col].str.strip().str.lower() != 'no risk'
+    ]
+    else:
+        st.info("No risk column present; showing all rows with University Label == 1.")
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
-    filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
