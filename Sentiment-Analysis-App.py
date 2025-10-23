@@ -80,6 +80,7 @@ if st.session_state.current_tab != selection:
     st.session_state.current_tab = selection
 
 if selection == "Unmatched Topic Analysis":
+    from typing import Iterable, Any
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
         token = os.getenv('GITHUB_TOKEN')
         try:
@@ -205,7 +206,14 @@ if selection == "Unmatched Topic Analysis":
             with open('Model_training/topics_BERT.json', 'r') as f:
                 st.session_state.topicsbert = json.load(f)
         else:
-            st.session_state.topicsbert = []
+            st.session_state.topicsbert = {'topics': []}
+
+    if 'topicandsubtopic' not in st.session_state:
+        if os.path.exists('Model_training/topics_BERT_auto.json'):
+            with open('Model_training/topics_BERT_auto.json', 'r') as f:
+                st.session_state.topicandsubtopic = json.load(f)
+        else:
+            st.session_state.topicandsubtopic = []
 
     if 'discarded' not in st.session_state:
         st.session_state.discarded = fetch_release(
@@ -262,9 +270,9 @@ if selection == "Unmatched Topic Analysis":
                     if st.button("Yes, create new topic", key=f"create_new_{radio_key}"):
                         st.session_state['confirm_new'] = False
                         saved_ids = [t.get('topic') for t in st.session_state.topicsbert['topics'] if 'topic' in t]
-                        next_id = next_topic_id(saved_ids, start = 0)
+                        next_subtopic_id = next_topic_id(saved_ids, start = 0)
                         new_topic = {
-                            'topic': next_id,
+                            'topic': next_subtopic_id,
                             'name': topic['name'],
                             'keywords': topic['keywords'],
                             'documents': topic['documents'],
@@ -281,6 +289,23 @@ if selection == "Unmatched Topic Analysis":
                                                                dest_path = 'Model_training/topics_BERT.json', branch = 'main')
                         unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
                         st.session_state.unmatched = unmatched_json
+                        saved_topicandsubtopic = [t.get('main_topic_id') for t in st.session_state.topicandsubtopic if 'main_topic_id' in t]
+                        new_main_id = next_topic_id(saved_topicandsubtopic, start = 1)
+                        new_topicandsubtopic = {
+                            'main_topic_id':new_main_id,
+                            'main_label':topic['name'],
+                            'subtopics':[{
+                                'topic_id':next_subtopic_id,
+                                'label': topic['name']
+                            }]
+                        }
+                        st.session_state.topicandsubtopic.append(new_topicandsubtopic)
+                        auto_path = 'Model_training/topics_BERT_auto.json'
+                        os.makedirs(os.path.dirname(auto_path), exist_ok = True)
+                        with open(auto_path, 'w', encoding = 'utf-8') as f:
+                            json.dump(st.session_state.topicandsubtopic, f, ensure_ascii = False, indent = 2)
+                        resp10 = push_file_to_github('Model_training/topics_BERT_auto.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT_auto.json', branch = 'main')
 
                         # Update the single canonical unmatched file (no Contents API!)
                         resp6 = upsert_single_big_json(
@@ -304,12 +329,46 @@ if selection == "Unmatched Topic Analysis":
             if st.session_state.get('confirm_merge'):
                 st.warning("Are you sure you want to merge this topic with an existing one?")
                 col1, col2= st.columns(2)
-                existing_topic = st.selectbox("Select existing topic to merge with:", ['--Select a topic--'] + [t['name'] for t in st.session_state.topicsbert['topics']],index = 0, key=f"existing_topic_{radio_key}")
+                id_to_name = {int(t['topic']): str(t.get('name', '')).strip()
+                             for t in st.session_state.topicsbert['topics'] if 'topic' in t}
+                
+                for main in st.session_state.topicandsubtopic:
+                    for stp in main.get('subtopics', []) or []:
+                        tid = int(stp.get('topic_id', -1))
+                        if tid in id_to_name:
+                            stp['label'] = id_to_name[tid]
+                                
+                
+                main_options = [('--Select a topic--', None)] + [(item['main_label'], item['main_topic_id')] for item in st.session_state.topicandsubtopic]
+                
+                main_choice = st.selectbox("Select existing topic to merge with:", main_options,index = 0, key=f"existing_topic_{radio_key}")
+                selected_main_label, selected_main_id = main_choice if main_choice else (None, None)
+                subtopic_list = []
+                if selected_main_id is not None:
+                    for item in st.session_state.topicandsubtopic:
+                        if item["main_topic_id"] == selected_main_id:
+                            subtopic_list = item.get("subtopics", []) or []
+                            break
+                selected_subtopic = None
+                if subtopic_list:
+                    # Build subtopic options as (label, id) pairs
+                    sub_options = [(stp["topic_id"], stp["label"]) for stp in subtopic_list]
+                    sub_choice = st.selectbox(
+                        "Subtopic (optional)",
+                        options=[("— All subtopics —", None)] + sub_options,
+                        format_func=lambda opt: opt[1],
+                        index=0,
+                        key="subtopic_select",
+                    )
+                    selected_subtopic = sub_choice[0]  # None means "All subtopics"
+                else:
+                    st.caption("No subtopics available for this main topic.")
                 with col1:
                     if st.button("Yes, merge topic", key=f"merge_{radio_key}"):
                         st.session_state['confirm_merge'] = False
+                        
                         for t in st.session_state.topicsbert['topics']:
-                            if t['name'] == existing_topic:
+                            if int(t['topic']) == selected_subtopic:
                                 if isinstance(t['documents'], str):
                                     t['documents'] = [t['documents']]
                                 t['documents'].extend(topic['documents'])
@@ -336,6 +395,7 @@ if selection == "Unmatched Topic Analysis":
                                     token=os.getenv('GITHUB_TOKEN'),
                                     mode = 'replace'
                                 )
+                                
                                 st.success(f"Topic {topic['topic']} merged successfully!")
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
