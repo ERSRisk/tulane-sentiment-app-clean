@@ -339,7 +339,7 @@ if selection == "Unmatched Topic Analysis":
                             stp['label'] = id_to_name[tid]
                                 
                 
-                main_options = [('--Select a topic--', None)] + [(item['main_label'], item['main_topic_id')] for item in st.session_state.topicandsubtopic]
+                main_options = [('--Select a topic--', None)] + [(item['main_label'], item['main_topic_id']) for item in st.session_state.topicandsubtopic]
                 
                 main_choice = st.selectbox("Select existing topic to merge with:", main_options,index = 0, key=f"existing_topic_{radio_key}")
                 selected_main_label, selected_main_id = main_choice if main_choice else (None, None)
