@@ -742,26 +742,38 @@ if selection == "Article Risk Review":
 
         raw = article.get("_RiskList", "[]")
         if isinstance(raw, list):
-            predicted = raw
+            predicted = [str(x).strip() for x in raw if str(x).strip()]
         elif isinstance(raw, str):
             s = raw.strip()
-            # 👇 NEW: if it looks like JSON, parse it first
+            predicted = []
+        
+            # 1) Try JSON (double-quoted lists)
             if s.startswith('[') and s.endswith(']'):
                 try:
-                    lst = json.loads(s)
-                    if isinstance(lst, list):
-                        predicted = [str(x).strip() for x in lst if str(x).strip()]
-                    else:
-                        predicted = []
+                    j = json.loads(s)
+                    if isinstance(j, list):
+                        predicted = [str(x).strip() for x in j if str(x).strip()]
                 except Exception:
-                    predicted = []
-            # fallback to your original logic if not parsed above
-            if not predicted:
-                if s.lower() in ("", "none", "no risk"):
-                    predicted = ["No Risk"]
+                    # 2) Try Python literal (single-quoted lists)
+                    try:
+                        import ast
+                        j = ast.literal_eval(s)
+                        if isinstance(j, list):
+                            predicted = [str(x).strip() for x in j if str(x).strip()]
+                    except Exception:
+                        pass
+        
+            # 3) If still not parsed, accept delimited strings (semicolon OR comma)
+            if not predicted and s:
+                sep = ';' if ';' in s else (',' if ',' in s else None)
+                if sep:
+                    predicted = [p.strip() for p in s.split(sep) if p.strip()]
                 else:
-                    parts = [r.strip() for r in s.split(';') if r.strip()]
-                    predicted = parts if parts else ["No Risk"]
+                    predicted = [s]  # single label string
+        
+            # 4) Normalize explicit "No Risk"
+            if not predicted or all(p.lower() in ("no risk","none") for p in predicted):
+                predicted = ["No Risk"]
         else:
             predicted = ["No Risk"]
 
