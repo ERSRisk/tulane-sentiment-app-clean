@@ -643,46 +643,9 @@ if selection == "Article Risk Review":
     base_df = st.session_state.articles
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    ul = base_df.get('University Label')
-    if ul is not None:
-        ul_num = pd.to_numeric(ul, errors='coerce')
-        if ul_num.isna().all():
-            # handle strings like "1", "1.0", "true"
-            ul_norm = ul.astype(str).str.strip().str.lower().map({'1':'1','1.0':'1','true':'1'})
-            ul_num = pd.to_numeric(ul_norm, errors='coerce').fillna(0)
-        base_df['__UL__'] = (ul_num == 1).astype(int)
-    else:
-        base_df['__UL__'] = 0
-    
-    filtered_df = base_df[base_df['__UL__'] == 1].copy()
+    filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
-    def parse_risks_cell(x):
-        if isinstance(x, list):
-            return [str(t).strip() for t in x if str(t).strip()]
-        if not isinstance(x, str):
-            return []
-        s = x.strip()
-        # Try JSON first
-        if (s.startswith('[') and s.endswith(']')) or (s.startswith('{') and s.endswith('}')):
-            try:
-                j = json.loads(s)
-                if isinstance(j, list):
-                    return [str(t).strip() for t in j if str(t).strip()]
-            except Exception:
-                pass
-        # Fall back to semicolon split; else single label
-        if ';' in s:
-            parts = [p.strip() for p in s.split(';') if p.strip()]
-            return parts or []
-        return [s] if s else []
-    
-    filtered_df['__parsed_risks__'] = filtered_df['_RiskList'].apply(parse_risks_cell)
-    def is_pure_no_risk(lst):
-        if not lst:
-            return True
-        norm = [str(t).strip().lower() for t in lst if str(t).strip()]
-        return len(norm) == 1 and norm[0] in ('no risk', 'none')
-    filtered_df = filtered_df[~filtered_df['__parsed_risks__'].apply(is_pure_no_risk)]
+    filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
@@ -722,12 +685,13 @@ if selection == "Article Risk Review":
 
     filtered_risks = st.multiselect("Select Risks to Filter Articles", options = all_possible_risks, default=filter_risks, key="risk_filter")
 
-    def match_any(predicted_list, selected):
-        pred = [str(p).strip().lower() for p in (predicted_list or []) if isinstance(p, (str, int, float))]
-        sel  = [str(s).strip().lower() for s in selected]
-        if not pred:
-            return "no risk" in sel
-        return any(p in sel for p in pred)
+    def match_any(predicted, selected):
+        if not isinstance(predicted, list) or not predicted:
+        # Treat empty as "No Risk"
+            return "no risk" in selected
+        predicted = [str(p).strip().lower() for p in predicted if isinstance(p, str)]
+        selected = [s.strip().lower() for s in selected]
+        return any(p in selected for p in predicted)
 
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
@@ -776,10 +740,33 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
 
 
-        predicted = article.get('__parsed_risks__', [])
+        raw = article.get("_RiskList", "[]")
+        if isinstance(raw, list):
+            predicted = raw
+        elif isinstance(raw, str):
+            s = raw.strip()
+            # 👇 NEW: if it looks like JSON, parse it first
+            if s.startswith('[') and s.endswith(']'):
+                try:
+                    lst = json.loads(s)
+                    if isinstance(lst, list):
+                        predicted = [str(x).strip() for x in lst if str(x).strip()]
+                    else:
+                        predicted = []
+                except Exception:
+                    predicted = []
+            # fallback to your original logic if not parsed above
+            if not predicted:
+                if s.lower() in ("", "none", "no risk"):
+                    predicted = ["No Risk"]
+                else:
+                    parts = [r.strip() for r in s.split(';') if r.strip()]
+                    predicted = parts if parts else ["No Risk"]
+        else:
+            predicted = ["No Risk"]
+
         if not match_any(predicted, filtered_risks):
             continue
-
 
         title = str(article.get("Title", ""))[:100]
 
