@@ -645,7 +645,7 @@ if selection == "Article Risk Review":
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
     filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
-    filtered_df = filtered_df[~(filtered_df['_RiskList'] == 'No Risk')]
+    filtered_df = filtered_df[~(filtered_df['_RiskList'].astype(str).str.contains(r'\bno\s*risk\b', case = False, regex = True))]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
@@ -860,12 +860,9 @@ if selection == "Article Risk Review":
                             st.success(f"Hid topic {tid} - {article['Topic_name']}")
                             st.rerun()
 
-                matched_risks = [
-                    opt for opt in all_possible_risks
-                    if any(opt.lower() == str(p).lower() for p in predicted if isinstance(p, str))
-                ]
+                shown = [str(p) for p in predicted if str(p).strip()]
 
-                st.markdown("**Predicted Risks:** " + (", ".join(matched_risks) if matched_risks else "No Risk"))
+                st.markdown("**Predicted Risks:** " + (", ".join(shown) if shown else "No Risk"))
 
 
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
