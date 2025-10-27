@@ -514,7 +514,7 @@ if selection == "Article Risk Review":
 
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
-        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', '_RiskList', 'Recency', 'Source_Accuracy',
+        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
         try:
             results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols=usecols)
@@ -645,7 +645,7 @@ if selection == "Article Risk Review":
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
     filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
-    filtered_df = filtered_df[~(filtered_df['_RiskList'].astype(str).str.contains(r'\bno\s*risk\b', case = False, regex = True))]
+    filtered_df = filtered_df[~(filtered_df['Predicted_Risks_new'].astype(str).str.contains(r'\bno\s*risk\b', case = False, regex = True))]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
@@ -740,7 +740,7 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
 
 
-        raw = article.get("_RiskList", "[]")
+        raw = article.get("Predicted_Risks_new", "[]")
         if isinstance(raw, list):
             predicted = [str(x).strip() for x in raw if str(x).strip()]
         elif isinstance(raw, str):
@@ -862,7 +862,7 @@ if selection == "Article Risk Review":
 
                 shown = [str(p) for p in predicted if str(p).strip()]
 
-                st.markdown("**Predicted Risks:** " + str(article['_RiskList']))
+                st.markdown("**Predicted Risks:** " + (", ".join(shown) if shown else "No Risk"))
 
 
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
