@@ -355,12 +355,13 @@ if selection == "Unmatched Topic Analysis":
                 if subtopic_list:
                     # Build subtopic options as (label, id) pairs
                     sub_options = [(stp["topic_id"], stp["label"]) for stp in subtopic_list]
+                    opts = [(None, '--All Subtopics--')] + sub_options
                     sub_choice = st.selectbox(
                         "Subtopic (optional)",
-                        options=[("— All subtopics —", None)] + sub_options,
+                        options=opts,
                         format_func=lambda opt: opt[1],
                         index=0,
-                        key="subtopic_select",
+                        key="subtopic_select_{radio_key}",
                     )
                     selected_subtopic = sub_choice[0]  # None means "All subtopics"
                 else:
@@ -915,7 +916,7 @@ if selection == "Article Risk Review":
                             else:
                                 pred_set = {str(p).strip().lower() for p in predicted if isinstance(p, str)}
                                 default_pair = next((pr for pr in pairs if pr[1].strip().lower() in pred_set), None)
-                                default_index = pairs.index(default_pair)
+                                default_index = pairs.index(default_pair) if default_pair in pairs else 0
                                 #valid_defaults = [opt for opt in all_possible_risks if any(opt.lower() == str(p).lower() for p in predicted if isinstance(p, str))]
                                 #selected_risks = st.multiselect(
                                  #   "Edit risks if necessary:",
