@@ -529,7 +529,7 @@ if selection == "Article Risk Review":
             try:
                 changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
                 def norm(s: pd.Series) -> pd.Series:
-                    return s.astype(str).str.replace(r's+', ' ', regex = True).str.strip()
+                    return s.astype(str).str.replace(r'\s+', ' ', regex = True).str.strip()
                 for df in (changes_df, results_df):
                     if 'Link' in df.columns:
                         df['Link'] = df['Link'].astype(str).str.strip()
@@ -862,7 +862,7 @@ if selection == "Article Risk Review":
 
                 shown = [str(p) for p in predicted if str(p).strip()]
 
-                st.markdown("**Predicted Risks:** " + article['_RiskList'])
+                st.markdown("**Predicted Risks:** " + str(article['_RiskList']))
 
 
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
