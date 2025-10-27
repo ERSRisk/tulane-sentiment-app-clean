@@ -862,7 +862,7 @@ if selection == "Article Risk Review":
 
                 shown = [str(p) for p in predicted if str(p).strip()]
 
-                st.markdown("**Predicted Risks:** " + (", ".join(shown) if shown else "No Risk"))
+                st.markdown("**Predicted Risks:** " + article['_RiskList'])
 
 
                 tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
