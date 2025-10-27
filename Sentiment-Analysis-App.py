@@ -351,6 +351,7 @@ if selection == "Unmatched Topic Analysis":
                         if item["main_topic_id"] == selected_main_id:
                             subtopic_list = item.get("subtopics", []) or []
                             break
+                    
                 selected_subtopic = None
                 if subtopic_list:
                     # Build subtopic options as (label, id) pairs
@@ -361,45 +362,99 @@ if selection == "Unmatched Topic Analysis":
                         options=opts,
                         format_func=lambda opt: opt[1],
                         index=0,
-                        key="subtopic_select_{radio_key}",
+                        key=f"subtopic_select_{radio_key}",
                     )
                     selected_subtopic = sub_choice[0]  # None means "All subtopics"
                 else:
                     st.caption("No subtopics available for this main topic.")
                 with col1:
-                    if st.button("Yes, merge topic", key=f"merge_{radio_key}"):
+                    if selected_subtopic is not None:
+                        if st.button("Yes, merge topic", key=f"merge_{radio_key}"):
+                            st.session_state['confirm_merge'] = False
+                            
+                            for t in st.session_state.topicsbert['topics']:
+                                if int(t['topic']) == selected_subtopic:
+                                    if isinstance(t['documents'], str):
+                                        t['documents'] = [t['documents']]
+                                    t['documents'].extend(topic['documents'])
+    
+                                # Ensure keywords are lists
+                                    t['keywords'] = [str(k).strip() for k in t['keywords'] if str(k).strip()]
+                                    new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
+                                    t['keywords'].extend(new_keywords)
+                                    with open('Model_training/topics_BERT.json', 'w', encoding='utf-8') as f:
+                                        json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
+                                    resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                                  dest_path = 'Model_training/topics_BERT.json', branch = 'main')
+                                    unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+                                    st.session_state.unmatched = unmatched_json
+    
+                                    # Update the single canonical unmatched file (no Contents API!)
+                                    resp6 = upsert_single_big_json(
+                                        owner="ERSRisk",
+                                        repo="tulane-sentiment-app-clean",
+                                        tag="unmatched-topics",
+                                        asset_name="unmatched_topics.json",
+                                        new_items=st.session_state.unmatched,
+                                        dedupe_key="topic",
+                                        token=os.getenv('GITHUB_TOKEN'),
+                                        mode = 'replace'
+                                    )
+                                    
+                                    st.success(f"Topic {topic['topic']} merged successfully!")
+                    if selected_subtopic is None:
+                        st.session_state['confirm_new'] = False
+                        saved_ids = [t.get('topic') for t in st.session_state.topicsbert['topics'] if 'topic' in t]
+                        next_subtopic_id = next_topic_id(saved_ids, start = 0)
+                        new_topic = {
+                            'topic': next_subtopic_id,
+                            'name': topic['name'],
+                            'keywords': topic['keywords'],
+                            'documents': topic['documents'],
+                            'source': 'Streamlit'
+                        }
+                        st.session_state.topicsbert['topics'].append(new_topic)
+                        local_path = 'Model_training/topics_BERT.json'
+                        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                        with open(local_path, 'w', encoding='utf-8') as f:
+                            json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
+                        push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
+                        push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/Tulane-Sentiment-Analysis',
+                                                               dest_path = 'Model_training/topics_BERT.json', branch = 'main') 
+                        for main in st.session_state.topicandsubtopic:
+                            if main['main_topic_id'] == selected_main_id:
+                                main.setdefault('subtopics', []).append({
+                                    'topic_id': next_subtopic_id,
+                                    'label': topic['name']
+                                })
+                                break
+                        os.makedirs(os.path.dirname('Model_training/topics_BERT_auto.json'), exist_ok=True)
+                        with open('Model_training/topics_BERT_auto.json', 'w', encoding = 'utf-8') as f:
+                            json.dump(st.session_state.topicandsubtopic, f, ensure_ascii = False, indent = 2)
+                        push_file_to_github(
+                            'Model_training/topics_BERT_auto.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
+                            dest_path = 'Model_training/topics_BERT_auto.json', branch = 'main')
+                        
+                        unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
+                        st.session_state.unmatched = unmatched_json
+
+                        # Update the single canonical unmatched file (no Contents API!)
+                        upsert_single_big_json(
+                            owner="ERSRisk",
+                            repo="tulane-sentiment-app-clean",
+                            tag="unmatched-topics",
+                            asset_name="unmatched_topics.json",
+                            new_items=st.session_state.unmatched,
+                            dedupe_key="topic",
+                            token=os.getenv('GITHUB_TOKEN'),
+                            mode = 'replace'
+                        )
+                        
+                        st.success(f"Topic {topic['topic']} merged successfully!")
                         st.session_state['confirm_merge'] = False
                         
-                        for t in st.session_state.topicsbert['topics']:
-                            if int(t['topic']) == selected_subtopic:
-                                if isinstance(t['documents'], str):
-                                    t['documents'] = [t['documents']]
-                                t['documents'].extend(topic['documents'])
-
-                            # Ensure keywords are lists
-                                t['keywords'] = [str(k).strip() for k in t['keywords'] if str(k).strip()]
-                                new_keywords = [k.strip() for k in topic['keywords'].split(',')] if isinstance(topic['keywords'], str) else topic['keywords']
-                                t['keywords'].extend(new_keywords)
-                                with open('Model_training/topics_BERT.json', 'w', encoding='utf-8') as f:
-                                    json.dump(st.session_state.topicsbert, f, ensure_ascii=False, indent=2)
-                                resp1 = push_file_to_github('Model_training/topics_BERT.json', repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/topics_BERT.json', branch = 'main')
-                                unmatched_json = [t for t in st.session_state.unmatched if t['topic'] != topic['topic']]
-                                st.session_state.unmatched = unmatched_json
-
-                                # Update the single canonical unmatched file (no Contents API!)
-                                resp6 = upsert_single_big_json(
-                                    owner="ERSRisk",
-                                    repo="tulane-sentiment-app-clean",
-                                    tag="unmatched-topics",
-                                    asset_name="unmatched_topics.json",
-                                    new_items=st.session_state.unmatched,
-                                    dedupe_key="topic",
-                                    token=os.getenv('GITHUB_TOKEN'),
-                                    mode = 'replace'
-                                )
-                                
-                                st.success(f"Topic {topic['topic']} merged successfully!")
+    
                 with col2:
                     if st.button("Cancel", key=f"cancel_merge_{radio_key}"):
                         st.session_state['confirm_merge'] = False
