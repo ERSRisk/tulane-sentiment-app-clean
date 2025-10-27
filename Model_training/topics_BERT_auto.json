@@ -1,2365 +1,2351 @@
 [
   {
-    "main_topic_id":1,
-    "main_label":"U.S. Education, Research Funding, and Student Policy",
-    "subtopics":[
+    "main_topic_id": 1,
+    "main_label": "U.S. Education, Research Funding, and Student Policy",
+    "subtopics": [
       {
-        "topic_id":30,
-        "label":"nih research update eo nsf"
+        "topic_id": 30,
+        "label": "Federal Research Funding and Policy"
       },
       {
-        "topic_id":184,
-        "label":"school students reading math scores"
+        "topic_id": 184,
+        "label": "Student Academic Performance and Test Scores"
       },
       {
-        "topic_id":185,
-        "label":"higher education enrollment undergraduate enrollment education institutions"
+        "topic_id": 185,
+        "label": "Higher Education Enrollment and Admissions"
       },
       {
-        "topic_id":233,
-        "label":"compact universities admissions higher education education"
+        "topic_id": 233,
+        "label": "Higher Education and University Compacts"
       },
       {
-        "topic_id":310,
-        "label":"research scientific nih science grants"
+        "topic_id": 310,
+        "label": "Scientific Research Funding"
       },
       {
-        "topic_id":342,
-        "label":"grants court supreme court supreme dei"
+        "topic_id": 342,
+        "label": "Supreme Court Rulings on DEI and Grants"
       },
       {
-        "topic_id":359,
-        "label":"borrowers student loan loan forgiveness repayment"
+        "topic_id": 359,
+        "label": "Student Loan Forgiveness"
       },
       {
-        "topic_id":449,
-        "label":"hispanic colleges students hsi instate"
+        "topic_id": 449,
+        "label": "College Admissions for Hispanic Students"
       },
       {
-        "topic_id":502,
-        "label":"students firstgeneration firstgeneration students percent academic"
-      }
-    ]
-  },
-  {"main_topic_id":2,
-    "main_label":"Antisemitism and Foreign Aid",
-    "subtopics":[
-      {
-        "topic_id":163,
-        "label":"synagogue manchester jewish attack kippur"
-      },
-      {
-        "topic_id":42,
-        "label":"harvard antisemitism harvards harvard university burroughs"
-      },
-      {
-        "topic_id":180,
-        "label":"foreign aid aid foreign withhold rescission"
-      },
-      {
-        "topic_id":529,
-        "label":"antisemitism jewish butler berkeley uc"
+        "topic_id": 502,
+        "label": "First-Generation Student Success"
       }
     ]
   },
   {
-    "main_topic_id":3,
-    "main_label":"U.S. health policy, vaccines, and the pharmaceutical industry",
-    "subtopics":[
+    "main_topic_id": 2,
+    "main_label": "Antisemitism and Foreign Aid",
+    "subtopics": [
       {
-        "topic_id":32,
-        "label":"biotech drug novartis phase patients"
+        "topic_id": 163,
+        "label": "Manchester Synagogue Attack"
       },
       {
-        "topic_id":43,
-        "label":"vaccine vaccines covid covid19 shots"
+        "topic_id": 42,
+        "label": "Harvard University and Antisemitism"
       },
       {
-        "topic_id":50,
-        "label":"kennedy jr rfk cassidy rfk jr"
+        "topic_id": 180,
+        "label": "Withholding Foreign Aid"
       },
       {
-        "topic_id":70,
-        "label":"monarez cdc kennedy susan monarez susan"
-      },
-      {
-        "topic_id":95,
-        "label":"nhs care hospital patients doctors"
-      },
-
-      {
-        "topic_id":107,
-        "label":"maha kennedy america healthy nutrition health"
-      },
-      {
-        "topic_id":120,
-        "label":"medicaid new mexico care snap health"
-      },
-      {
-        "topic_id":126,
-        "label":"ai health tech stat health patient"
-      },
-      {
-        "topic_id":136,
-        "label":"pfizer drug prices drug prices drugs"
-      },
-      {
-        "topic_id":187,
-        "label":"mrna vaccines vaccine mrna vaccines mrna technology"
-      },
-      {
-        "topic_id":206,
-        "label":"ladapo mandates vaccine mandates vaccine florida"
-      },
-      {
-        "topic_id":243,
-        "label":"medicare unitedhealth prior authorization care health"
-      },
-      {
-        "topic_id":253,
-        "label":"vaccine vaccines kennedy covid acip"
-      },
-      {
-        "topic_id":254,
-        "label":"organ transplant pig organs embryo"
-      },
-      {
-        "topic_id":284,
-        "label":"brandname drugs tariffs drugmakers pharma"
-      },
-      {
-        "topic_id":333,
-        "label":"insurance insurers employers coverage health insurance"
-      },
-      {
-        "topic_id":349,
-        "label":"medicines uk nhs pharmaceutical pharma"
-      },
-      {
-        "topic_id":447,
-        "label":"hepatitis hepatitis vaccine vaccine liver newborns"
-      },
-      {
-        "topic_id":453,
-        "label":"novo novo nordisk nordisk obesity wegovy"
-      },
-      {
-        "topic_id":473,
-        "label":"patel fbi director fired refusing director patel vaccine chief"
-      },
-      {
-        "topic_id":477,
-        "label":"prasad vinay vinay prasad fda biologics"
-      },
-      {
-        "topic_id":492,
-        "label":"medicare final rule rule inpatient payment"
-      },
-      {
-        "topic_id":535,
-        "label":"covid shots deaths vaccine covid shots"
+        "topic_id": 529,
+        "label": "Antisemitism at UC Berkeley"
       }
     ]
   },
   {
-    "main_topic_id":4,
-    "main_label":"Health-Adjacent Social Issues (abortion, birthrght citizenship, etc.)",
-    "subtopics":[
+    "main_topic_id": 3,
+    "main_label": "U.S. health policy, vaccines, and the pharmaceutical industry",
+    "subtopics": [
       {
-        "topic_id":58,
-        "label":"transgender gender genderaffirming genderaffirming care trans"
+        "topic_id": 32,
+        "label": "Biopharmaceutical Drug Development"
       },
       {
-        "topic_id":106,
-        "label":"abortion planned parenthood parenthood pills planned"
+        "topic_id": 43,
+        "label": "COVID-19 Vaccine Recommendations"
       },
       {
-        "topic_id":236,
-        "label":"mifepristone abortion fda pill generic"
+        "topic_id": 50,
+        "label": "Robert F. Kennedy Jr. Hearings"
       },
       {
-        "topic_id":480,
-        "label":"contraceptives usaid birth control warehouse implants"
+        "topic_id": 70,
+        "label": "CDC Leadership and Personnel"
       },
       {
-        "topic_id":560,
-        "label":"birthright citizenship citizenship birthright supreme court supreme"
+        "topic_id": 95,
+        "label": "NHS and Maternity Care"
+      },
+      {
+        "topic_id": 107,
+        "label": "Nutrition and Public Health"
+      },
+      {
+        "topic_id": 120,
+        "label": "New Mexico Medicaid and SNAP Policies"
+      },
+      {
+        "topic_id": 126,
+        "label": "AI in Health Tech"
+      },
+      {
+        "topic_id": 136,
+        "label": "Prescription Drug Costs"
+      },
+      {
+        "topic_id": 187,
+        "label": "mRNA Vaccine Technology"
+      },
+      {
+        "topic_id": 206,
+        "label": "Florida Vaccine Mandates"
+      },
+      {
+        "topic_id": 243,
+        "label": "Medicare and Prior Authorization"
+      },
+      {
+        "topic_id": 253,
+        "label": "COVID-19 Vaccine Advisory Panels"
+      },
+      {
+        "topic_id": 254,
+        "label": "Pig Organ Transplants"
+      },
+      {
+        "topic_id": 284,
+        "label": "Pharmaceutical Tariffs"
+      },
+      {
+        "topic_id": 333,
+        "label": "Health Insurance Costs"
+      },
+      {
+        "topic_id": 349,
+        "label": "Pharmaceuticals in the UK and Saudi Arabia"
+      },
+      {
+        "topic_id": 447,
+        "label": "Hepatitis Vaccine for Newborns"
+      },
+      {
+        "topic_id": 453,
+        "label": "Novo Nordisk's Obesity and Diabetes Drugs"
+      },
+      {
+        "topic_id": 473,
+        "label": "Controversies Surrounding Public Officials"
+      },
+      {
+        "topic_id": 477,
+        "label": "Vinay Prasad and the FDA"
+      },
+      {
+        "topic_id": 492,
+        "label": "Medicare Payment Rules"
+      },
+      {
+        "topic_id": 535,
+        "label": "Debate on COVID-19 Vaccines"
       }
     ]
   },
   {
-    "main_topic_id":5,
-    "main_label":"Public Media, Podcasts & Streaming Journalism",
-    "subtopics":[
+    "main_topic_id": 4,
+    "main_label": "Health-Adjacent Social Issues (abortion, birthrght citizenship, etc.)",
+    "subtopics": [
       {
-        "topic_id":20,
-        "label":"bloomberg podcast source source bloomberg podcast source"
+        "topic_id": 58,
+        "label": "Gender-Affirming Care for Minors"
       },
       {
-        "topic_id":56,
-        "label":"cbc bbc r1 music sa"
+        "topic_id": 106,
+        "label": "Abortion and Reproductive Health"
       },
       {
-        "topic_id":191,
-        "label":"nprs npr editor journalism evans"
+        "topic_id": 236,
+        "label": "Regulation of Abortion Pills"
       },
       {
-        "topic_id":218,
-        "label":"movers podcast source source bloomberg podcast bloomberg"
+        "topic_id": 480,
+        "label": "USAID Contraceptive Supplies"
       },
       {
-        "topic_id":318,
-        "label":"streaming youtube hls netflix youtube tv"
-      },
-      {
-        "topic_id":334,
-        "label":"kos daily kos hours hours help desk newsnow"
-      },
-      {
-        "topic_id":397,
-        "label":"cpb npr rank public media stations"
-      },
-      {
-        "topic_id":413,
-        "label":"ali pbs news pbs news weekend news association"
-      },
-      {
-        "topic_id":511,
-        "label":"john yang yang pbs news pbs news weekend"
-      },
-      {
-        "topic_id":533,
-        "label":"pbs iowa captions tv video closed"
+        "topic_id": 560,
+        "label": "Birthright Citizenship Law"
       }
     ]
   },
   {
-    "main_topic_id":6,
-    "main_label":"Chronic Diseases & Neurological Health",
-    "subtopics":[
+    "main_topic_id": 5,
+    "main_label": "Public Media, Podcasts & Streaming Journalism",
+    "subtopics": [
       {
-        "topic_id":39,
-        "label":"cancer exercise doctor shares tips workout"
+        "topic_id": 20,
+        "label": "Bloomberg Podcasts"
       },
       {
-        "topic_id":69,
-        "label":"autism tylenol acetaminophen pregnancy pregnant"
+        "topic_id": 56,
+        "label": "Public Broadcasting (CBC/BBC)"
       },
       {
-        "topic_id":142,
-        "label":"glp1 weight weight loss ozempic diabetes"
+        "topic_id": 191,
+        "label": "NPR Journalism and Staff"
       },
       {
-        "topic_id":276,
-        "label":"sleep diabetes eating sweeteners diet"
+        "topic_id": 218,
+        "label": "Bloomberg Stock Market Podcast"
       },
       {
-        "topic_id":317,
-        "label":"autism autistic autistic people diagnosed diagnosed autism"
+        "topic_id": 318,
+        "label": "Video Streaming Services"
       },
       {
-        "topic_id":408,
-        "label":"breast breast cancer cancer munn cancer survivor"
+        "topic_id": 334,
+        "label": "Daily Kos Website"
       },
       {
-        "topic_id":417,
-        "label":"blood pressure heart blood heart attack pressure"
+        "topic_id": 397,
+        "label": "US Public Broadcasting"
       },
       {
-        "topic_id":421,
-        "label":"leucovorin autism folate drug fda"
+        "topic_id": 413,
+        "label": "PBS News and Journalism Awards"
       },
       {
-        "topic_id":445,
-        "label":"reviews closed captioning captioning video closed reviews 2025"
+        "topic_id": 511,
+        "label": "John Yang at PBS News"
       },
       {
-        "topic_id":521,
-        "label":"alzheimers lithium brain alzheimers disease dementia"
+        "topic_id": 533,
+        "label": "PBS App and TV Captions"
       }
     ]
   },
   {
-    "main_topic_id":7,
-    "main_label":"Artificial Intelligence & Emerging Tech Ecosystem",
-    "subtopics":[
+    "main_topic_id": 6,
+    "main_label": "Chronic Diseases & Neurological Health",
+    "subtopics": [
       {
-        "topic_id":55,
-        "label":"iphone pro apple iphone 17 pieces new"
+        "topic_id": 39,
+        "label": "Health and Fitness Advice"
       },
       {
-        "topic_id":68,
-        "label":"chatbots chatgpt chatbot ai openai"
+        "topic_id": 69,
+        "label": "Autism and Acetaminophen Use During Pregnancy"
       },
       {
-        "topic_id":124,
-        "label":"ai skills technology coding tech"
+        "topic_id": 142,
+        "label": "Weight Loss Drugs"
       },
       {
-        "topic_id":168,
-        "label":"ai energy readership premium infrastructure"
+        "topic_id": 276,
+        "label": "Diet, Health, and Longevity"
       },
       {
-        "topic_id":210,
-        "label":"robotaxi robots humanoid robot autonomous"
+        "topic_id": 317,
+        "label": "Autism Diagnosis and Spectrum"
       },
       {
-        "topic_id":383,
-        "label":"glasses meta zuckerberg metas smart glasses"
+        "topic_id": 408,
+        "label": "Breast Cancer and Survivorship"
       },
       {
-        "topic_id":389,
-        "label":"sora openai slop altman app"
+        "topic_id": 417,
+        "label": "Cardiovascular Health and Risk"
       },
       {
-        "topic_id":475,
-        "label":"ai students cheating use ai education"
+        "topic_id": 421,
+        "label": "Folate Deficiency and Autism Treatment"
       },
       {
-        "topic_id":548,
-        "label":"fitness apple watch watch apple smartwatch"
+        "topic_id": 445,
+        "label": "Product Reviews and Technical Issues"
       },
       {
-        "topic_id":556,
-        "label":"openai chatgpt gpt5 altman ai"
+        "topic_id": 521,
+        "label": "Lithium Treatment for Alzheimer's"
       }
     ]
   },
   {
-    "main_topic_id":8,
-    "main_label":"Natural Disasters & Extreme Weather Events",
-    "subtopics":[
+    "main_topic_id": 7,
+    "main_label": "Artificial Intelligence & Emerging Tech Ecosystem",
+    "subtopics": [
       {
-        "topic_id":165,
-        "label":"afghanistan earthquake taliban quake afghans"
+        "topic_id": 55,
+        "label": "New Smartphone Models and Rumors"
       },
       {
-        "topic_id":24,
-        "label":"floods pakistan rains monsoon punjab"
+        "topic_id": 68,
+        "label": "AI Chatbots and Teen Mental Health"
       },
       {
-        "topic_id":33,
-        "label":"wildfire smoke firefighters wildfires fires"
+        "topic_id": 124,
+        "label": "AI and Job Skills"
       },
       {
-        "topic_id":53,
-        "label":"hurricane tropical storm erin atlantic"
+        "topic_id": 168,
+        "label": "AI and Energy Sector Investing"
       },
       {
-        "topic_id":78,
-        "label":"fema disaster assistance flood span"
+        "topic_id": 210,
+        "label": "Autonomous Vehicles and Robots"
       },
       {
-        "topic_id":81,
-        "label":"earthquake magnitude tsunami quake earthquakes"
+        "topic_id": 383,
+        "label": "Meta's AI Smart Glasses"
       },
       {
-        "topic_id":91,
-        "label":"typhoon ragasa hong hong kong kong"
+        "topic_id": 389,
+        "label": "OpenAI Sora Video Generation"
       },
       {
-        "topic_id":117,
-        "label":"showers rain temperatures weather thunderstorms"
+        "topic_id": 475,
+        "label": "AI and Cheating in Education"
       },
       {
-        "topic_id":119,
-        "label":"water river dams rivers drought"
+        "topic_id": 548,
+        "label": "Apple Watch Health and Fitness Features"
       },
       {
-        "topic_id":192,
-        "label":"heat temperatures extreme heat extreme climate"
-      },
-      {
-        "topic_id":220,
-        "label":"wildfires spain fires portugal firefighters"
-      },
-      {
-        "topic_id":309,
-        "label":"explosion clairton steel plant coke"
-      },
-      {
-        "topic_id":316,
-        "label":"rubble collapsed rescuers indonesia boarding school"
-      },
-      {
-        "topic_id":425,
-        "label":"news media disaster resources updated hour page events"
-      },
-      {
-        "topic_id":466,
-        "label":"camp camp mystic mystic flood campers"
-      },
-      {
-        "topic_id":493,
-        "label":"flooding rainfall floods sudan nile"
-      },
-      {
-        "topic_id":499,
-        "label":"scotland storm winds amy gusts"
-      },
-      {
-        "topic_id":510,
-        "label":"katrina orleans new orleans salter hurricane katrina"
-      },
-      {
-        "topic_id":566,
-        "label":"glacier juneau flooding outburst basin"
+        "topic_id": 556,
+        "label": "OpenAI and ChatGPT"
       }
     ]
   },
   {
-    "main_topic_id":9,
-    "main_label":"Local News and Miscellaneous Articles",
-    "subtopics":[
+    "main_topic_id": 8,
+    "main_label": "Natural Disasters & Extreme Weather Events",
+    "subtopics": [
       {
-        "topic_id":19,
-        "label":"pm st festival oct event"
+        "topic_id": 165,
+        "label": "Afghanistan Earthquake"
       },
       {
-        "topic_id":21,
-        "label":"ref council planning housing homes"
+        "topic_id": 24,
+        "label": "Pakistan Monsoon Floods"
       },
       {
-        "topic_id":167,
-        "label":"road bridge traffic closures closure"
+        "topic_id": 33,
+        "label": "Wildfires and Smoke"
       },
       {
-        "topic_id":323,
-        "label":"subscriber reset password account click print"
+        "topic_id": 53,
+        "label": "Hurricanes and Tropical Storms"
       },
       {
-        "topic_id":354,
-        "label":"village pub beautiful town essex"
+        "topic_id": 78,
+        "label": "FEMA Disaster Assistance"
       },
       {
-        "topic_id":376,
-        "label":"hunting fishing wildlife wildlife fisheries snapper"
+        "topic_id": 81,
+        "label": "Earthquakes and Tsunamis"
       },
       {
-        "topic_id":394,
-        "label":"letter editor announcement submit editor submit letter"
+        "topic_id": 91,
+        "label": "Typhoon Ragasa"
       },
       {
-        "topic_id":450,
-        "label":"account log mississippi state vanderbilt reading subscribe regular rate"
+        "topic_id": 117,
+        "label": "Weather Forecasts"
+      },
+      {
+        "topic_id": 119,
+        "label": "Water Management and Drought"
+      },
+      {
+        "topic_id": 192,
+        "label": "Extreme Heat and Heatwaves"
+      },
+      {
+        "topic_id": 220,
+        "label": "Wildfires in Spain and Portugal"
+      },
+      {
+        "topic_id": 309,
+        "label": "Clairton Coke Plant Explosion"
+      },
+      {
+        "topic_id": 316,
+        "label": "Indonesian School Building Collapse"
+      },
+      {
+        "topic_id": 425,
+        "label": "Disaster News and Resources"
+      },
+      {
+        "topic_id": 466,
+        "label": "Camp Mystic Flood and Safety"
+      },
+      {
+        "topic_id": 493,
+        "label": "Flooding in Sudan and South Sudan"
+      },
+      {
+        "topic_id": 499,
+        "label": "Storm Warnings in Scotland"
+      },
+      {
+        "topic_id": 510,
+        "label": "Hurricane Katrina in New Orleans"
+      },
+      {
+        "topic_id": 566,
+        "label": "Glacial Flooding in Alaska"
       }
     ]
   },
   {
-    "main_topic_id":100,
-    "main_label":"Noise articles -- gibberish",
-    "subtopics":[
+    "main_topic_id": 9,
+    "main_label": "Local News and Miscellaneous Articles",
+    "subtopics": [
       {
-        "topic_id":234,
-        "label":"pm 2025 10 1301 ins 2025 2025"
-      },
-      
-      {
-        "topic_id":490,
-        "label":"menon flashback read latest kamal 18 2025"
+        "topic_id": 19,
+        "label": "Local Events and Festivals"
       },
       {
-        "topic_id":506,
-        "label":"clever 17 50 30m contents criminal liability"
+        "topic_id": 21,
+        "label": "Council Planning and Housing"
       },
       {
-        "topic_id":441,
-        "label":"armani fashion giorgio armanis milan"
+        "topic_id": 167,
+        "label": "Road and Traffic Closures"
       },
       {
-        "topic_id":28,
-        "label":"spacex i5 817 i9 3c"
+        "topic_id": 323,
+        "label": "Online Account and Password Management"
       },
       {
-        "topic_id":505,
-        "label":"20250813 g4 g3 1018 new tab"
+        "topic_id": 354,
+        "label": "Picturesque English Villages"
       },
       {
-        "topic_id":145,
-        "label":"republic islands kingdom peoples republic peoples"
+        "topic_id": 376,
+        "label": "Wildlife, Hunting, and Fishing"
       },
       {
-        "topic_id":93,
-        "label":"09 2025 01 01 2025 08 09"
+        "topic_id": 394,
+        "label": "Newspaper Submissions and Announcements"
       },
       {
-        "topic_id":393,
-        "label":"maga 2100 1430 google news 830"
-      },
-      {
-        "topic_id":186,
-        "label":"god oh praise jesus lord"
-      },
-      {
-        "topic_id":47,
-        "label":"youth programmes topics childrens childrens youth puppets programmes"
-      },
-      {
-        "topic_id":100,
-        "label":"listings emmerdale eastenders tv bbc news"
-      },
-      {
-        "topic_id":113,
-        "label":"topics factual subtitles airs season episode"
-      },
-      {
-        "topic_id":132,
-        "label":"actor drama page topics topics factual"
-      },
-      {
-        "topic_id":448,
-        "label":"dream home presenter dream topics leisure leisure hobbies"
-      },
-      {
-        "topic_id":18,
-        "label":"el que en la por"
-      },
-      {
-        "topic_id":34,
-        "label":"van dat op je az"
-      },
-      {
-        "topic_id":160,
-        "label":"les le des et la"
-      },
-      {
-        "topic_id":195,
-        "label":"und der die mit den"
-      },
-      {
-        "topic_id":205,
-        "label":"di il che la della"
-      },
-      {
-        "topic_id":307,
-        "label":"ng cng th nh ch"
-      },
-      {
-        "topic_id":507,
-        "label":"partager mt newswires newswires toute demande contacteznous pour"
-      },
-      {
-        "topic_id":271,
-        "label":"indy solid post sans entry"
-      },
-      {
-        "topic_id":63,
-        "label":"powerball jackpot lottery winning drawing"
-      },
-      {
-        "topic_id":509,
-        "label":"net worth net worth cosby kodak"
-      },
-      {
-        "topic_id":524,
-        "label":"teeth toothbrush dental oral brush"
-      },
-      {
-        "topic_id":4,
-        "label":"kimmel jimmy kimmels jimmy kimmel carr"
-      },
-      {
-        "topic_id":147,
-        "label":"emmy emmys outstanding series awards"
-      },
-      {
-        "topic_id":216,
-        "label":"bad bunny bunny super bowl bowl halftime"
-      },
-      {
-        "topic_id":410,
-        "label":"saudi adler comedians festival riyadh"
-      },
-      {
-        "topic_id":438,
-        "label":"south park episode park comedy central satan"
-      },
-      {
-        "topic_id":12,
-        "label":"film movie films movies horror"
-      },
-      {
-        "topic_id":213,
-        "label":"game games xbox nintendo knight"
-      },
-      {
-        "topic_id":567,
-        "label":"kpop demon hunters kpop demon demon hunters"
-      },
-      {
-        "topic_id":11,
-        "label":"cheese restaurant chicken burger menu"
-      },
-      {
-        "topic_id":36,
-        "label":"shoes limited time coupon shoe decorating"
-      },
-      {
-        "topic_id":158,
-        "label":"cracker cracker barrel barrel logo new logo"
-      },
-      {
-        "topic_id":172,
-        "label":"skin hair sunscreen spf nail"
-      },
-      {
-        "topic_id":229,
-        "label":"fashion dress calvin collection gown"
-      },
-      {
-        "topic_id":249,
-        "label":"coffee starbucks stores dr pepper barista"
-      },
-      {
-        "topic_id":391,
-        "label":"labubu pop mart mart labubus pop"
-      },
-      {
-        "topic_id":29,
-        "label":"kids mom im id family"
-      },
-      {
-        "topic_id":330,
-        "label":"image credits wedding couples credits dating"
-      },
-      {
-        "topic_id":460,
-        "label":"gen generation zers gen zers workforce"
-      },
-      {
-        "topic_id":101,
-        "label":"funeral funeral home cemetery passed away family"
-      },
-      {
-        "topic_id":487,
-        "label":"blackstock brandon shelby reba stepson"
-      },
-      {
-        "topic_id":489,
-        "label":"spencer danielle whats happening dee happening"
-      },
-      {
-        "topic_id":555,
-        "label":"bezos jeff bezos jeff lewy list people"
-      },
-      {
-        "topic_id":562,
-        "label":"celeste rivas tesla singer body"
-      },
-      {
-        "topic_id":373,
-        "label":"eurovision israel contest song contest vuelta"
-      },
-      {
-        "topic_id":7,
-        "label":"album tour music band rock"
-      },
-      {
-        "topic_id":84,
-        "label":"perry dancing morgan strictly brown"
-      },
-      {
-        "topic_id":94,
-        "label":"certified diamond album billboard chart"
-      },
-      {
-        "topic_id":237,
-        "label":"kelce swift travis kelces swifts"
-      },
-      {
-        "topic_id":303,
-        "label":"swift new heights kelce heights taylor swift"
-      },
-      {
-        "topic_id":331,
-        "label":"swift album swifts showgirl life showgirl"
-      },
-      {
-        "topic_id":267,
-        "label":"div obligated span cat ona"
+        "topic_id": 450,
+        "label": "Online News Subscriptions"
       }
     ]
   },
   {
-    "main_topic_id":10,
-    "main_label":"Space, NASA, and Celestial Phenomena",
-    "subtopics":[
+    "main_topic_id": 100,
+    "main_label": "Noise articles -- gibberish",
+    "subtopics": [
       {
-        "topic_id":44,
-        "label":"nasa space artemis astronauts moon"
+        "topic_id": 234,
+        "label": "Numerical and Coded Data"
       },
       {
-        "topic_id":118,
-        "label":"telescope stars planet webb planets"
+        "topic_id": 490,
+        "label": "TV Serial Updates and Recaps"
       },
       {
-        "topic_id":188,
-        "label":"starship spacex rocket launch space"
+        "topic_id": 506,
+        "label": "Legal Disclaimers and Liability"
       },
       {
-        "topic_id":285,
-        "label":"gemini scorpio aquarius tarot zodiac"
+        "topic_id": 441,
+        "label": "Giorgio Armani and Italian Fashion"
       },
       {
-        "topic_id":381,
-        "label":"source cnn playing source ad feedback video ad cnn video"
+        "topic_id": 28,
+        "label": "Website/App Boilerplate"
       },
       {
-        "topic_id":488,
-        "label":"eclipse lunar eclipse moon lunar total lunar"
+        "topic_id": 505,
+        "label": "Technical IDs and Codes"
       },
       {
-        "topic_id":542,
-        "label":"solar nasa space nasas projector"
+        "topic_id": 145,
+        "label": "Official Country Designations"
       },
       {
-        "topic_id":544,
-        "label":"meteor shower moon sky peak"
+        "topic_id": 93,
+        "label": "Dates in 2025"
+      },
+      {
+        "topic_id": 393,
+        "label": "General News Feed"
+      },
+      {
+        "topic_id": 186,
+        "label": "Praise and Worship Songs"
+      },
+      {
+        "topic_id": 47,
+        "label": "Children's Television Programming"
+      },
+      {
+        "topic_id": 100,
+        "label": "TV Listings and Programmes"
+      },
+      {
+        "topic_id": 113,
+        "label": "Factual TV and Documentary Series"
+      },
+      {
+        "topic_id": 132,
+        "label": "Movie and TV Drama"
+      },
+      {
+        "topic_id": 448,
+        "label": "Home Improvement and Hobby TV Shows"
+      },
+      {
+        "topic_id": 18,
+        "label": "Spanish Stop Words"
+      },
+      {
+        "topic_id": 34,
+        "label": "Dutch Language Words"
+      },
+      {
+        "topic_id": 160,
+        "label": "French Language"
+      },
+      {
+        "topic_id": 195,
+        "label": "German Stop Words"
+      },
+      {
+        "topic_id": 205,
+        "label": "Italian Language Documents"
+      },
+      {
+        "topic_id": 307,
+        "label": "Vietnamese Language Text"
+      },
+      {
+        "topic_id": 507,
+        "label": "Newswire Disclaimers"
+      },
+      {
+        "topic_id": 271,
+        "label": "Blog and Website Components"
+      },
+      {
+        "topic_id": 63,
+        "label": "Lottery Jackpots"
+      },
+      {
+        "topic_id": 509,
+        "label": "Celebrity Net Worth"
+      },
+      {
+        "topic_id": 524,
+        "label": "Dental and Oral Hygiene"
+      },
+      {
+        "topic_id": 4,
+        "label": "Jimmy Kimmel FCC Complaint"
+      },
+      {
+        "topic_id": 147,
+        "label": "Emmy Awards"
+      },
+      {
+        "topic_id": 216,
+        "label": "Bad Bunny and the Super Bowl"
+      },
+      {
+        "topic_id": 410,
+        "label": "Comedy and Human Rights in Saudi Arabia"
+      },
+      {
+        "topic_id": 438,
+        "label": "South Park TV Show"
+      },
+      {
+        "topic_id": 12,
+        "label": "Film and Television"
+      },
+      {
+        "topic_id": 213,
+        "label": "Video Games"
+      },
+      {
+        "topic_id": 567,
+        "label": "K-pop Demon Hunters Film"
+      },
+      {
+        "topic_id": 11,
+        "label": "Food and Restaurants"
+      },
+      {
+        "topic_id": 36,
+        "label": "Retail Promotions and Coupons"
+      },
+      {
+        "topic_id": 158,
+        "label": "Cracker Barrel Logo"
+      },
+      {
+        "topic_id": 172,
+        "label": "Skincare and Haircare Products"
+      },
+      {
+        "topic_id": 229,
+        "label": "Fashion and Designer Collections"
+      },
+      {
+        "topic_id": 249,
+        "label": "Starbucks Business and Policies"
+      },
+      {
+        "topic_id": 391,
+        "label": "Pop Mart Labubu Dolls"
+      },
+      {
+        "topic_id": 29,
+        "label": "Family Life and Personal Stories"
+      },
+      {
+        "topic_id": 330,
+        "label": "Image Credits for Couples"
+      },
+      {
+        "topic_id": 460,
+        "label": "Generations in the Workforce"
+      },
+      {
+        "topic_id": 101,
+        "label": "Obituaries and Funerals"
+      },
+      {
+        "topic_id": 487,
+        "label": "The Blackstock Family"
+      },
+      {
+        "topic_id": 489,
+        "label": "Character Storylines"
+      },
+      {
+        "topic_id": 555,
+        "label": "Jeff Bezos and Family Philanthropy"
+      },
+      {
+        "topic_id": 562,
+        "label": "Discovery of Singer's Body in Los Angeles"
+      },
+      {
+        "topic_id": 373,
+        "label": "Israel's Participation in Eurovision"
+      },
+      {
+        "topic_id": 7,
+        "label": "Music Tours and Albums"
+      },
+      {
+        "topic_id": 84,
+        "label": "Strictly Come Dancing Celebrities"
+      },
+      {
+        "topic_id": 94,
+        "label": "Music Album Certifications"
+      },
+      {
+        "topic_id": 237,
+        "label": "Taylor Swift and Travis Kelce's Relationship"
+      },
+      {
+        "topic_id": 303,
+        "label": "Taylor Swift and Travis Kelce"
+      },
+      {
+        "topic_id": 331,
+        "label": "Taylor Swift's Music"
+      },
+      {
+        "topic_id": 267,
+        "label": "HTML and Text Fragments"
       }
     ]
   },
   {
-    "main_topic_id":11,
-    "main_label":"Molecular and Cellular Biology",
-    "subtopics":[
+    "main_topic_id": 10,
+    "main_label": "Space, NASA, and Celestial Phenomena",
+    "subtopics": [
       {
-        "topic_id":0,
-        "label":"cells cell protein gene genes"
+        "topic_id": 44,
+        "label": "NASA Moon Missions"
       },
       {
-        "topic_id":436,
-        "label":"insurance experience preferred travelers salary"
+        "topic_id": 118,
+        "label": "Astronomy and Space Telescopes"
       },
       {
-        "topic_id":541,
-        "label":"bathroom auckland renovations renovation architecture"
+        "topic_id": 188,
+        "label": "SpaceX Starship Launches"
       },
       {
-        "topic_id":559,
-        "label":"sensors glass omni cookie shielding"
+        "topic_id": 285,
+        "label": "Astrology and Horoscopes"
+      },
+      {
+        "topic_id": 381,
+        "label": "CNN Video Ads"
+      },
+      {
+        "topic_id": 488,
+        "label": "Lunar Eclipses"
+      },
+      {
+        "topic_id": 542,
+        "label": "NASA Solar Observation Missions"
+      },
+      {
+        "topic_id": 544,
+        "label": "Meteor Showers and Celestial Events"
       }
     ]
   },
   {
-    "main_topic_id":12,
-    "main_label":"Global Trade Policy, Tariffs, and Global Energy Markets",
-    "subtopics":[
+    "main_topic_id": 11,
+    "main_label": "Molecular and Cellular Biology",
+    "subtopics": [
       {
-        "topic_id":25,
-        "label":"tiktok bytedance tiktoks algorithm tiktok deal"
+        "topic_id": 0,
+        "label": "Molecular and Cellular Biology"
       },
       {
-        "topic_id":26,
-        "label":"h1b visa fee h1b visa visas"
+        "topic_id": 436,
+        "label": "Insurance Industry Employment"
       },
       {
-        "topic_id":49,
-        "label":"carney canada canadian mark carney minister mark"
+        "topic_id": 541,
+        "label": "Auckland Bathroom Renovations"
       },
       {
-        "topic_id":67,
-        "label":"parade xi kim china beijing"
-      },
-      {
-        "topic_id":92,
-        "label":"oil opec crude brent texas intermediate"
-      },
-      {
-        "topic_id":128,
-        "label":"plastic plastics treaty chemicals plastic pollution"
-      },
-      {
-        "topic_id":129,
-        "label":"energy coal solar wind solar wind"
-      },
-      {
-        "topic_id":135,
-        "label":"wind offshore wind offshore wind farm wind project"
-      },
-      {
-        "topic_id":138,
-        "label":"emissions climate 2035 net zero target"
-      },
-      {
-        "topic_id":146,
-        "label":"iron ore rare earths ore earths iron"
-      },
-      {
-        "topic_id":177,
-        "label":"solar energy electricity energy storage totalenergies"
-      },
-      {
-        "topic_id":197,
-        "label":"russian oil india oil russian navarro"
-      },
-      {
-        "topic_id":211,
-        "label":"postal exemption minimis shipments packages"
-      },
-      {
-        "topic_id":222,
-        "label":"tariffs supreme court supreme court appeals"
-      },
-      {
-        "topic_id":225,
-        "label":"lng natural gas liquefied natural liquefied gas"
-      },
-      {
-        "topic_id":240,
-        "label":"follow 000 gold copper 001"
-      },
-      {
-        "topic_id":255,
-        "label":"sectors tariff rate tariff goods effective"
-      },
-      {
-        "topic_id":256,
-        "label":"climate greenhouse pollution climate change emissions"
-      },
-      {
-        "topic_id":261,
-        "label":"india indias tariffs trade tariff"
-      },
-      {
-        "topic_id":266,
-        "label":"chinas pork exports factory activity factory"
-      },
-      {
-        "topic_id":274,
-        "label":"modi india trade trade deal narendra"
-      },
-      {
-        "topic_id":295,
-        "label":"modi india china india china xi"
-      },
-      {
-        "topic_id":301,
-        "label":"soybeans soybean canola farmers china"
-      },
-      {
-        "topic_id":311,
-        "label":"nuclear reactors energy reactor secretary energy"
-      },
-      {
-        "topic_id":314,
-        "label":"truce china tariffs trade 90 days"
-      },
-      {
-        "topic_id":326,
-        "label":"climate fossil energy fossil fuels climate change"
-      },
-      {
-        "topic_id":366,
-        "label":"eu trade deal trade tariffs european"
-      },
-      {
-        "topic_id":371,
-        "label":"hong kong hong kong property kongs"
-      },
-      {
-        "topic_id":387,
-        "label":"tiktok xi chinese trade trump xi"
-      },
-      {
-        "topic_id":429,
-        "label":"mexico mexicos tariffs amador trade"
-      },
-      {
-        "topic_id":465,
-        "label":"anglo teck anglo american copper mining"
-      },
-      {
-        "topic_id":498,
-        "label":"emissions climate chinas china xi"
-      },
-      {
-        "topic_id":500,
-        "label":"order executive order shall section united states"
-      },
-      {
-        "topic_id":516,
-        "label":"marine ocean high seas treaty seas"
-      },
-      {
-        "topic_id":536,
-        "label":"smith delegation china beijing adam smith"
+        "topic_id": 559,
+        "label": "Sensor Technology and Components"
       }
     ]
   },
   {
-    "main_topic_id":13,
-    "main_label":"Recreational Drugs and Substance Use",
-    "subtopics":[
+    "main_topic_id": 12,
+    "main_label": "Global Trade Policy, Tariffs, and Global Energy Markets",
+    "subtopics": [
       {
-        "topic_id":427,
-        "label":"alcohol drinking drink alcohol consumption gallup"
+        "topic_id": 25,
+        "label": "TikTok Ban and Oracle Deal"
       },
       {
-        "topic_id":446,
-        "label":"marijuana recreational schedule recreational marijuana legalizing"
-      }
-    ]
-  },
-  
-  {
-    "main_topic_id":14,
-    "main_label":"Airlines, Aviation Industry, and Aerospace Manufacturing",
-    "subtopics":[
-      {
-        "topic_id":104,
-        "label":"air canada canada attendants flight attendants flight"
+        "topic_id": 26,
+        "label": "H-1B Visa Fees"
       },
       {
-        "topic_id":134,
-        "label":"aircraft air force flight aviation air"
+        "topic_id": 49,
+        "label": "Mark Carney and Canadian Trade"
       },
       {
-        "topic_id":150,
-        "label":"plane turbulence aircraft airport flight"
+        "topic_id": 67,
+        "label": "China's Military Parade"
       },
       {
-        "topic_id":189,
-        "label":"drone drones sightings drone sightings danish"
+        "topic_id": 92,
+        "label": "Crude Oil Market"
       },
       {
-        "topic_id":305,
-        "label":"boeing airlines passengers delta 737"
+        "topic_id": 128,
+        "label": "Global Plastic Pollution Treaty"
       },
       {
-        "topic_id":378,
-        "label":"spirit bankruptcy spirit airlines airline airlines"
+        "topic_id": 129,
+        "label": "Renewable and Clean Energy"
       },
       {
-        "topic_id":430,
-        "label":"boeing jet 737 planes boeings"
+        "topic_id": 135,
+        "label": "Offshore Wind Projects"
       },
       {
-        "topic_id":433,
-        "label":"airport briefs international airport profiles airports"
+        "topic_id": 138,
+        "label": "Climate and Emissions Targets"
       },
       {
-        "topic_id":457,
-        "label":"emerson guo chilean flight antarctica"
+        "topic_id": 146,
+        "label": "Iron Ore and Rare Earth Mining"
       },
       {
-        "topic_id":523,
-        "label":"workers strike boeing amazon union"
+        "topic_id": 177,
+        "label": "Renewable Energy and Power"
       },
       {
-        "topic_id":537,
-        "label":"qantas credits status airline hui"
-      }
-    ]
-  },
-  {
-    "main_topic_id":15,
-    "main_label":"Financial Markets, Tech Stocks, and Digital Assets",
-    "subtopics":[
-      {
-        "topic_id":46,
-        "label":"bloomberg technology hosted emily francisco hosted exclusively technology innovation future"
+        "topic_id": 197,
+        "label": "India's Russian Oil Purchases"
       },
       {
-        "topic_id":59,
-        "label":"shares stock rating quarter earnings"
+        "topic_id": 211,
+        "label": "Postal Shipping Exemptions"
       },
       {
-        "topic_id":65,
-        "label":"asian shares rose asian stocks shares"
+        "topic_id": 222,
+        "label": "Legal Challenges to Tariffs"
       },
       {
-        "topic_id":66,
-        "label":"musk tesla elon musks elon musk"
+        "topic_id": 225,
+        "label": "LNG and Natural Gas Exports"
       },
       {
-        "topic_id":71,
-        "label":"ipo klarna initial public public offering shares"
+        "topic_id": 240,
+        "label": "Mining and Mineral Resources"
       },
       {
-        "topic_id":112,
-        "label":"nvidia chips chip h20 china"
+        "topic_id": 255,
+        "label": "Trade Tariffs"
       },
       {
-        "topic_id":122,
-        "label":"gold precious precious metals metals silver"
+        "topic_id": 256,
+        "label": "Climate Change and Emissions"
       },
       {
-        "topic_id":130,
-        "label":"points sp 500 dow sp nasdaq"
+        "topic_id": 261,
+        "label": "India's Trade and Tariffs"
       },
       {
-        "topic_id":131,
-        "label":"google googles search monopoly antitrust"
+        "topic_id": 266,
+        "label": "China's Economy"
       },
       {
-        "topic_id":148,
-        "label":"common stock stock common traded ticker symbol"
+        "topic_id": 274,
+        "label": "India Trade Deals"
       },
       {
-        "topic_id":149,
-        "label":"musk xai openai grok apple"
+        "topic_id": 295,
+        "label": "India-China Relations"
       },
       {
-        "topic_id":159,
-        "label":"nifty cent rs crore crore rs"
+        "topic_id": 301,
+        "label": "Soybean and Canola Trade with China"
       },
       {
-        "topic_id":182,
-        "label":"nvidia intel nvidias chips ai"
+        "topic_id": 311,
+        "label": "Nuclear Energy and Reactors"
       },
       {
-        "topic_id":208,
-        "label":"story appeared stock surge oracles 20250911 caused"
+        "topic_id": 314,
+        "label": "US-China Trade Truce"
       },
       {
-        "topic_id":214,
-        "label":"bloomberg markets markets bloomberg bringing important markets news"
+        "topic_id": 326,
+        "label": "Climate Change and Energy"
       },
       {
-        "topic_id":259,
-        "label":"amazon ftc prime settlement customers"
+        "topic_id": 366,
+        "label": "EU Trade and Tariffs"
       },
       {
-        "topic_id":328,
-        "label":"data centers data center data centers data centres"
+        "topic_id": 371,
+        "label": "Hong Kong Real Estate Market"
       },
       {
-        "topic_id":338,
-        "label":"anz bendigo bank customers job cuts"
+        "topic_id": 387,
+        "label": "US-China TikTok Deal"
       },
       {
-        "topic_id":341,
-        "label":"pnc jpmorgan millennium citigroup jpmorgan chase"
+        "topic_id": 429,
+        "label": "Mexico's Trade and Tariffs"
       },
       {
-        "topic_id":358,
-        "label":"ticketmaster ftc tickets ticket live nation"
+        "topic_id": 465,
+        "label": "Mining Company Mergers"
       },
       {
-        "topic_id":385,
-        "label":"murdoch lachlan rupert murdochs media empire"
+        "topic_id": 498,
+        "label": "China's Climate Pledges"
       },
       {
-        "topic_id":388,
-        "label":"ellison paramount warner bros bros skydance"
+        "topic_id": 500,
+        "label": "US Executive Orders"
       },
       {
-        "topic_id":403,
-        "label":"ceo soho soho house railroad nestl"
+        "topic_id": 516,
+        "label": "Marine Protection and High Seas Treaty"
       },
       {
-        "topic_id":409,
-        "label":"rs crore rs crore jun 2025 quarterly"
-      },
-      {
-        "topic_id":416,
-        "label":"digital assets crypto digital asset assets digital"
-      },
-      {
-        "topic_id":520,
-        "label":"ea electronic arts buyout electronic eas"
-      },
-      {
-        "topic_id":522,
-        "label":"brands debt bankruptcy technical supplier"
-      },
-      {
-        "topic_id":534,
-        "label":"ethereum bitcoin price bullish cloudflare"
+        "topic_id": 536,
+        "label": "Congressional Delegation to China"
       }
     ]
   },
   {
-    "main_topic_id":16,
-    "main_label":"Contaminated Food Products and Food Safety",
-    "subtopics":[
+    "main_topic_id": 13,
+    "main_label": "Recreational Drugs and Substance Use",
+    "subtopics": [
       {
-        "topic_id":207,
-        "label":"recalled recall product listeria products"
+        "topic_id": 427,
+        "label": "Alcohol Consumption in America"
       },
       {
-        "topic_id":364,
-        "label":"shrimp radioactive walmart frozen contamination"
+        "topic_id": 446,
+        "label": "Legalization of Recreational Marijuana"
       }
     ]
   },
   {
-    "main_topic_id":17,
-    "main_label":"Cybersecurity, Data Privacy, and Digital Identity",
-    "subtopics":[
+    "main_topic_id": 14,
+    "main_label": "Airlines, Aviation Industry, and Aerospace Manufacturing",
+    "subtopics": [
       {
-        "topic_id":227,
-        "label":"cookies safari browser settings select"
+        "topic_id": 104,
+        "label": "Air Canada Flight Attendant Strike"
       },
       {
-        "topic_id":176,
-        "label":"scammers scam phishing scams breach"
+        "topic_id": 134,
+        "label": "Military Aircraft and Drones"
       },
       {
-        "topic_id":194,
-        "label":"var phones school phone cellphone"
+        "topic_id": 150,
+        "label": "Air Travel and Incidents"
       },
       {
-        "topic_id":369,
-        "label":"checkin airports cyberattack heathrow airport"
+        "topic_id": 189,
+        "label": "Airport Drone Sightings"
       },
       {
-        "topic_id":396,
-        "label":"cookie cookies user consent website"
+        "topic_id": 305,
+        "label": "Boeing Aircraft Incidents"
       },
       {
-        "topic_id":406,
-        "label":"digital id id digital cards facial recognition"
+        "topic_id": 378,
+        "label": "Spirit Airlines Bankruptcy"
       },
       {
-        "topic_id":483,
-        "label":"optus outage rue triple zero triple"
+        "topic_id": 430,
+        "label": "Boeing Aircraft and 737 MAX"
       },
       {
-        "topic_id":495,
-        "label":"microsoft azure mass surveillance microsofts surveillance"
+        "topic_id": 433,
+        "label": "Airport and Aviation Industry News"
+      },
+      {
+        "topic_id": 457,
+        "label": "Antarctica Flight Incident"
+      },
+      {
+        "topic_id": 523,
+        "label": "Labor Union Strikes"
+      },
+      {
+        "topic_id": 537,
+        "label": "Qantas Airline Credits and Penalties"
       }
     ]
   },
   {
-    "main_topic_id":18,
-    "main_label":"U.S. Immigration Policy and Border Enforcement",
-    "subtopics":[
+    "main_topic_id": 15,
+    "main_label": "Financial Markets, Tech Stocks, and Digital Assets",
+    "subtopics": [
       {
-        "topic_id":86,
-        "label":"ice immigration agents enforcement home depot"
+        "topic_id": 46,
+        "label": "Bloomberg Technology Program"
       },
       {
-        "topic_id":190,
-        "label":"deportees ghana deported eswatini african"
+        "topic_id": 59,
+        "label": "Stock Performance and Analyst Ratings"
       },
       {
-        "topic_id":200,
-        "label":"tps venezuelans protections protected status temporary protected"
+        "topic_id": 65,
+        "label": "Asian Stock Markets"
       },
       {
-        "topic_id":219,
-        "label":"detention angola facility detainees ice"
+        "topic_id": 66,
+        "label": "Elon Musk's Tesla Pay Package"
       },
       {
-        "topic_id":226,
-        "label":"immigrants immigration uscis visas visa"
+        "topic_id": 71,
+        "label": "Klarna IPO"
       },
       {
-        "topic_id":252,
-        "label":"guatemalan children unaccompanied guatemala guatemalan children"
+        "topic_id": 112,
+        "label": "Nvidia and AMD Chip Exports to China"
       },
       {
-        "topic_id":296,
-        "label":"immigration agents supreme los angeles angeles"
+        "topic_id": 122,
+        "label": "Precious Metals Investing"
       },
       {
-        "topic_id":464,
-        "label":"sanctuary boston sanctuary policies cities counties immigration"
+        "topic_id": 130,
+        "label": "Stock Market Indices"
       },
       {
-        "topic_id":531,
-        "label":"border wall border wall noem painted black"
+        "topic_id": 131,
+        "label": "Google Antitrust Lawsuit"
       },
       {
-        "topic_id":543,
-        "label":"masks agents california enforcement ban"
+        "topic_id": 148,
+        "label": "Publicly Traded Stocks"
       },
       {
-        "topic_id":547,
-        "label":"guevara journalist mario immigration deportation"
+        "topic_id": 149,
+        "label": "AI Companies (Musk, OpenAI, xAI)"
       },
       {
-        "topic_id":549,
-        "label":"homan border czar czar tom homan msnbc"
+        "topic_id": 159,
+        "label": "Indian Stock Market"
       },
       {
-        "topic_id":79,
-        "label":"abrego abrego garcia garcia kilmar el salvador"
+        "topic_id": 182,
+        "label": "AI Chip Industry"
+      },
+      {
+        "topic_id": 208,
+        "label": "Oracle Stock Surge"
+      },
+      {
+        "topic_id": 214,
+        "label": "Bloomberg Markets News"
+      },
+      {
+        "topic_id": 259,
+        "label": "Amazon FTC Settlement"
+      },
+      {
+        "topic_id": 328,
+        "label": "Data Center Resource Consumption"
+      },
+      {
+        "topic_id": 338,
+        "label": "Australian Banking Job Cuts"
+      },
+      {
+        "topic_id": 341,
+        "label": "Major Banking and Financial Institutions"
+      },
+      {
+        "topic_id": 358,
+        "label": "Ticketmaster/Live Nation Antitrust Lawsuit"
+      },
+      {
+        "topic_id": 385,
+        "label": "Murdoch Media Empire"
+      },
+      {
+        "topic_id": 388,
+        "label": "Paramount-Skydance Merger Talks"
+      },
+      {
+        "topic_id": 403,
+        "label": "CEO Appointments"
+      },
+      {
+        "topic_id": 409,
+        "label": "Indian Stock Market Prices"
+      },
+      {
+        "topic_id": 416,
+        "label": "Digital Assets and Cryptocurrency"
+      },
+      {
+        "topic_id": 520,
+        "label": "Electronic Arts (EA) Buyout"
+      },
+      {
+        "topic_id": 522,
+        "label": "Corporate Bankruptcy and Debt"
+      },
+      {
+        "topic_id": 534,
+        "label": "Cryptocurrency Market Analysis"
       }
     ]
   },
   {
-    "main_topic_id":19,
-    "main_label":"National Guard Deployments and Domestic Security",
-    "subtopics":[
+    "main_topic_id": 16,
+    "main_label": "Contaminated Food Products and Food Safety",
+    "subtopics": [
       {
-        "topic_id":3,
-        "label":"dc crime national guard guard washington"
+        "topic_id": 207,
+        "label": "Product Recalls"
       },
       {
-        "topic_id":75,
-        "label":"portland oregon troops guard national guard"
-      },
-      {
-        "topic_id":203,
-        "label":"memphis national guard guard tennessee crime"
-      },
-      {
-        "topic_id":360,
-        "label":"landry louisiana national guard guard orleans"
-      },
-      {
-        "topic_id":454,
-        "label":"breyer national guard guard los angeles angeles"
+        "topic_id": 364,
+        "label": "Radioactive Shrimp Contamination"
       }
     ]
   },
   {
-    "main_topic_id":20,
-    "main_label":"U.S. Domestic Politics and Governance",
-    "subtopics":[
+    "main_topic_id": 17,
+    "main_label": "Cybersecurity, Data Privacy, and Digital Identity",
+    "subtopics": [
       {
-        "topic_id":361,
-        "label":"cantrell orleans new orleans indictment mayor"
+        "topic_id": 227,
+        "label": "Browser Cookie Settings"
       },
       {
-        "topic_id":1,
-        "label":"shutdown democrats government shutdown republicans funding"
+        "topic_id": 176,
+        "label": "Phishing and Data Scams"
       },
       {
-        "topic_id":10,
-        "label":"mamdani cuomo adams zohran mayoral"
+        "topic_id": 194,
+        "label": "Cell Phones in Schools"
       },
       {
-        "topic_id":35,
-        "label":"jobs unemployment labor job labor market"
+        "topic_id": 369,
+        "label": "Airport Cyberattacks"
       },
       {
-        "topic_id":38,
-        "label":"texas redistricting map maps democrats"
+        "topic_id": 396,
+        "label": "Website Cookie Consent"
       },
       {
-        "topic_id":80,
-        "label":"bls antoni statistics labor statistics bureau labor"
+        "topic_id": 406,
+        "label": "Digital ID and Facial Recognition"
       },
       {
-        "topic_id":105,
-        "label":"voting voter ballots mailin voters"
+        "topic_id": 483,
+        "label": "Optus Outage and Emergency Calls"
       },
       {
-        "topic_id":115,
-        "label":"redistricting newsom california newsoms texas"
-      },
-      {
-        "topic_id":144,
-        "label":"harris biden buttigieg kamala kamala harris"
-      },
-      {
-        "topic_id":151,
-        "label":"supreme court supreme court judges barrett"
-      },
-      {
-        "topic_id":154,
-        "label":"nominees senate thune republicans trumps nominees"
-      },
-      {
-        "topic_id":155,
-        "label":"united nations nations general assembly assembly speech"
-      },
-      {
-        "topic_id":173,
-        "label":"republican georgia governor rnc gop"
-      },
-      {
-        "topic_id":202,
-        "label":"newsom newsoms california gavin gavin newsom"
-      },
-      {
-        "topic_id":217,
-        "label":"ciattarelli sherrill new jersey jersey mikie"
-      },
-      {
-        "topic_id":244,
-        "label":"missouri redistricting map districts congressional"
-      },
-      {
-        "topic_id":245,
-        "label":"walkinshaw tiffany spanberger virginia wisconsin"
-      },
-      {
-        "topic_id":257,
-        "label":"poll approval approval rating approve rating"
-      },
-      {
-        "topic_id":297,
-        "label":"powell jackson hole fed feds hole"
-      },
-      {
-        "topic_id":312,
-        "label":"husted ohio brown sherrod sherrod brown"
-      },
-      {
-        "topic_id":319,
-        "label":"iowa hinson ernst senate ashley"
-      },
-      {
-        "topic_id":363,
-        "label":"fed chair hassett fed chair powell"
-      },
-      {
-        "topic_id":395,
-        "label":"redistricting indiana maps republicans texas"
-      },
-      {
-        "topic_id":442,
-        "label":"collier texas democrats nicole collier rep nicole"
-      },
-      {
-        "topic_id":459,
-        "label":"roberts moines des moines superintendent des"
-      },
-      {
-        "topic_id":463,
-        "label":"utahs congressional map legislature gibson"
-      },
-      {
-        "topic_id":482,
-        "label":"jones virginia spanberger earlesears gilbert"
-      },
-      {
-        "topic_id":512,
-        "label":"moore wes wes moore gov wes maryland gov"
-      },
-      {
-        "topic_id":513,
-        "label":"newsom gavin newsoms gavin newsom california gov"
-      },
-      {
-        "topic_id":557,
-        "label":"biden bidens bates comer jeanpierre"
-      },
-      {
-        "topic_id":563,
-        "label":"habba attorney alina alina habba new jersey"
-      }
-    ]
-  },
-  
-  {
-    "main_topic_id":21,
-    "main_label":"Culture, Media, and Public Figures",
-    "subtopics":[
-      {
-        "topic_id":157,
-        "label":"menendez parole brothers erik lyle"
-      },
-      {
-        "topic_id":260,
-        "label":"goodall jane jane goodall chimpanzees dame"
-      },
-      {
-        "topic_id":62,
-        "label":"epstein files epstein files jeffrey jeffrey epstein"
-      },
-      {
-        "topic_id":171,
-        "label":"smithsonian museum museums history institution"
-      },
-      {
-        "topic_id":175,
-        "label":"epstein birthday epsteins signature note"
-      },
-      {
-        "topic_id":181,
-        "label":"mandelson epstein mandelsons ambassador emails"
-      },
-      {
-        "topic_id":264,
-        "label":"maxwell epstein maxwell said blanche epsteins"
-      },
-      {
-        "topic_id":382,
-        "label":"combs diddy sentencing sean diddy ventura"
-      },
-      {
-        "topic_id":414,
-        "label":"kennedy center kennedy center center honors honors"
-      },
-      {
-        "topic_id":418,
-        "label":"booed boos match open mens final"
-      },
-      {
-        "topic_id":467,
-        "label":"fonda chang jane speech entertainment industry"
+        "topic_id": 495,
+        "label": "Microsoft and Israeli Surveillance"
       }
     ]
   },
   {
-    "main_topic_id":22,
-    "main_label":"South Asian News",
-    "subtopics":[
+    "main_topic_id": 18,
+    "main_label": "U.S. Immigration Policy and Border Enforcement",
+    "subtopics": [
       {
-        "topic_id":401,
-        "label":"hindi marathi news latest sms db"
+        "topic_id": 86,
+        "label": "ICE Immigration Arrests"
       },
       {
-        "topic_id":37,
-        "label":"bjp bihar gandhi sabha chief minister"
+        "topic_id": 190,
+        "label": "Deportation of African Migrants"
       },
       {
-        "topic_id":41,
-        "label":"film bollywood crore khan box office"
+        "topic_id": 200,
+        "label": "Temporary Protected Status for Venezuelans"
       },
       {
-        "topic_id":64,
-        "label":"police delhi police station delhi police arrested"
+        "topic_id": 219,
+        "label": "Immigration Detention in Louisiana"
       },
       {
-        "topic_id":161,
-        "label":"temple durga puja goddess powder"
+        "topic_id": 226,
+        "label": "US Immigration and Visas"
       },
       {
-        "topic_id":461,
-        "label":"ntpc news 2025 2025 live exams result"
+        "topic_id": 252,
+        "label": "Unaccompanied Guatemalan Minors"
       },
       {
-        "topic_id":519,
-        "label":"vijay stampede karur tamil gettr"
+        "topic_id": 296,
+        "label": "Immigration Raids and Legal Challenges"
       },
       {
-        "topic_id":545,
-        "label":"gst crore cent sitharaman budget"
+        "topic_id": 464,
+        "label": "Sanctuary City Immigration Policies"
       },
       {
-        "topic_id":565,
-        "label":"mizoram railway railway line buses road"
+        "topic_id": 531,
+        "label": "Painting the Southern Border Wall"
+      },
+      {
+        "topic_id": 543,
+        "label": "California Law Enforcement and Mandates"
+      },
+      {
+        "topic_id": 547,
+        "label": "ICE Detention of a Journalist"
+      },
+      {
+        "topic_id": 549,
+        "label": "Tom Homan Investigation"
+      },
+      {
+        "topic_id": 79,
+        "label": "Deportation of Kilmar Abrego Garcia"
       }
     ]
   },
   {
-    "main_topic_id":23,
-    "main_label":"South East and East Asian News",
-    "subtopics":[
+    "main_topic_id": 19,
+    "main_label": "National Guard Deployments and Domestic Security",
+    "subtopics": [
       {
-        "topic_id":320,
-        "label":"china daily multimedia connecting higher resolution information published"
+        "topic_id": 3,
+        "label": "Washington D.C. Crime and Policing"
       },
       {
-        "topic_id":518,
-        "label":"turtles lin socks worth 14 smuggling"
+        "topic_id": 75,
+        "label": "National Guard Deployment in Portland"
       },
       {
-        "topic_id":108,
-        "label":"takaichi ldp japans ishiba koizumi"
+        "topic_id": 203,
+        "label": "National Guard Deployment in Memphis"
       },
       {
-        "topic_id":241,
-        "label":"boj bank japan japan yen japans"
+        "topic_id": 360,
+        "label": "Louisiana National Guard"
       },
       {
-        "topic_id":352,
-        "label":"nagasaki hiroshima incendiary weapons nuclear"
-      },
-      {
-        "topic_id":370,
-        "label":"japans akazawa japan tariffs 550 billion"
-      },
-      {
-        "topic_id":23,
-        "label":"korean raid south korean south hyundai"
-      },
-      {
-        "topic_id":76,
-        "label":"korea korean kim north korea north"
-      },
-      {
-        "topic_id":143,
-        "label":"lai hong hong kong kong spying"
-      },
-      {
-        "topic_id":248,
-        "label":"prabowo president prabowo indonesian indonesias indonesia"
-      },
-      {
-        "topic_id":335,
-        "label":"thai thailands peoples party prime minister parliament"
-      },
-      {
-        "topic_id":337,
-        "label":"thaksin thai shinawatra thailands thaksin shinawatra"
-      },
-      {
-        "topic_id":340,
-        "label":"marcos flood control corruption projects flood"
-      },
-      {
-        "topic_id":411,
-        "label":"cambodian cambodia thai thailand border"
-      },
-      {
-        "topic_id":434,
-        "label":"yoon unification church kim han"
-      },
-      {
-        "topic_id":481,
-        "label":"korea south korea south shipbuilding lee"
-      },
-      {
-        "topic_id":526,
-        "label":"vietnam vietnams minh ho chi chi minh"
-      },
-      {
-        "topic_id":551,
-        "label":"sri colombo sri lanka lanka public funds"
+        "topic_id": 454,
+        "label": "Posse Comitatus Act and National Guard"
       }
     ]
   },
   {
-    "main_topic_id":24,
-    "main_label":"Interest Rates, Inflation, and Fiscal Policy",
-    "subtopics":[
+    "main_topic_id": 20,
+    "main_label": "U.S. Domestic Politics and Governance",
+    "subtopics": [
       {
-        "topic_id":96,
-        "label":"ecb european central central bank inflation ecbs"
+        "topic_id": 361,
+        "label": "Mayor LaToya Cantrell Indictment"
       },
       {
-        "topic_id":103,
-        "label":"inflation prices rose consumer index"
+        "topic_id": 1,
+        "label": "US Government Shutdown"
       },
       {
-        "topic_id":170,
-        "label":"fed powell rates rate inflation"
+        "topic_id": 10,
+        "label": "New York City Politics"
       },
       {
-        "topic_id":193,
-        "label":"buyers housing homes housing market mortgage rates"
+        "topic_id": 35,
+        "label": "Jobs and Unemployment"
       },
       {
-        "topic_id":199,
-        "label":"bond auction bonds yields yield"
+        "topic_id": 38,
+        "label": "Texas Redistricting"
       },
       {
-        "topic_id":215,
-        "label":"moodys fitch polands downgrade melonis"
+        "topic_id": 80,
+        "label": "Bureau of Labor Statistics"
       },
       {
-        "topic_id":224,
-        "label":"rba rate inflation reserve bank cut"
+        "topic_id": 105,
+        "label": "Voting and Elections"
       },
       {
-        "topic_id":230,
-        "label":"mortgage mortgage rates rates rate 30year"
+        "topic_id": 115,
+        "label": "California Congressional Redistricting"
       },
       {
-        "topic_id":283,
-        "label":"gdp percent personal income income pce"
+        "topic_id": 144,
+        "label": "US Vice Presidential Candidates"
       },
       {
-        "topic_id":345,
-        "label":"social security security checks benefits ssa"
+        "topic_id": 151,
+        "label": "The Supreme Court"
       },
       {
-        "topic_id":347,
-        "label":"reeves rachel reeves rachel chancellor budget"
+        "topic_id": 154,
+        "label": "Senate Confirmation of Nominees"
       },
       {
-        "topic_id":351,
-        "label":"treasuries bets traders fed yield"
+        "topic_id": 155,
+        "label": "United Nations General Assembly"
       },
       {
-        "topic_id":355,
-        "label":"powell fed jerome powell jerome inflation"
+        "topic_id": 173,
+        "label": "Georgia Republican Primaries"
       },
       {
-        "topic_id":405,
-        "label":"housing tenants landlords homes landlord"
+        "topic_id": 202,
+        "label": "California Governor Gavin Newsom"
       },
       {
-        "topic_id":423,
-        "label":"card credit cash apr rewards"
+        "topic_id": 217,
+        "label": "New Jersey Politics: Ciattarelli and Sherrill"
       },
       {
-        "topic_id":443,
-        "label":"cd savings money market rates savings account"
+        "topic_id": 244,
+        "label": "Missouri Congressional Redistricting"
       },
       {
-        "topic_id":485,
-        "label":"tax income tax filing income tax return"
+        "topic_id": 245,
+        "label": "Virginia and Wisconsin Political Races"
       },
       {
-        "topic_id":508,
-        "label":"inflation central bank rate central target range"
+        "topic_id": 257,
+        "label": "Public Approval Ratings"
       },
       {
-        "topic_id":540,
-        "label":"fitch rating debt credit rating frances"
+        "topic_id": 297,
+        "label": "Federal Reserve / Jackson Hole Symposium"
       },
       {
-        "topic_id":552,
-        "label":"mitsotakis tax billion tax greek kyriakos"
+        "topic_id": 312,
+        "label": "Ohio Senate Race"
       },
       {
-        "topic_id":564,
-        "label":"tax budget tax rate lubbock library"
+        "topic_id": 319,
+        "label": "Iowa Senate Election"
+      },
+      {
+        "topic_id": 363,
+        "label": "Federal Reserve Policy"
+      },
+      {
+        "topic_id": 395,
+        "label": "Political Redistricting"
+      },
+      {
+        "topic_id": 442,
+        "label": "Texas Politics and Nicole Collier"
+      },
+      {
+        "topic_id": 459,
+        "label": "Des Moines, Iowa School District"
+      },
+      {
+        "topic_id": 463,
+        "label": "Utah Congressional Redistricting"
+      },
+      {
+        "topic_id": 482,
+        "label": "Virginia Politics"
+      },
+      {
+        "topic_id": 512,
+        "label": "Maryland Governor Wes Moore"
+      },
+      {
+        "topic_id": 513,
+        "label": "Gavin Newsom's Media Style"
+      },
+      {
+        "topic_id": 557,
+        "label": "House Oversight Investigation of Biden"
+      },
+      {
+        "topic_id": 563,
+        "label": "Attorney Alina Habba in New Jersey"
       }
     ]
   },
   {
-    "main_topic_id":25,
-    "main_label":"Global Infectious Disease Outbreak",
-    "subtopics":[
+    "main_topic_id": 21,
+    "main_label": "Culture, Media, and Public Figures",
+    "subtopics": [
       {
-        "topic_id":166,
-        "label":"scholar doipubmedgoogle scholar doipubmedgoogle parasite infection"
+        "topic_id": 157,
+        "label": "Menendez Brothers' Parole Hearing"
       },
       {
-        "topic_id":262,
-        "label":"chikungunya cases dengue virus mosquito"
+        "topic_id": 260,
+        "label": "Jane Goodall and Conservation"
       },
       {
-        "topic_id":270,
-        "label":"que la en el measles"
+        "topic_id": 62,
+        "label": "House Oversight Investigation of Epstein Files"
       },
       {
-        "topic_id":291,
-        "label":"ebola outbreak congo kasai virus"
+        "topic_id": 171,
+        "label": "The Smithsonian Institution"
       },
       {
-        "topic_id":350,
-        "label":"cholera cholera outbreak darfur outbreak msf"
+        "topic_id": 175,
+        "label": "Epstein Investigation"
       },
       {
-        "topic_id":517,
-        "label":"hiv medication clinics sex workers obesity"
+        "topic_id": 181,
+        "label": "Peter Mandelson and Jeffrey Epstein"
       },
       {
-        "topic_id":525,
-        "label":"disease outbreak disease outbreak bacteria symptoms"
+        "topic_id": 264,
+        "label": "Ghislaine Maxwell Trial"
+      },
+      {
+        "topic_id": 382,
+        "label": "Sean 'Diddy' Combs Legal Case"
+      },
+      {
+        "topic_id": 414,
+        "label": "Kennedy Center Honors"
+      },
+      {
+        "topic_id": 418,
+        "label": "Booing at Tennis Matches"
+      },
+      {
+        "topic_id": 467,
+        "label": "Jane Fonda on Hate Speech"
       }
     ]
   },
   {
-    "main_topic_id":26,
-    "main_label":"Travel, Wildlife, and Outdoor Incidents",
-    "subtopics":[
+    "main_topic_id": 22,
+    "main_label": "South Asian News",
+    "subtopics": [
       {
-        "topic_id":139,
-        "label":"shark sharks whales beaches nets"
+        "topic_id": 401,
+        "label": "News in Hindi and Marathi"
       },
       {
-        "topic_id":178,
-        "label":"climbing hikers rescue dennis terra"
+        "topic_id": 37,
+        "label": "Indian Politics"
       },
       {
-        "topic_id":386,
-        "label":"cruise ship ships cruises suite"
+        "topic_id": 41,
+        "label": "Bollywood Film Industry"
+      },
+      {
+        "topic_id": 64,
+        "label": "Delhi Police Arrests"
+      },
+      {
+        "topic_id": 161,
+        "label": "Hindu Festivals and Worship"
+      },
+      {
+        "topic_id": 461,
+        "label": "NTPC Exams 2025"
+      },
+      {
+        "topic_id": 519,
+        "label": "Stampede at Vijay's Rally in Tamil Nadu"
+      },
+      {
+        "topic_id": 545,
+        "label": "Indian Budget and GST"
+      },
+      {
+        "topic_id": 565,
+        "label": "Transportation Infrastructure Projects"
       }
     ]
   },
   {
-    "main_topic_id":27,
-    "main_label":"Animals, Wildlife, and Conservation",
-    "subtopics":[
+    "main_topic_id": 23,
+    "main_label": "South East and East Asian News",
+    "subtopics": [
       {
-        "topic_id":125,
-        "label":"dogs dog pet pets cats"
+        "topic_id": 320,
+        "label": "Online Content and Publishing"
       },
       {
-        "topic_id":246,
-        "label":"bees hornet species bee insect"
+        "topic_id": 518,
+        "label": "Turtle Smuggling in Hong Kong"
       },
       {
-        "topic_id":293,
-        "label":"bear bears cougar fat bear chunk"
+        "topic_id": 108,
+        "label": "Japanese Politics"
       },
       {
-        "topic_id":390,
-        "label":"amazon indigenous deforestation forest rainforest"
+        "topic_id": 241,
+        "label": "Bank of Japan Rate Hike"
       },
       {
-        "topic_id":407,
-        "label":"birds bird turtle pond species"
+        "topic_id": 352,
+        "label": "Atomic Bombings of Hiroshima and Nagasaki"
       },
       {
-        "topic_id":528,
-        "label":"dogs stray stray dogs delhi feeding"
+        "topic_id": 370,
+        "label": "Japanese Trade Tariffs"
       },
       {
-        "topic_id":568,
-        "label":"gorillas rats gorilla gee palm oil"
+        "topic_id": 23,
+        "label": "South Korean Labor Raid"
+      },
+      {
+        "topic_id": 76,
+        "label": "North and South Korea Relations"
+      },
+      {
+        "topic_id": 143,
+        "label": "Chinese Espionage in Hong Kong"
+      },
+      {
+        "topic_id": 248,
+        "label": "Indonesian President Prabowo Subianto"
+      },
+      {
+        "topic_id": 335,
+        "label": "Thai Politics and Government"
+      },
+      {
+        "topic_id": 337,
+        "label": "Thai Politics and Thaksin Shinawatra"
+      },
+      {
+        "topic_id": 340,
+        "label": "Marcos-era Flood Control Corruption"
+      },
+      {
+        "topic_id": 411,
+        "label": "Cambodia-Thailand Border Conflict"
+      },
+      {
+        "topic_id": 434,
+        "label": "South Korean Politics and Yoon Suk-yeol"
+      },
+      {
+        "topic_id": 481,
+        "label": "South Korean Shipbuilding Industry"
+      },
+      {
+        "topic_id": 526,
+        "label": "Vietnam and Ho Chi Minh City"
+      },
+      {
+        "topic_id": 551,
+        "label": "Arrest of Sri Lankan President"
       }
     ]
   },
   {
-    "main_topic_id":28,
-    "main_label":"Police Incidents, Shootings, and Public Safety",
-    "subtopics":[
+    "main_topic_id": 24,
+    "main_label": "Interest Rates, Inflation, and Fiscal Policy",
+    "subtopics": [
       {
-        "topic_id":2,
+        "topic_id": 96,
+        "label": "European Central Bank Policy"
+      },
+      {
+        "topic_id": 103,
+        "label": "Inflation and Consumer Prices"
+      },
+      {
+        "topic_id": 170,
+        "label": "Federal Reserve Interest Rate Policy"
+      },
+      {
+        "topic_id": 193,
+        "label": "Housing Market and Mortgages"
+      },
+      {
+        "topic_id": 199,
+        "label": "Japanese Government Bond Market"
+      },
+      {
+        "topic_id": 215,
+        "label": "Sovereign Credit Ratings"
+      },
+      {
+        "topic_id": 224,
+        "label": "Reserve Bank Interest Rates"
+      },
+      {
+        "topic_id": 230,
+        "label": "Mortgage Rates"
+      },
+      {
+        "topic_id": 283,
+        "label": "Economic Indicators"
+      },
+      {
+        "topic_id": 345,
+        "label": "Social Security Benefits"
+      },
+      {
+        "topic_id": 347,
+        "label": "Rachel Reeves and UK Economic Policy"
+      },
+      {
+        "topic_id": 351,
+        "label": "Federal Reserve and Bond Markets"
+      },
+      {
+        "topic_id": 355,
+        "label": "Federal Reserve Interest Rate Decisions"
+      },
+      {
+        "topic_id": 405,
+        "label": "Housing, Rent, and Landlords"
+      },
+      {
+        "topic_id": 423,
+        "label": "Credit Cards"
+      },
+      {
+        "topic_id": 443,
+        "label": "Savings Accounts and Interest Rates"
+      },
+      {
+        "topic_id": 485,
+        "label": "Income Tax Filing and Deadlines"
+      },
+      {
+        "topic_id": 508,
+        "label": "Central Bank Monetary Policy"
+      },
+      {
+        "topic_id": 540,
+        "label": "France's Credit Rating Downgrade"
+      },
+      {
+        "topic_id": 552,
+        "label": "Greek Government Tax Policy"
+      },
+      {
+        "topic_id": 564,
+        "label": "City Taxes and Budgets"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 25,
+    "main_label": "Global Infectious Disease Outbreak",
+    "subtopics": [
+      {
+        "topic_id": 166,
+        "label": "Parasitic Infections and Diseases"
+      },
+      {
+        "topic_id": 262,
+        "label": "Mosquito-Borne Diseases"
+      },
+      {
+        "topic_id": 270,
+        "label": "Measles"
+      },
+      {
+        "topic_id": 291,
+        "label": "Ebola and Mpox Outbreaks in Congo"
+      },
+      {
+        "topic_id": 350,
+        "label": "Cholera Outbreak in Sudan"
+      },
+      {
+        "topic_id": 517,
+        "label": "HIV Treatment and Prevention in Africa"
+      },
+      {
+        "topic_id": 525,
+        "label": "Disease Outbreaks"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 26,
+    "main_label": "Travel, Wildlife, and Outdoor Incidents",
+    "subtopics": [
+      {
+        "topic_id": 139,
+        "label": "Marine Animals and Shark Nets"
+      },
+      {
+        "topic_id": 178,
+        "label": "Polar Rescue Operations"
+      },
+      {
+        "topic_id": 386,
+        "label": "Cruise Ship Vacations"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 27,
+    "main_label": "Animals, Wildlife, and Conservation",
+    "subtopics": [
+      {
+        "topic_id": 125,
+        "label": "Pet Ownership"
+      },
+      {
+        "topic_id": 246,
+        "label": "Bees and Pollinating Insects"
+      },
+      {
+        "topic_id": 293,
+        "label": "Fat Bear Week"
+      },
+      {
+        "topic_id": 390,
+        "label": "Amazon Rainforest Deforestation"
+      },
+      {
+        "topic_id": 407,
+        "label": "New Zealand Native Wildlife"
+      },
+      {
+        "topic_id": 528,
+        "label": "Stray Dogs in Delhi"
+      },
+      {
+        "topic_id": 568,
+        "label": "Threats to Gorillas"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 28,
+    "main_label": "Police Incidents, Shootings, and Public Safety",
+    "subtopics": [
+      {
+        "topic_id": 2,
         "label": "Charlie Kirk and Political Violence"
       },
       {
-        "topic_id":399,
-        "label":"Charlie Kirk Assassination Attempt"
+        "topic_id": 399,
+        "label": "Charlie Kirk Assassination Attempt"
       },
       {
-        "topic_id":27,
-        "label":"shooting police officers suspect man"
+        "topic_id": 27,
+        "label": "Police Shootings"
       },
       {
-        "topic_id":72,
-        "label":"man assault sexual court police"
+        "topic_id": 72,
+        "label": "Sexual Assault and Court Cases"
       },
       {
-        "topic_id":87,
-        "label":"crash driver scene vehicle highway"
+        "topic_id": 87,
+        "label": "Traffic Accidents"
       },
       {
-        "topic_id":97,
-        "label":"vehicle police arrested pursuit driver"
+        "topic_id": 97,
+        "label": "Police Pursuits and Arrests"
       },
       {
-        "topic_id":123,
-        "label":"decker missing sheriffs sheriffs office police"
+        "topic_id": 123,
+        "label": "Travis Decker Disappearance"
       },
       {
-        "topic_id":164,
-        "label":"routh ryan routh jurors golf assassinate"
+        "topic_id": 164,
+        "label": "Ryan Routh Assassination Trial"
       },
       {
-        "topic_id":204,
-        "label":"bus crash train school bus bus crash"
+        "topic_id": 204,
+        "label": "Bus and Train Crashes"
       },
       {
-        "topic_id":212,
-        "label":"lockdown threats naval academy swatting campus"
+        "topic_id": 212,
+        "label": "University Campus Threats"
       },
       {
-        "topic_id":228,
-        "label":"charlotte zarutska stabbing brown iryna"
+        "topic_id": 228,
+        "label": "Stabbing of Ukrainian Refugee in Charlotte"
       },
       {
-        "topic_id":242,
-        "label":"minneapolis catholic school annunciation catholic school"
+        "topic_id": 242,
+        "label": "Minneapolis Catholic School Shooting"
       },
       {
-        "topic_id":247,
-        "label":"drivers singh truck commercial florida"
+        "topic_id": 247,
+        "label": "Commercial Truck Driving"
       },
       {
-        "topic_id":275,
-        "label":"funicular lisbon portuguese lisbons crash"
+        "topic_id": 275,
+        "label": "Lisbon Funicular Accident"
       },
       {
-        "topic_id":286,
-        "label":"ice dallas ice facility shooting enforcement"
+        "topic_id": 286,
+        "label": "Dallas ICE Facility Shooting"
       },
       {
-        "topic_id":290,
-        "label":"cdc atlanta shooter campus shooting"
+        "topic_id": 290,
+        "label": "Atlanta CDC Campus Shooting"
       },
       {
-        "topic_id":308,
-        "label":"cannabis zealand new zealand drug drugs"
+        "topic_id": 308,
+        "label": "Drugs and Firearms in New Zealand"
       },
       {
-        "topic_id":327,
-        "label":"church blanc sanford michigan latterday"
+        "topic_id": 327,
+        "label": "Latter-day Saints Church"
       },
       {
-        "topic_id":353,
-        "label":"freeman victoria police victoria police officers"
-      },
-      
-      {
-        "topic_id":365,
-        "label":"uvalde school shooting evergreen school shooting"
+        "topic_id": 353,
+        "label": "Victoria Police Search Operation"
       },
       {
-        "topic_id":392,
-        "label":"florida execution death bates desantis"
+        "topic_id": 365,
+        "label": "Uvalde School Shooting"
       },
       {
-        "topic_id":400,
-        "label":"mangione mangiones luigi death penalty penalty"
+        "topic_id": 392,
+        "label": "Death Penalty in Florida"
       },
       {
-        "topic_id":435,
-        "label":"phillips children police campsite fugitive"
+        "topic_id": 400,
+        "label": "Murder of Brian Thompson"
       },
       {
-        "topic_id":437,
-        "label":"patterson wilkinson beale pattersons erin"
+        "topic_id": 435,
+        "label": "Fugitive Tom Phillips Case"
       },
       {
-        "topic_id":456,
-        "label":"cameras drivers plates number plates speeding"
+        "topic_id": 437,
+        "label": "Erin Patterson Mushroom Case"
       },
       {
-        "topic_id":546,
-        "label":"ice chicago officer dhs dragged"
-      }
-    ]
-  },
-  
-  {
-    "main_topic_id":29,
-    "main_label":"Russia-Ukraine War and Regional Geopolitics",
-    "subtopics":[
-      {
-        "topic_id":9,
-        "label":"putin alaska summit ukraine meeting"
+        "topic_id": 456,
+        "label": "Traffic Enforcement Cameras"
       },
       {
-        "topic_id":14,
-        "label":"zelenskyy putin ukraine european leaders zelensky"
-      },
-      {
-        "topic_id":31,
-        "label":"ukraine russia putin zelenskyy russian"
-      },
-      {
-        "topic_id":60,
-        "label":"poland drones airspace polish drone"
-      },
-      {
-        "topic_id":89,
-        "label":"russian ukrainian kyiv ukraine drones"
-      },
-      {
-        "topic_id":116,
-        "label":"erdogan sanctions russian oil russian oil"
-      },
-      {
-        "topic_id":209,
-        "label":"moldova moldovas sandu moldovan prorussian"
-      },
-      {
-        "topic_id":223,
-        "label":"fmr putin zelenskyy dc police dc"
-      },
-      {
-        "topic_id":263,
-        "label":"refinery refineries russias oil ukrainian"
-      },
-      {
-        "topic_id":277,
-        "label":"airspace nato jets estonian russian"
-      },
-      {
-        "topic_id":294,
-        "label":"ukraine ukraines ukrainian donetsk russia"
-      },
-      {
-        "topic_id":348,
-        "label":"belarus lukashenko belarusian prisoners political prisoners"
-      },
-      {
-        "topic_id":398,
-        "label":"istanbul chp turkish erdogans opposition"
-      },
-      {
-        "topic_id":428,
-        "label":"czech ano andrej populist billionaire"
-      },
-      {
-        "topic_id":491,
-        "label":"sanctions graham russia sanctions putin sen lindsey"
-      },
-      {
-        "topic_id":503,
-        "label":"kyrgyzstan mongolia turkmenistan mongolias cyprus"
-      },
-      {
-        "topic_id":527,
-        "label":"orthodox russian bishops alexei orthodoxy"
-      },
-      {
-        "topic_id":558,
-        "label":"nord stream nord stream pipelines explosions"
+        "topic_id": 546,
+        "label": "ICE Officer Confrontation in Chicago"
       }
     ]
   },
   {
-    "main_topic_id":30,
-    "main_label":"Israel-Gaza War",
-    "subtopics":[
+    "main_topic_id": 29,
+    "main_label": "Russia-Ukraine War and Regional Geopolitics",
+    "subtopics": [
       {
-        "topic_id":8,
-        "label":"hamas hostages gaza netanyahu israel"
+        "topic_id": 9,
+        "label": "Putin and International Summits"
       },
       {
-        "topic_id":45,
-        "label":"palestinian palestinian state recognition palestine israel"
-      },
-      
-      {
-        "topic_id":74,
-        "label":"qatar hamas doha strike israel"
+        "topic_id": 14,
+        "label": "Ukrainian Diplomacy and European Leaders"
       },
       {
-        "topic_id":77,
-        "label":"gaza city gaza israeli city israel"
+        "topic_id": 31,
+        "label": "Ukraine War and Security Guarantees"
       },
       {
-        "topic_id":121,
-        "label":"iran nuclear sanctions irans snapback"
+        "topic_id": 60,
+        "label": "Russian Drone Incursions into Poland"
       },
       {
-        "topic_id":127,
-        "label":"flotilla blockade thunberg boats activists"
+        "topic_id": 89,
+        "label": "Russian Attacks on Ukraine"
       },
       {
-        "topic_id":156,
-        "label":"syria syrian assad syrias alsharaa"
+        "topic_id": 116,
+        "label": "Sanctions on Russian Energy"
       },
       {
-        "topic_id":162,
-        "label":"famine gaza ipc starvation malnutrition"
-      },
-      
-      {
-        "topic_id":183,
-        "label":"rubio israel gaza qatar israeli"
+        "topic_id": 209,
+        "label": "Moldovan Politics"
       },
       {
-        "topic_id":232,
-        "label":"houthi houthis yemen rebels israel"
+        "topic_id": 223,
+        "label": "Threats Against John Bolton"
       },
       {
-        "topic_id":235,
-        "label":"palestine action palestine protest action kneecap"
-      },
-      
-      
-      {
-        "topic_id":288,
-        "label":"genocide israel gaza israels israeli"
+        "topic_id": 263,
+        "label": "Ukrainian Drone Attacks on Russian Refineries"
       },
       {
-        "topic_id":298,
-        "label":"israeli gaza gaza city palestinians west bank"
+        "topic_id": 277,
+        "label": "Estonian Airspace Violation"
       },
       {
-        "topic_id":321,
-        "label":"hezbollah lebanon lebanese unifil southern lebanon"
-      },
-      
-      
-      {
-        "topic_id":379,
-        "label":"west bank e1 settlement smotrich palestinian"
+        "topic_id": 294,
+        "label": "Russia-Ukraine Conflict"
       },
       {
-        "topic_id":384,
-        "label":"journalists nasser nasser hospital killed hospital"
+        "topic_id": 348,
+        "label": "Belarusian Political Prisoners"
       },
       {
-        "topic_id":420,
-        "label":"robinson tommy robinson farright rally tommy"
+        "topic_id": 398,
+        "label": "Turkish Politics"
       },
       {
-        "topic_id":424,
-        "label":"israel palestinians gaza south sudan israels"
+        "topic_id": 428,
+        "label": "Czech Parliamentary Election"
       },
       {
-        "topic_id":439,
-        "label":"iran executions tehran iranian prisoners"
+        "topic_id": 491,
+        "label": "Lindsey Graham on Russia Sanctions"
       },
       {
-        "topic_id":444,
-        "label":"iran antisemitic albanese australia attacks"
-      },
-      
-      {
-        "topic_id":468,
-        "label":"gaza israeli israel palestinian israels"
-      },
-      
-      {
-        "topic_id":479,
-        "label":"iran iranian pezeshkian nuclear irans"
+        "topic_id": 503,
+        "label": "Politics of Central Asian Nations"
       },
       {
-        "topic_id":494,
-        "label":"qatar state qatar states shall order attack united"
-      },
-      
-      {
-        "topic_id":497,
-        "label":"lebanon humanitarian decisionmakers actionable response strategies"
+        "topic_id": 527,
+        "label": "Russian Orthodox Church"
       },
       {
-        "topic_id":514,
-        "label":"jazeera al jazeera alsharif journalists al"
-      }
-      
-    ]
-  },
-  {
-    "main_topic_id":31,
-    "main_label":"Global Protests and Instability",
-    "subtopics":[
-      {
-        "topic_id":462,
-        "label":"serbia protesters serbian belgrade novi"
-      },
-      {
-        "topic_id":471,
-        "label":"morocco moroccos protests gen protesters"
-      },
-      {
-        "topic_id":515,
-        "label":"georgian georgias georgia opposition presidential palace"
-      },
-      {
-        "topic_id":279,
-        "label":"pakistani security forces balochistan pakistan militants"
-      },
-      {
-        "topic_id":287,
-        "label":"taliban internet afghanistan blackout afghan"
-      },
-      {
-        "topic_id":343,
-        "label":"bagram taliban afghanistan air base bagram air"
-      },
-      {
-        "topic_id":496,
-        "label":"taliban afghanistan reynolds barbie british couple"
-      },
-      {
-        "topic_id":54,
-        "label":"nepal nepals kathmandu protests karki"
-      }]
-      },
-  {
-    "main_topic_id":32,
-    "main_label":"Latin American News",
-    "subtopics":[
-      {
-        "topic_id":16,
-        "label":"venezuela venezuelan maduro drug cartels"
-      },
-      {
-        "topic_id":82,
-        "label":"milei mileis argentina argentinas javier"
-      },
-      {
-        "topic_id":88,
-        "label":"bolsonaro bolsonaros coup moraes brazils"
-      },
-      {
-        "topic_id":265,
-        "label":"lula brazils brazil brazilian bolsonaro"
-      },
-      {
-        "topic_id":281,
-        "label":"uribe haiti haitis gang colombia"
-      },
-      {
-        "topic_id":300,
-        "label":"morales bolivias bolivia paz mas"
-      },
-      {
-        "topic_id":302,
-        "label":"cartel mexico mexican sinaloa guzmn"
-      },
-      {
-        "topic_id":344,
-        "label":"petro colombian visa gustavo colombian president"
-      },
-      {
-        "topic_id":357,
-        "label":"haiti gangs haitis portauprince gang"
+        "topic_id": 558,
+        "label": "Nord Stream Pipeline Explosions"
       }
     ]
   },
   {
-    "main_topic_id":33,
-    "main_label":"African News",
-    "subtopics":[
+    "main_topic_id": 30,
+    "main_label": "Israel-Gaza War",
+    "subtopics": [
       {
-        "topic_id":52,
-        "label":"nigeria pdp nan nigerian nigerians"
+        "topic_id": 8,
+        "label": "Israel-Hamas Conflict"
       },
       {
-        "topic_id":98,
-        "label":"sudan darfur sudans sudanese displacement"
+        "topic_id": 45,
+        "label": "Recognition of Palestinian Statehood"
       },
       {
-        "topic_id":111,
-        "label":"nigeria nigerias refinery nigerian petroleum"
+        "topic_id": 74,
+        "label": "Qatar and the Israel-Hamas Conflict"
       },
       {
-        "topic_id":114,
-        "label":"seychelles malawi election elections kaieteur"
+        "topic_id": 77,
+        "label": "Israeli Military Offensive in Gaza"
       },
       {
-        "topic_id":221,
-        "label":"yemen 2025 format governorate format infographic infographic"
+        "topic_id": 121,
+        "label": "Iran Nuclear Program and Sanctions"
       },
       {
-        "topic_id":258,
-        "label":"south africa trade africa south africas exports"
+        "topic_id": 127,
+        "label": "Gaza Blockade Flotilla"
       },
       {
-        "topic_id":356,
-        "label":"nigeria boko haram boko haram fct"
+        "topic_id": 156,
+        "label": "Syrian Politics and Assad Regime"
       },
       {
-        "topic_id":368,
-        "label":"food food insecurity insecurity malnutrition acute"
+        "topic_id": 162,
+        "label": "Famine and Starvation in Gaza"
       },
       {
-        "topic_id":412,
-        "label":"imf debt international monetary creditors senegal"
+        "topic_id": 183,
+        "label": "US Policy on the Israel-Gaza Conflict"
       },
       {
-        "topic_id":422,
-        "label":"sahel congo m23 fighters civilians"
+        "topic_id": 232,
+        "label": "Houthi Rebel Attacks in the Red Sea"
       },
       {
-        "topic_id":458,
-        "label":"ugandan icc uganda crimes treason"
+        "topic_id": 235,
+        "label": "Palestine Action Protests and Proscription"
       },
       {
-        "topic_id":486,
-        "label":"dam ethiopia egypt nile addis"
+        "topic_id": 288,
+        "label": "Israel-Gaza Conflict and Genocide Allegations"
       },
       {
-        "topic_id":501,
-        "label":"kenya kenyan agnes british british army"
+        "topic_id": 298,
+        "label": "Israeli-Palestinian Conflict in Gaza"
+      },
+      {
+        "topic_id": 321,
+        "label": "Hezbollah and UN Peacekeeping in Lebanon"
+      },
+      {
+        "topic_id": 379,
+        "label": "Israeli Settlements in the West Bank"
+      },
+      {
+        "topic_id": 384,
+        "label": "Journalists Killed in Gaza"
+      },
+      {
+        "topic_id": 420,
+        "label": "Tommy Robinson and UK Far-Right Activism"
+      },
+      {
+        "topic_id": 424,
+        "label": "Israel-Palestine and Sudan Conflicts"
+      },
+      {
+        "topic_id": 439,
+        "label": "Executions in Iran"
+      },
+      {
+        "topic_id": 444,
+        "label": "Iran and Antisemitism in Australia"
+      },
+      {
+        "topic_id": 468,
+        "label": "Israeli-Palestinian Conflict"
+      },
+      {
+        "topic_id": 479,
+        "label": "Iranian Politics and Nuclear Program"
+      },
+      {
+        "topic_id": 494,
+        "label": "US-Qatar Security Agreement"
+      },
+      {
+        "topic_id": 497,
+        "label": "Humanitarian Crisis Response in Lebanon"
+      },
+      {
+        "topic_id": 514,
+        "label": "Al Jazeera Journalists in Gaza"
       }
     ]
   },
   {
-    "main_topic_id":34,
-    "main_label":"Natural Science Discoveries",
-    "subtopics":[
+    "main_topic_id": 31,
+    "main_label": "Global Protests and Instability",
+    "subtopics": [
       {
-        "topic_id":141,
-        "label":"fossil species dinosaur fossils dinosaurs"
+        "topic_id": 462,
+        "label": "Serbian Anti-Government Protests"
       },
       {
-        "topic_id":250,
-        "label":"mars rover perseverance rocks earth"
+        "topic_id": 471,
+        "label": "Anti-government Protests in Morocco"
       },
       {
-        "topic_id":339,
-        "label":"glaciers glacier ice sea ice sea"
+        "topic_id": 515,
+        "label": "Protests in Georgia"
+      },
+      {
+        "topic_id": 279,
+        "label": "Militant Conflict in Pakistan"
+      },
+      {
+        "topic_id": 287,
+        "label": "Taliban Rule in Afghanistan"
+      },
+      {
+        "topic_id": 343,
+        "label": "Withdrawal from Bagram Air Base"
+      },
+      {
+        "topic_id": 496,
+        "label": "British Couple in Afghanistan"
+      },
+      {
+        "topic_id": 54,
+        "label": "Political Protests in Nepal"
       }
     ]
   },
   {
-    "main_topic_id":35,
-    "main_label":"Sports",
-    "subtopics":[
+    "main_topic_id": 32,
+    "main_label": "Latin American News",
+    "subtopics": [
       {
-        "topic_id":6,
-        "label":"lsu yards tigers kelly lsus"
+        "topic_id": 16,
+        "label": "Venezuelan Drug Trafficking"
       },
       {
-        "topic_id":15,
-        "label":"innings inning dodgers runs hits"
+        "topic_id": 82,
+        "label": "Argentina's President Javier Milei"
       },
       {
-        "topic_id":17,
-        "label":"yards touchdown nfl game quarterback"
+        "topic_id": 88,
+        "label": "Brazilian Politics and Coup Plot"
       },
       {
-        "topic_id":73,
-        "label":"league club players grand final player"
+        "topic_id": 265,
+        "label": "Brazilian Politics"
       },
       {
-        "topic_id":99,
-        "label":"athletics championships mens bronze olympic"
+        "topic_id": 281,
+        "label": "Colombian Armed Groups in Haiti"
       },
       {
-        "topic_id":110,
-        "label":"sinner anisimova alcaraz match tennis"
+        "topic_id": 300,
+        "label": "Bolivian Politics and Elections"
       },
       {
-        "topic_id":140,
-        "label":"loading account post make friends free account surfing"
+        "topic_id": 302,
+        "label": "Mexican Drug Cartels"
       },
       {
-        "topic_id":153,
-        "label":"cricket pakistan asia cup cup india"
+        "topic_id": 344,
+        "label": "Colombian President Gustavo Petro"
       },
       {
-        "topic_id":169,
-        "label":"wnba aces lynx mercury game"
-      },
-      {
-        "topic_id":174,
-        "label":"ryder ryder cup cup mcilroy fleetwood"
-      },
-      {
-        "topic_id":273,
-        "label":"formula f1 topics sports grand prix prix"
-      },
-      {
-        "topic_id":280,
-        "label":"ufc crawford boxing fight lvarez"
-      },
-      {
-        "topic_id":282,
-        "label":"volleyball kills digs invitational pm"
-      },
-      {
-        "topic_id":315,
-        "label":"5k 10k coughlan marathon races"
-      },
-      {
-        "topic_id":322,
-        "label":"wwe vs match wrestling championship"
-      },
-      {
-        "topic_id":325,
-        "label":"eagles cup nigeria africa south africa"
-      },
-      {
-        "topic_id":362,
-        "label":"horse racing race nascar bowman"
-      },
-      {
-        "topic_id":367,
-        "label":"mls nhl fc minute cincinnati"
-      },
-      {
-        "topic_id":455,
-        "label":"pm et mlb fubo vs brewers"
+        "topic_id": 357,
+        "label": "Haiti Gang Violence"
       }
     ]
   },
   {
-    "main_topic_id":36,
-    "main_label":"Art and Literature",
-    "subtopics":[
+    "main_topic_id": 33,
+    "main_label": "African News",
+    "subtopics": [
       {
-        "topic_id":152,
-        "label":"book books author singers poetry"
+        "topic_id": 52,
+        "label": "Nigerian Politics and Elections"
       },
       {
-        "topic_id":269,
-        "label":"painting portrait art portrait lady paintings"
+        "topic_id": 98,
+        "label": "Humanitarian Crisis in Sudan"
       },
       {
-        "topic_id":440,
-        "label":"comics comic graphic publisher graphic novel"
+        "topic_id": 111,
+        "label": "Nigeria's Petroleum and Economy"
       },
       {
-        "topic_id":452,
-        "label":"art artists gallery artist exhibition"
+        "topic_id": 114,
+        "label": "Guyana, Malawi & Seychelles Elections"
       },
       {
-        "topic_id":550,
-        "label":"week political offering best enrage week politics world politics"
+        "topic_id": 221,
+        "label": "Yemen Situation Infographics"
+      },
+      {
+        "topic_id": 258,
+        "label": "South African Trade and Tariffs"
+      },
+      {
+        "topic_id": 356,
+        "label": "Insecurity in Nigeria"
+      },
+      {
+        "topic_id": 368,
+        "label": "Food Insecurity in Somalia"
+      },
+      {
+        "topic_id": 412,
+        "label": "International Monetary Fund and National Debt"
+      },
+      {
+        "topic_id": 422,
+        "label": "Armed Conflict in the Sahel and Congo"
+      },
+      {
+        "topic_id": 458,
+        "label": "War Crimes in Uganda and Sudan"
+      },
+      {
+        "topic_id": 486,
+        "label": "Ethiopian Dam on the Nile"
+      },
+      {
+        "topic_id": 501,
+        "label": "British Army in Kenya"
       }
     ]
   },
   {
-    "main_topic_id":37,
-    "main_label":"Electric Vehicles",
-    "subtopics":[
+    "main_topic_id": 34,
+    "main_label": "Natural Science Discoveries",
+    "subtopics": [
       {
-        "topic_id":5,
-        "label":"ev electric car suv rear"
+        "topic_id": 141,
+        "label": "Fossil Discoveries"
       },
       {
-        "topic_id":470,
-        "label":"ford rearview recall vehicles defect"
+        "topic_id": 250,
+        "label": "Mars Perseverance Rover Mission"
       },
       {
-        "topic_id":472,
-        "label":"land rover jaguar land jaguar rover cyber"
-      },
-      {
-        "topic_id":504,
-        "label":"tesla door doors handles trapped"
+        "topic_id": 339,
+        "label": "Melting Glaciers and Sea Ice"
       }
     ]
   },
   {
-    "main_topic_id":38,
-    "main_label":"European News",
-    "subtopics":[
+    "main_topic_id": 35,
+    "main_label": "Sports",
+    "subtopics": [
       {
-        "topic_id":278,
-        "label":"norway norwegian norways wealth tax wealth"
+        "topic_id": 6,
+        "label": "LSU Football"
       },
       {
-        "topic_id":324,
-        "label":"greenland denmark danish arctic denmarks"
+        "topic_id": 15,
+        "label": "Major League Baseball Games"
       },
       {
-        "topic_id":40,
-        "label":"bayrou macron frances lecornu france"
+        "topic_id": 17,
+        "label": "NFL Football Games"
       },
       {
-        "topic_id":419,
-        "label":"kushner france antisemitism macron french"
+        "topic_id": 73,
+        "label": "Rugby League Competitions"
       },
       {
-        "topic_id":530,
-        "label":"libyan libya french 2007 corruption"
+        "topic_id": 99,
+        "label": "Athletics Championships"
       },
       {
-        "topic_id":553,
-        "label":"kick french death streamer streamers"
+        "topic_id": 110,
+        "label": "Professional Tennis"
       },
       {
-        "topic_id":85,
-        "label":"starmer labour rayner farage reform"
+        "topic_id": 140,
+        "label": "Online Ads and Account Spam"
       },
       {
-        "topic_id":272,
-        "label":"childcare children child centres aboriginal"
+        "topic_id": 153,
+        "label": "International Cricket Tournaments"
       },
       {
-        "topic_id":346,
-        "label":"ley liberal hastie liberals sussan"
+        "topic_id": 169,
+        "label": "WNBA Basketball"
       },
       {
-        "topic_id":404,
-        "label":"timetable waterloo london tube sunday october"
+        "topic_id": 174,
+        "label": "Ryder Cup Golf"
       },
       {
-        "topic_id":474,
-        "label":"mahmood home secretary migrants farage black"
+        "topic_id": 273,
+        "label": "Formula 1 Racing"
       },
       {
-        "topic_id":561,
-        "label":"phillipson labour deputy leadership bridget phillipson deputy"
+        "topic_id": 280,
+        "label": "Combat Sports (Boxing & MMA)"
+      },
+      {
+        "topic_id": 282,
+        "label": "High School Sports"
+      },
+      {
+        "topic_id": 315,
+        "label": "Running Races and Marathons"
+      },
+      {
+        "topic_id": 322,
+        "label": "WWE Wrestling Matches"
+      },
+      {
+        "topic_id": 325,
+        "label": "Africa Cup of Nations Football"
+      },
+      {
+        "topic_id": 362,
+        "label": "Auto and Horse Racing"
+      },
+      {
+        "topic_id": 367,
+        "label": "US Sports Leagues (MLS/NHL)"
+      },
+      {
+        "topic_id": 455,
+        "label": "MLB Game Broadcasts and Schedules"
       }
     ]
   },
   {
-    "main_topic_id":39,
-    "main_label":"Australia/Oceania News",
-    "subtopics":[
+    "main_topic_id": 36,
+    "main_label": "Art and Literature",
+    "subtopics": [
       {
-        "topic_id":238,
-        "label":"papua papua new new guinea guinea australia"
+        "topic_id": 152,
+        "label": "Books, Authors, and Music"
       },
       {
-        "topic_id":336,
-        "label":"philippine china sea coast guard south china philippines"
+        "topic_id": 269,
+        "label": "Nazi-Looted Art"
       },
       {
-        "topic_id":532,
-        "label":"aukus submarines submarine australia marles"
+        "topic_id": 440,
+        "label": "Comics and Graphic Novels"
+      },
+      {
+        "topic_id": 452,
+        "label": "Art Galleries and Exhibitions"
+      },
+      {
+        "topic_id": 550,
+        "label": "Weekly Political Review"
       }
     ]
   },
   {
-    "main_topic_id":40,
-    "main_label":"Religious Topics",
-    "subtopics":[
+    "main_topic_id": 37,
+    "main_label": "Electric Vehicles",
+    "subtopics": [
       {
-        "topic_id":48,
-        "label":"god touchstone church jesus pastor"
+        "topic_id": 5,
+        "label": "Electric and Hybrid Vehicles"
       },
       {
-        "topic_id":109,
-        "label":"leo pope acutis church pope leo"
+        "topic_id": 470,
+        "label": "Ford Vehicle Recall for Rearview Cameras"
       },
       {
-        "topic_id":476,
-        "label":"religious religious liberty liberty prayer christian"
+        "topic_id": 472,
+        "label": "Jaguar Land Rover Cyberattack"
+      },
+      {
+        "topic_id": 504,
+        "label": "Tesla Door Malfunctions"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 38,
+    "main_label": "European News",
+    "subtopics": [
+      {
+        "topic_id": 278,
+        "label": "Norway's Wealth Tax"
+      },
+      {
+        "topic_id": 324,
+        "label": "Danish-Greenland Relations"
+      },
+      {
+        "topic_id": 40,
+        "label": "French Politics"
+      },
+      {
+        "topic_id": 419,
+        "label": "Antisemitism in France"
+      },
+      {
+        "topic_id": 530,
+        "label": "French-Libyan Campaign Finance Scandal"
+      },
+      {
+        "topic_id": 553,
+        "label": "Death of a French Streamer"
+      },
+      {
+        "topic_id": 85,
+        "label": "UK Labour and Reform Parties"
+      },
+      {
+        "topic_id": 272,
+        "label": "Aboriginal and Islander Childcare"
+      },
+      {
+        "topic_id": 346,
+        "label": "Australian Liberal Party Politics"
+      },
+      {
+        "topic_id": 404,
+        "label": "London Transport Timetables"
+      },
+      {
+        "topic_id": 474,
+        "label": "Racial Politics in UK Immigration"
+      },
+      {
+        "topic_id": 561,
+        "label": "Bridget Phillipson and Labour Deputy Leadership"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 39,
+    "main_label": "Australia/Oceania News",
+    "subtopics": [
+      {
+        "topic_id": 238,
+        "label": "Australia-Papua New Guinea Security Treaty"
+      },
+      {
+        "topic_id": 336,
+        "label": "South China Sea Maritime Disputes"
+      },
+      {
+        "topic_id": 532,
+        "label": "AUKUS Submarine Pact"
+      }
+    ]
+  },
+  {
+    "main_topic_id": 40,
+    "main_label": "Religious Topics",
+    "subtopics": [
+      {
+        "topic_id": 48,
+        "label": "Christianity and Faith"
+      },
+      {
+        "topic_id": 109,
+        "label": "The Catholic Church"
+      },
+      {
+        "topic_id": 476,
+        "label": "Christian Religious Liberty"
       }
     ]
   }
