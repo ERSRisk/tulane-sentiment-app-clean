@@ -322,6 +322,10 @@
       {
         "topic_id": 556,
         "label": "OpenAI and ChatGPT"
+      },
+      {
+        "topic_id": 585,
+        "label": "Anthropic Copyright Settlement with Authors"
       }
     ]
   },
