@@ -2362,5 +2362,15 @@
         "label": "Political and Economic News Analysis"
       }
     ]
+  },
+  {
+    "main_topic_id": 102,
+    "main_label": "Remote Work and Employee Skills",
+    "subtopics": [
+      {
+        "topic_id": 586,
+        "label": "Remote Work and Employee Skills"
+      }
+    ]
   }
 ]
