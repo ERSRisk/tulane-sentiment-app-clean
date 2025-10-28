@@ -725,6 +725,7 @@ if selection == "Article Risk Review":
     filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
     filtered_df = filtered_df.drop_duplicates(subset=['Title'])
     filtered_df = filtered_df[~(filtered_df['Predicted_Risks_new'].astype(str).str.contains(r'\bno\s*risk\b', case = False, regex = True))]
+    filtered_df = filtered_df[~(filtered_df['Predicted_Risks_new'].astype(str).str.contains(r'\bleadership\s*missteps\b', case = False, regex = True))]
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
