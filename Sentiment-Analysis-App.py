@@ -570,6 +570,26 @@ if selection == "Article Risk Review":
         if r.status_code != 200:
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    @st.cache_data
+    def load_subtopic_to_main_label_map(auto_path: str = "Model_training/topics_BERT_auto.json") -> dict[int, str]:
+        try:
+            with open(auto_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            return {}
+    
+        sub_to_main: dict[int, str] = {}
+        if isinstance(data, list):
+            # expected shape: [{"main_topic_id": int, "main_label": str, "subtopics":[{"topic_id": int, "label": str}, ...]}, ...]
+            for main in data:
+                main_label = str(main.get("main_label", "")).strip() or "Unlabeled Topic"
+                for stp in (main.get("subtopics") or []):
+                    try:
+                        tid = int(stp.get("topic_id"))
+                        sub_to_main[tid] = main_label
+                    except Exception:
+                        continue
+        return sub_to_main
 
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
@@ -767,8 +787,11 @@ if selection == "Article Risk Review":
     st.caption(f"Showing {start + 1} to {min(end, total)} of {total} articles")
     page_df = filtered_df.iloc[start:end]
 
-    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
+    with open('Model_training/topics_BERT.json', 'r', encoding='utf-8') as f:
         name_map = {int(t['topic']): t['name'] for t in json.load(f)['topics']}
+    
+    # NEW:
+    subtopic_to_main = load_subtopic_to_main_label_map("Model_training/topics_BERT_auto.json")
 
     hidden_names = [f"{tid} - {name_map.get(tid, 'Unlabeled Topic')}" for tid in sorted(hidden_topic_ids)]
     st.sidebar.markdown('Hidden topics')
@@ -846,7 +869,7 @@ if selection == "Article Risk Review":
             tid = coerce_topic_scalar(article.get('Topic'))
             article['Topic'] = tid
 
-            article['Topic_name'] = name_map.get(tid, 'Unlabeled Topic')
+            article['Topic_name'] = subtopic_to_main.get(tid, name_map.get(tid, 'Unlabeled Topic'))
             if tid in hidden_topic_ids:
                 continue
             with st.expander(f"{badge} — {title}..."):
