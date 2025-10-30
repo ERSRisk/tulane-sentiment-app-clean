@@ -158,7 +158,7 @@
     },
     {
       "topic": 21,
-      "name": "Council Planning and Housing",
+      "name": "Student Housing",
       "keywords": "ref, council, planning, housing, homes, road, property, development, turnover, st",
       "documents": []
     },
@@ -290,7 +290,7 @@
     },
     {
       "topic": 43,
-      "name": "COVID-19 Vaccine Recommendations",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "vaccine, vaccines, covid, covid19, shots, recommendations, vaccinated, cdc, covid19 vaccines, flu",
       "documents": []
     },
@@ -575,7 +575,7 @@
     },
     {
       "topic": 68,
-      "name": "AI Chatbots and Teen Mental Health",
+      "name": "AI and Wellness",
       "keywords": [
         "c",
         "h",
@@ -667,13 +667,13 @@
     },
     {
       "topic": 69,
-      "name": "Autism and Acetaminophen Use During Pregnancy",
+      "name": "Medical Misinformation",
       "keywords": "autism, tylenol, acetaminophen, pregnancy, pregnant, pregnant women, paracetamol, fever, women, autistic",
       "documents": []
     },
     {
       "topic": 70,
-      "name": "CDC Leadership and Personnel",
+      "name": "CDC Involvement in Higher Education",
       "keywords": "monarez, cdc, kennedy, susan monarez, susan, cdc director, director, health, houry, vaccine",
       "documents": []
     },
@@ -1067,7 +1067,7 @@
     },
     {
       "topic": 118,
-      "name": "Astronomy and Space Telescopes",
+      "name": "Astronomy Discoveries",
       "keywords": "telescope, stars, planet, webb, planets, black hole, space telescope, asteroid, astronomers, star",
       "documents": []
     },
@@ -1103,7 +1103,7 @@
     },
     {
       "topic": 124,
-      "name": "AI and Job Skills",
+      "name": "AI Skills in the Job Market",
       "keywords": [
         "a",
         "i",
@@ -1191,7 +1191,7 @@
     },
     {
       "topic": 126,
-      "name": "AI in Health Tech",
+      "name": "AI and Wellness",
       "keywords": "ai, health tech, stat, health, patient, sign delivered, reading web, web edition, youre reading, stats",
       "documents": []
     },
@@ -1263,7 +1263,7 @@
     },
     {
       "topic": 138,
-      "name": "Climate and Emissions Targets",
+      "name": "Climate Crisis",
       "keywords": "emissions, climate, 2035, net zero, target, australia, zero, 2050, carbon, net",
       "documents": []
     },
@@ -1524,7 +1524,7 @@
     },
     {
       "topic": 168,
-      "name": "AI and Energy Sector Investing",
+      "name": "AI and Energy and Climate",
       "keywords": "ai, energy, readership, premium, infrastructure, nuclear energy, 30day, stock, owns, guarantee",
       "documents": []
     },
@@ -1645,110 +1645,8 @@
     {
       "topic": 188,
       "name": "SpaceX Starship Launches",
-      "keywords": [
-        "s",
-        "t",
-        "a",
-        "r",
-        "s",
-        "h",
-        "i",
-        "p",
-        ",",
-        "s",
-        "p",
-        "a",
-        "c",
-        "e",
-        "x",
-        ",",
-        "r",
-        "o",
-        "c",
-        "k",
-        "e",
-        "t",
-        ",",
-        "l",
-        "a",
-        "u",
-        "n",
-        "c",
-        "h",
-        ",",
-        "s",
-        "p",
-        "a",
-        "c",
-        "e",
-        ",",
-        "s",
-        "p",
-        "a",
-        "c",
-        "e",
-        "x",
-        "s",
-        ",",
-        "s",
-        "p",
-        "a",
-        "c",
-        "e",
-        "s",
-        "t",
-        "a",
-        "t",
-        "i",
-        "o",
-        "n",
-        ",",
-        "f",
-        "l",
-        "i",
-        "g",
-        "h",
-        "t",
-        ",",
-        "t",
-        "e",
-        "s",
-        "t",
-        ",",
-        "i",
-        "n",
-        "t",
-        "e",
-        "r",
-        "n",
-        "a",
-        "t",
-        "i",
-        "o",
-        "n",
-        "a",
-        "l",
-        "s",
-        "p",
-        "a",
-        "c",
-        "e",
-        "spacex",
-        "starship",
-        "bloomberg",
-        "cook",
-        "feds",
-        "launch",
-        "source",
-        "listen",
-        "removes",
-        "finalists"
-      ],
-      "documents": [
-        "Trump Removes Fed's Cook, Failure to Launch for SpaceX Starship. Bloomberg News Now • Browse all episodes\nTrump Removes Fed's Cook, Failure to Launch for SpaceX Starship\nTrump Removes Fed's Cook, Failure to Launch for SpaceX Starship\nListen for the latest from Bloomberg News\nAug 26, 2025\nListen for the latest from Bloomberg News\nAug 26, 2025",
-        "Trump Removes Fed's Cook, Failure to Launch for SpaceX Starship. Bloomberg News Now • Browse all episodes\nTrump Removes Fed's Cook, Failure to Launch for SpaceX Starship, More\nTrump Removes Fed's Cook, Failure to Launch for SpaceX Starship, More\nListen for the latest from Bloomberg News\nAug 26, 2025\nListen for the latest from Bloomberg News\nAug 26, 2025",
-        "SpaceX Starship Launch Imminent, Korean Air Plans Boeing Order. Bloomberg News Now • Browse all episodes\nSpaceX Starship Launch Imminent, Korean Air Plans Boeing Order\nSpaceX Starship Launch Imminent, Korean Air Plans Boeing Order\nListen for the latest from Bloomberg News\nAug 25, 2025\nListen for the latest from Bloomberg News\nAug 25, 2025"
-      ]
+      "keywords": "starship, spacex, rocket, launch, space, spacexs, space station, flight, test, international space",
+      "documents": []
     },
     {
       "topic": 189,
@@ -1830,7 +1728,7 @@
     },
     {
       "topic": 202,
-      "name": "California Governor Gavin Newsom",
+      "name": "Politics in California Universities",
       "keywords": "newsom, newsoms, california, gavin, gavin newsom, governor, redistricting, gov gavin, newsom said, california gov",
       "documents": []
     },
@@ -1902,7 +1800,7 @@
     },
     {
       "topic": 214,
-      "name": "Bloomberg Markets News",
+      "name": "Wall Street Relevant Updates",
       "keywords": "bloomberg markets, markets, bloomberg, bringing important, markets news, focused bringing, important global, markets bloomberg, news information, global business",
       "documents": []
     },
@@ -2004,7 +1902,7 @@
     },
     {
       "topic": 231,
-      "name": "AI-Generated Content about Hakeem Jeffries",
+      "name": "Cyberattacks",
       "keywords": "jeffries, hakeem jeffries, hakeem, video, aigenerated, minority leader, house minority, minority, mustache, memes",
       "documents": []
     },
@@ -2136,7 +2034,7 @@
     },
     {
       "topic": 253,
-      "name": "COVID-19 Vaccine Advisory Panels",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "vaccine, vaccines, kennedy, covid, acip, covid19, placebo, panel, rfk, committee",
       "documents": []
     },
@@ -2154,7 +2052,7 @@
     },
     {
       "topic": 256,
-      "name": "Climate Change and Emissions",
+      "name": "Climate Crisis",
       "keywords": "climate, greenhouse, pollution, climate change, emissions, epa, ipcc, greenhouse gas, scientists, greenhouse gases",
       "documents": []
     },
@@ -2454,7 +2352,7 @@
     },
     {
       "topic": 290,
-      "name": "Atlanta CDC Campus Shooting",
+      "name": "Non-School shootings",
       "keywords": "cdc, atlanta, shooter, campus, shooting, dekalb county, dekalb, cdc campus, officer david, police officer",
       "documents": []
     },
@@ -2568,7 +2466,7 @@
     },
     {
       "topic": 309,
-      "name": "Clairton Coke Plant Explosion",
+      "name": "Infrastructure Collapse",
       "keywords": "explosion, clairton, steel, plant, coke, allegheny, steel plant, pennsylvania, clairton coke, pittsburgh",
       "documents": []
     },
@@ -2616,7 +2514,7 @@
     },
     {
       "topic": 317,
-      "name": "Autism Diagnosis and Spectrum",
+      "name": "Medical Studies Findings",
       "keywords": "autism, autistic, autistic people, diagnosed, diagnosed autism, disorder, autism spectrum, spectrum, diagnosis, pregnancy",
       "documents": []
     },
@@ -2707,7 +2605,7 @@
     },
     {
       "topic": 328,
-      "name": "Data Center Resource Consumption",
+      "name": "AI and Energy and Climate",
       "keywords": "data centers, data center, data, centers, data centres, electricity, center, centres, water, power",
       "documents": []
     },
@@ -2827,7 +2725,7 @@
     },
     {
       "topic": 348,
-      "name": "Belarusian Political Prisoners",
+      "name": "Students and Faculty as Political Prisoners",
       "keywords": "belarus, lukashenko, belarusian, prisoners, political prisoners, lithuania, opposition, 52, czech, human rights",
       "documents": []
     },
@@ -2911,7 +2809,7 @@
     },
     {
       "topic": 362,
-      "name": "Auto and Horse Racing",
+      "name": "Racing News",
       "keywords": "horse, racing, race, nascar, bowman, playoffs, travers, jockey, larson, penske",
       "documents": []
     },
@@ -3037,7 +2935,7 @@
     },
     {
       "topic": 369,
-      "name": "Airport Cyberattacks",
+      "name": "Cloud Services Outages",
       "keywords": "checkin, airports, cyberattack, heathrow, airport, collins aerospace, airport said, brussels, european airports, flights",
       "documents": []
     },
@@ -3067,7 +2965,7 @@
     },
     {
       "topic": 374,
-      "name": "American Flag Burning Protests",
+      "name": "American Flag Protests",
       "keywords": "flag, american flag, burning, flag burning, park, yosemite, capitan, el capitan, executive order, amendment",
       "documents": []
     },
@@ -3175,7 +3073,7 @@
     },
     {
       "topic": 392,
-      "name": "Death Penalty in Florida",
+      "name": "Death Penalty News",
       "keywords": "florida, execution, death, bates, desantis, pittman, executions, executed, death penalty, convicted",
       "documents": []
     },
@@ -3306,7 +3204,7 @@
     },
     {
       "topic": 399,
-      "name": "Charlie Kirk Assassination Attempt",
+      "name": "Charlie Kirk and Political Violence",
       "keywords": "charlie, charlie kirk, kirk assassination, kirk shooting, kirk, assassination, shooting, 0244, utah gov, utah",
       "documents": []
     },
@@ -3360,7 +3258,7 @@
     },
     {
       "topic": 408,
-      "name": "Breast Cancer and Survivorship",
+      "name": "Cancer and Surgery developments",
       "keywords": "breast, breast cancer, cancer, munn, cancer survivor, watts, pain, survivor, menopause, doctors",
       "documents": []
     },
@@ -3534,7 +3432,7 @@
     },
     {
       "topic": 418,
-      "name": "Booing at Tennis Matches",
+      "name": "Sport rallies",
       "keywords": "booed, boos, match, open, mens final, tennis, ashe, crowd, tournament, mens",
       "documents": []
     },
@@ -3720,7 +3618,7 @@
     },
     {
       "topic": 449,
-      "name": "College Admissions for Hispanic Students",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "hispanic, colleges, students, hsi, instate, unconstitutional, tuition, admissions, universities, program",
       "documents": []
     },
@@ -3876,13 +3774,13 @@
     },
     {
       "topic": 475,
-      "name": "AI and Cheating in Education",
+      "name": "Use of AI in Higher Education",
       "keywords": "ai, students, cheating, use ai, education, faculty, essay, chatgpt, educators, students say",
       "documents": []
     },
     {
       "topic": 476,
-      "name": "Christian Religious Liberty",
+      "name": "Religious Freedom in Higher Education",
       "keywords": "religious, religious liberty, liberty, prayer, christian, museum bible, liberty commission, faith, commission, zionists",
       "documents": []
     },
@@ -4014,7 +3912,7 @@
     },
     {
       "topic": 498,
-      "name": "China's Climate Pledges",
+      "name": "Climate Crisis",
       "keywords": "emissions, climate, chinas, china, xi, president xi, 2035, carbon, degrees, climate change",
       "documents": []
     },
@@ -4110,7 +4008,7 @@
     },
     {
       "topic": 514,
-      "name": "Al Jazeera Journalists in Gaza",
+      "name": "Israel-Palestine Conflict Journalism Presence",
       "keywords": "jazeera, al jazeera, alsharif, journalists, al, sharif, anas, gaza, anas alsharif, israeli",
       "documents": []
     },
@@ -4200,7 +4098,7 @@
     },
     {
       "topic": 529,
-      "name": "Antisemitism at UC Berkeley",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "antisemitism, jewish, butler, berkeley, uc, uc berkeley, judith, antisemitic, students faculty, university",
       "documents": []
     },
@@ -4267,7 +4165,7 @@
     },
     {
       "topic": 536,
-      "name": "Congressional Delegation to China",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "smith, delegation, china, beijing, adam smith, visit china, smith said, congressional delegation, house armed, services committee",
       "documents": []
     },
@@ -4279,7 +4177,7 @@
     },
     {
       "topic": 538,
-      "name": "Accusations Against George Soros",
+      "name": "Trump and Civil Rights",
       "keywords": "soros, george soros, open society, terrorism, society foundations, george, violent protests, foundations, society, racketeering",
       "documents": []
     },
@@ -4297,7 +4195,7 @@
     },
     {
       "topic": 541,
-      "name": "Auckland Bathroom Renovations",
+      "name": "Historical site renovations",
       "keywords": "bathroom, auckland, renovations, renovation, architecture, design, renovating, hello, bathrooms, fixtures",
       "documents": []
     },
@@ -4309,7 +4207,7 @@
     },
     {
       "topic": 543,
-      "name": "California Law Enforcement and Mandates",
+      "name": "ICE and Immigration Officer Presence",
       "keywords": "masks, agents, california, enforcement, ban, immigration, federal agents, law enforcement, newsom, officers",
       "documents": []
     },
@@ -4339,7 +4237,7 @@
     },
     {
       "topic": 548,
-      "name": "Apple Watch Health and Fitness Features",
+      "name": "Technology and Fitness",
       "keywords": "fitness, apple watch, watch, apple, smartwatch, heart rate, sleep, trackers, features, battery life",
       "documents": []
     },
@@ -5069,23 +4967,23 @@
     },
     {
       "topic": 591,
-      "name": "Global HIV Prevention",
+      "name": "Trump Threatens 35% Tariffs on Canadian Goods",
       "keywords": [
-        "hiv",
-        "prevention",
-        "drug",
-        "lenacapavir",
-        "fgm",
-        "condoms",
-        "aids",
-        "gilead",
-        "women",
-        "pepfar"
+        "canada",
+        "tariffs",
+        "tariff",
+        "carney",
+        "canadian",
+        "fentanyl",
+        "trade",
+        "goods",
+        "trump",
+        "35"
       ],
       "documents": [
-        "Landmark deal paves way for cheaper HIV protection jab. Landmark deal paves way for cheaper HIV protection jab\nA new HIV prevention drug will be made available at a lower cost in over 100 low-income countries within two years — a move expected to give millions access to the breakthrough treatment and potentially bring the world closer to ending the HIV/Aids epidemic.\nThe drug, called Lenacapavir and administered by injection, is due to be rolled out as early as the end of this year, at a cost of $28,000 (£20,000) per person annually.\nBut Wednesday's announcement promises to slash that price to just $40 — around 0.1% of the original cost. The lower-cost version will be rolled out in 2027 across 120 low- and middle-income countries.\nScientists say the drug stops the virus from replicating inside cells.\nThe agreement announced on Wednesday was reached between the Clinton Health Access Initiative in partnership with the Gates Foundation and other groups, including South African research institute, Wits RHI.\n\"For many low- and middle-income countries, affordable access to HIV prevention is not a luxury, it is a necessity,\" Professor Saiqa Mullick from Wits RHI told the BBC.\nShe added that Lenacapavir had \"the potential to transform prevention, especially for young people and underserved communities who struggle with frequent clinic visits.\n\"The real work begins now, partnering with communities and governments to build demand, secure commitments, and prepare systems so countries are ready for rapid introduction and scale.\"\nWATCH: HIV prevention drug Lenacapavir recommended by WHO\n-\nPODCAST: Lenacapavir: could new HIV drug help end the pandemic?\n-\nLenacapavir has delivered impressive trial results and, in July, it received official backing from the World Health Organization for HIV prevention.\nThe injection is taken twice a year and provides six months of protection against HIV infection at a time.\nExperts say long-acting injectables like Lenacapavir could help reduce new infections in populations that are most vulnerable, including adolescent girls and young women, LGBT people, sex workers, and those who use drugs.\nIt is hoped it will replace the current form of HIV preventative drug, know as PrEP, or pre-exposure prophylaxis, which is taken orally and also costs $40 per person each year.\nThe pills are taken daily, which can be difficult for patients to consume, and can carry stigma in certain societies. The daily dose also makes it harder to access consistently. According to the Gates Foundation, only 18% of those who could benefit from PrEP currently have access.\nLenacapavir has already been approved by the US Food and Drug Administration and the European Commission this year.\nLast year June, the US drug company Gilead announced that a trial of its HIV drug Lenacapavir had a 100% success rate.\nThe new, generic version is still pending regulatory approval but it is hoped it will be available within 18 months.\nOne study says that increasing access to the injection to just 4% of the population could prevent up to 20% of new HIV infections.\nThe drug can be used to protect people from catching the virus, but also to treat those who have it, according to scientists.\nThe announcement comes amid a turbulent year for global health, particularly the fight against HIV and Aids, following swingeing cuts by the US government's foreign aid programme, USAID, under the Trump administration.\nAccording to UNAIDS, more than 40 million people are currently living with HIV.\nDespite huge strides made to reduce global HIV rates and AIDS-related deaths since 2000, about 1.3 million people still contracted HIV last year, and more than 600,000 people died from AIDS-related illnesses.\nSouth Africa remains the country with the highest number of HIV cases, with almost eight million people living with the virus. It will be one of the countries to access the new, cheaper drug.\nSouth Africa's department of health told the BBC that it \"supports any efforts to make life saving treatment like Lenacapavir available and accessible at affordable rate to all countries, including low and middle income countries, as and when they need it\".\nAdditional reporting by Akisa Wandera in Nairobi\nYou may also be interested in:\nGo to BBCAfrica.com for more news from the African continent.\nFollow us on Twitter @BBCAfrica, on Facebook at BBC Africa or on Instagram at bbcafrica",
-        "The US will buy 2 million doses of an HIV prevention drug for low-income countries. The US will buy 2 million doses of an HIV prevention drug for low-income countries\nThe U.S. is purchasing enough doses of a new twice-a-year HIV prevention shot to share with up to 2 million people in poor countries by 2028\nWASHINGTON -- The U.S. is purchasing enough doses of a new twice-a-year HIV prevention shot to share with up to 2 million people in poor countries by 2028, the State Department announced Thursday.\nGilead Sciences had already announced it would sell that supply of the protective drug lenacapvir at no profit for use in low- and middle-income countries that are hard-hit by HIV. The question was who would buy and distribute them after the Trump administration slashed foreign aid earlier this year – forcing closures of health clinics and disrupting HIV testing and care in many countries.\nUnder Thursday’s move, the U.S. will purchase the doses under the PEPFAR program and work with governments in hard-hit countries on how to distribute them. The priority will be to protect pregnant or breastfeeding women, said Jeremy Lewin, a State department senior official.\nLewin said the program will be a collaboration with the Global Fund, another international program that funds HIV treatment and prevention efforts but wouldn’t disclose how much the U.S. was investing.\n“We’re hoping, with the Global Fund, to help 2 million people get on the medication over the next three years but could potentially see more,” he said.\nThere are more than 30,000 new HIV infections in the U.S. every year and 1.2 million people are living with the virus. Worldwide there are 1.3 million new infections annually and nearly 40 million people living with the virus.\nMany experts say lenacapavir is the most powerful option yet for what’s called PrEP – using preventive medicines to guard against sexually transmitted HIV. Unlike daily pills that people may forget, each lenacapavir shot offers protection for six months. In two groundbreaking studies with people at high risk, it nearly eliminated new infections.\nThe drug already has been approved for use in the U.S. and Europe.\nIn March, the head of the U.N. AIDS agency urged the Trump administration and Gilead to make the preventive shots available worldwide for millions.\nGilead has signed agreements with generic drug makers to produce low-cost versions of the shot for poor countries, mostly in Africa, Southeast Asia and the Caribbean. The doses provided at-cost for up to 2 million people in those countries was intended to be a stopgap until the generics are available.\n—-\nThe Associated Press Health and Science Department receives support from the Howard Hughes Medical Institute’s Department of Science Education and the Robert Wood Johnson Foundation. The AP is solely responsible for all content.\nSponsored Content by Taboola\nPopular Reads\nABC News Live\n24/7 coverage of breaking news and live events",
-        "Love, drugs and condoms: Couples with different HIV status face a new reality. Love, drugs and condoms: Couples with different HIV status face a new reality\nLet's say you fall in love with someone harboring a deadly -- and highly infectious -- virus. And you think … is it crazy to get married?\nSometimes love conquers all — with the help of modern medicine.\nThat's the story of serodiscordant couples — the term used when one partner is HIV positive and the other is HIV negative.\nRobert Ochweda and Millicent Akoth of Kenya are one such couple. She is HIV positive — she caught the virus from her former husband. He is a fisherman who is HIV negative. After the two of them fell in love, he says he was afraid to marry her lest he contract the virus.\nHe was able to overcome his fears.\n\"I have been able to stay safe by using condoms and PrEP,\" Ochweda explains, referring to a pill that prevents infection. And The Centers for Disease Control and Prevention writes: \"Most condoms are highly effective in preventing HIV.\"\nHis wife takes antiretroviral pills that reduce her viral load, so she does not face the risk of death from AIDS. Those pills also reduce the risk that she will infect her husband.\nThis year, couples in this category are especially anxious. They say that, in the wake of the Trump administration's dramatic foreign aid cuts and dismantling of USAID, the agency that supported health-related programs, it's become harder to find the pills and condoms that keep them safe.\nCaleb Ochieng, who is HIV negative, has been married to Diana Odhiambo, who is HIV positive, for eight years.\nOchieng learned of Odhiambo's HIV status when they went to do an HIV test as they made plans to tie the knot after several years of cohabiting. She believes she contracted the disease from a previous relationship.\n\"We were shocked because at that time we had two children and wanted others. We were advised on preventive measures like condom use and voluntary male circumcision as a way of preventing HIV infection,\" he says.\n\"I wondered how we would manage,\" he recalls. \"It's not been easy but with love, we have been taking care of ourselves.\"\nOdhiambo takes pills to suppress the virus; he takes pre-exposure prophylaxis (PrEP) to stay safe. He is tested for HIV every three months.\nTaking these precautions, the couple has had two children who are HIV negative. After counseling, Odhiambo has become a peer educator who talks to other couples in the same situation. The partner who is positive, he reflects, \"has a lot of emotions. AS a partner, you should be there for them and support them well.\"\nOn a recent visit to the clinic where he picks up his PrEP drugs, he says, \"I was told the supply that was available has been reserved for pregnant women. I traveled to neighboring Busia county and managed to get a small dose that could last a month and a half.\"\nHis experience echoes a memo from the State Department that NPR obtained, stating that if a clinic receives funding through the U.S. program PEPFAR, this preventative medication can \"only\" be given to \"pregnant and breastfeeding women\" during the 90-day freeze on foreign aid that the Trump administration instituted — and that is still in effect.\nA senior health official with the Kenyan Ministry of Health told NPR that clinics have been rationing medications and other supplies because of the uncertainties about donor funds.\n\"We acquire most of the HIV medication through partners and donors. The exit of U.S. funding means that there is a gap, and until that gap is filled, there is always bound to be friction but the government has done everything to keep operations going,\" says the official, who asked not to be identified by name because he did not have permission to speak to the press.\nJoywine Adek, a programs officer at Mildmay Kenya, an organization that supports HIV patients, is seeing this gap.\nMildmay Kenya is among the organizations that was receiving funding from the U.S. government to support HIV interventions in Kenya, including screening services, distribution of antiretroviral drugs and condoms, and counseling for serodiscordant couples.\n\"In the current grant that is available after the reduction in funding, there is no support for discordant couples,\" Adek says, adding that the charity has had to halt many of its services because of the loss of U.S. aid.\n\"We are trying to sort this out by doing what we call integration of HIV care into routine health care,\" says Fredrick Oluoch, the director of public health in Kenya's Kisumu County.\nThe lack of condoms is evident. This reporter saw empty dispensers where co Kndoms were once stocked and made available in clinics.\nAnd even though condoms are inexpensive — as little as $1 or $2 each in the U.S., even less in Kenya — that price could still be daunting in a country where a third of the population lives below the poverty line of about $2 a day in income.\nKenya has previously reported that the supply of condoms was not equal to the demand. But this year, officials say, things are worse than ever in the wake of the U.S. foreign aid shakeup, which has affected some of the suppliers, like the United Nations Population Fund (UNFPA).\nIn a statement to NPR, UNFPA noted: \"Kenya has historically relied heavily on USAID for its free condom distribution programs. Kenya's annual condom requirement is estimated at 400–450 million units. Condom procurement by UNFPA has been affected indirectly — but nonetheless significantly - by U.S. funding cuts. While UNFPA continues its role in condom programming through funding from other global partners, the U.S. stop work order has contributed to shortfalls in supply, putting more pressure on UNFPA and other providers. Some 9.8 million UNFPA-procured condoms were received at the Kenya Central Stores on August 13, 2025, but funding restrictions from the U.S. and other donors mean there is uncertainty as to whether UNFPA will be able to meet projected condom procurement needs for 2026 and beyond.\"\nNPR asked the State Department to respond to these points about U.S. funding and free condom programs but did not receive a response.\nThe result of this altered aid landscape is that partners with different HIV status are living with newfound uncertainty.\nErastus Ng'uono was born with HIV positive status. When he met Winnie Auma Miyare and wanted to start a relationship with her, he asked her if she could love someone who is HIV positive and using ARVs. A few days later, he told her about his HIV status.\nAt first she did not want to have anything to do with him. But when he explained how medications could help her ward off infection, she changed her mind. She takes PrEP pills. They have four children who are all HIV negative. Their youngest is six months old.\nThe news of U.S. aid cuts that could affect the strategies they use has hit them hard. \"I encouraged him to have courage and not to worry,\" she says. \"I know the government will intervene.\"\n\"I was very afraid,\" he says. \"I even prayed over it and I know God will see us through.\"\nStill he worries. \"The shortage of the drugs and condoms is a major concern for us and the government is yet to address our concerns,\" says Ng'uono. \"I don't know what the future holds.\"\nViola Kosome is a Kenyan journalist. See more of photojournalist Julia Gunther's work on her website or follow her on Instagram: @juliagunther_photography.\nCopyright 2025 NPR"
+        "Trump threatens 35% tariffs on Canadian goods. Trump threatens 35% tariffs on Canadian goods\nUS President Donald Trump has said he will impose a 35% tariff on Canadian goods starting on 1 August, even as the two countries were days away from a self-imposed deadline to reach a new trade deal.\nThe announcement came in the form of a letter published on Trump's social media platform Truth Social, along with additional threats of blanket tariffs of 15% or 20% on most trade partners.\nCanadian Prime Minister Mark Carney said his government would continue to protect his country's workers and businesses as they head towards the new deadline.\nTrump has sent more than 20 such letters to other US partners this week. He also says he will soon announce new tariffs on the European Union.\nLike Canada's letter, Trump has vowed to implement those tariffs by 1 August.\nA blanket 25% tariff has already been imposed on some Canadian goods, with the nation also hit hard by Trump's global steel, aluminium and auto tariffs - though there is a current exemption in place for goods that comply with a North American free trade agreement.\nIt is unclear if the latest tariffs threat would also apply to goods covered by the Canada-United States-Mexico Agreement (CUSMA).\nTrump has also imposed a global 50% tariff on aluminium and steel imports, and a 25% tariff on all cars and trucks not built in the US.\nHe also recently announced a 50% tariff on copper imports, scheduled to take effect next month.\nCanada sells about three-quarters of its goods to the US, and is an auto manufacturing hub and a major supplier of metals, making the US tariffs especially damaging to those sectors.\nAsia is reeling from Trump's tariff salvo – is anyone winning?\n-\n'In business, indecision is killer' - Canadian firms seek certainty in tariff war\n-\nTrump's letter said the 35% tariffs were separate to those sector-specific levies.\n\"As you are aware, there will be no tariff if Canada, or companies within your country, decide to build or manufacture products within the United States,\" Trump stated.\nHe also tied the tariffs to what he called \"Canada's failure\" to stop the flow of fentanyl into the US, as well as Canada's existing levies on US dairy farmers and the trade deficit between the two countries.\n\"If Canada works with me to stop the flow of Fentanyl, we will, perhaps, consider an adjustment to this letter. These Tariffs may be modified, upward or downward, depending on our relationship with Your Country,\" Trump said.\nPresident Trump has previously accused Canada - alongside Mexico - of allowing \"vast numbers of people to come in and fentanyl to come in\" to the US.\nIn his response on X, Carney said Canada had made essential progress to \"stop the scourge of fentanyl\" in North America, and that his government was committed to continuing to work alongside the US to protect communities in both countries.\nAccording to data from the US Customs and Border Patrol, only about 0.2% of all seizures of fentanyl entering the US are made at the Canadian border. Almost all of the rest is confiscated at the US border with Mexico.\nEarlier this year, Canada also announced more funding towards border security and had appointed a fentanyl czar in response to Trump's complaints.\nCanada has been engaged in intense talks with the US in recent months to reach a new trade and security deal.\nAt the G7 Summit in June, Carney and Trump said they were committed to reaching a new deal within 30 days, setting a deadline of 21 July.\nTrump threatened in the letter to increase levies on Canada if it retaliated. Canada has already imposed counter-tariffs on the US, and has vowed more if they failed to reach a deal by the deadline.\nIn late June, Carney removed a tax on big US technology firms after Trump labelled it a \"blatant attack\" and threatened to call off trade talks.\nCarney said the tax was dropped as \"part of a bigger negotiation\" on trade between the two countries.",
+        "Trump's latest tariff target: Canadian goods will be hit with 35% tax in August. WASHINGTON — President Donald Trump said in a letter that he will raise taxes on many imported goods from Canada to 35%, deepening a rift between two North American countries that have suffered a debilitating blow to their decades-old alliance.\nThe Thursday letter to Canadian Prime Minister Mark Carney is an aggressive increase to the top 25% tariff rates that Trump first imposed in March after months of threats. Trump's tariffs were allegedly in an effort to get Canada to crack down on fentanyl smuggling despite the relatively modest trafficking in the drug from that country. Trump has also expressed frustration with a trade deficit with Canada that largely reflects oil purchases by America.\n“I must mention that the flow of Fentanyl is hardly the only challenge we have with Canada, which has many Tariff, and Non-Tariff, Policies and Trade Barriers,” Trump wrote in the letter.\nThe higher rates would go into effect Aug. 1, creating a tense series of weeks ahead for the global economy as recent gains in the S&P 500 stock index suggest many investors think Trump will ultimately back down on the increases. But stock market futures were down early Friday in a sign that Trump's wave of tariff letters may be starting to generate concern among investors.\nIn a social media post, Carney said Canada would continue to work toward a new trade framework with the U.S. and has made “vital progress to stop the scourge of fentanyl.”\n“Through the current trade negotiations with the United States, the Canadian government has steadfastly defended our workers and business,” Carney said.\nWhile multiple countries have received tariff letters this week, Canada — America's second largest trading partner after Mexico — has become something of a foil to Trump. It has imposed retaliatory tariffs on U.S. goods and pushed back on the president's taunts of making Canada the 51st state. Mexico has also faced 25% tariffs because of fentanyl, yet it has not faced the same public pressure from the Republican U.S. president.\nCarney was elected prime minister in April on the argument that Canadians should keep their “elbows up.” He has responded by distancing Canada from its intertwined relationship with the U.S., seeking to strengthen its links with the European Union and the United Kingdom.\nHours before Trump's letter, Carney posted on X a picture of himself with British Prime Minister Keir Starmer, saying, “In the face of global trade challenges, the world is turning to reliable economic partners like Canada.” Implied in his statement was that the U.S. has become unreliable because of Trump's haphazard tariff regime, which has gone through aggressive threats and reversals.\nWhen Carney went to the White House in May, the public portion of their meeting was cordial. But Trump said there was nothing the Canadian leader could tell him to remove the tariffs, saying, “Just the way it is.”\nDaniel Beland, a political science professor at McGill University in Montreal, said Trump's latest move will make it more difficult for Canada and the U.S. to reach a trade deal, Beland said.\n“It doesn’t mean a new trade deal between Canada and the United States is impossible, but it shows how hard it is for the Canadian government to negotiate with a U.S. president who regularly utters threats and doesn’t appear to be a reliable and truthful interlocutor,” he said.\nTrump has sent a series of tariff letters to 23 countries. Those form letters became increasingly personal with Canada as well as a Wednesday note that put a 50% tariff on Brazil for the ongoing trial of its former President Jair Bolsonaro for trying to stay in office after his 2022 election loss. Trump was similarly indicted for his efforts to overturn his 2020 election loss to Democrat Joe Biden.\nTrump administration officials have said that Trump was seeking to isolate its geopolitical rival China with the tariffs, but the latest tariffs have undermined that message. Brazil's largest trading partner is China, not the U.S., and Chinese government officials have framed his import taxes as a form of bullying.\n“Sovereign equality and non-interference in internal affairs are important principles of the U.N. Charter and basic norms governing international relations,\" said Mao Ning, the Chinese Foreign Ministry spokesman. “Tariffs should not be used as a tool for coercion, bullying and interference in the internal affairs of other countries.”\nThe letters reflect the inability of Trump to finalize the dozens of trade frameworks that he claimed would be easy to negotiate. Shortly after unveiling his April 2 “Liberation Day” tariffs, a financial market selloff caused Trump to announce a 90-day negotiating period during which a 10% baseline tariff would be charged on most imported goods.\nBut Trump has indicated that the 10% tariff rates are largely disappearing as he resets the rates with his letters.\n“We’re just going to say all of the remaining countries are going to pay, whether it’s 20% or 15%,” Trump said in a phone interview with NBC News.\nTrump has announced trade frameworks with the U.K. and Vietnam, as well as a separate deal with China to enable continued trade talks. Trump jacked up import taxes on Chinese goods to as much as 145%, but after talks he has said China faces total tariffs of 55%.\nIn June, Trump said he was suspending trade talks with Canada over its plans to continue its digital services tax, which would hit U.S. technology companies. A few days later, talks resumed when Carney rescinded the tax.\nUnder the current tariff structure, the 2020 United States Mexico Canada Agreement has protected eligible goods from Trump's tariffs. But a review of the pact is scheduled for 2026.\n___\nJim Morris contributed to this report from Vancouver, British Columbia.\nCopyright 2025 Associated Press. All rights reserved. This material may not be published, broadcast, rewritten, or redistributed.",
+        "Trump plans to hike tariffs on Canadian goods to 35%. WASHINGTON — President Donald Trump said in a letter that he will raise taxes on many imported goods from Canada to 35%, deepening a rift between two North American countries that have suffered a debilitating blow to their decades-old alliance.\nThe Thursday letter to Canadian Prime Minister Mark Carney is an aggressive increase to the top 25% tariff rates that Trump first imposed in March after months of threats. Trump's tariffs were allegedly in an effort to get Canada to crack down on fentanyl smuggling despite the relatively modest trafficking in the drug from that country. Trump has also expressed frustration with a trade deficit with Canada that largely reflects oil purchases by America.\n“I must mention that the flow of Fentanyl is hardly the only challenge we have with Canada, which has many Tariff, and Non-Tariff, Policies and Trade Barriers,” Trump wrote in the letter.\nThe higher rates would go into effect Aug. 1, creating a tense series of weeks ahead for the global economy as recent gains in the S&P 500 stock index suggest many investors think Trump will ultimately back down on the increases. But stock market futures were down early Friday in a sign that Trump's wave of tariff letters may be starting to generate concern among investors.\nIn a social media post, Carney said Canada would continue to work toward a new trade framework with the U.S. and has made “vital progress to stop the scourge of fentanyl.”\n“Through the current trade negotiations with the United States, the Canadian government has steadfastly defended our workers and business,” Carney said.\nWhile multiple countries have received tariff letters this week, Canada — America's second largest trading partner after Mexico — has become something of a foil to Trump. It has imposed retaliatory tariffs on U.S. goods and pushed back on the president's taunts of making Canada the 51st state. Mexico has also faced 25% tariffs because of fentanyl, yet it has not faced the same public pressure from the Republican U.S. president.\nCarney was elected prime minister in April on the argument that Canadians should keep their “elbows up.” He has responded by distancing Canada from its intertwined relationship with the U.S., seeking to strengthen its links with the European Union and the United Kingdom.\nHours before Trump's letter, Carney posted on X a picture of himself with British Prime Minister Keir Starmer, saying, “In the face of global trade challenges, the world is turning to reliable economic partners like Canada.” Implied in his statement was that the U.S. has become unreliable because of Trump's haphazard tariff regime, which has gone through aggressive threats and reversals.\nWhen Carney went to the White House in May, the public portion of their meeting was cordial. But Trump said there was nothing the Canadian leader could tell him to remove the tariffs, saying, “Just the way it is.”\nDaniel Beland, a political science professor at McGill University in Montreal, said Trump's latest move will make it more difficult for Canada and the U.S. to reach a trade deal, Beland said.\n“It doesn’t mean a new trade deal between Canada and the United States is impossible, but it shows how hard it is for the Canadian government to negotiate with a U.S. president who regularly utters threats and doesn’t appear to be a reliable and truthful interlocutor,” he said.\nTrump has sent a series of tariff letters to 23 countries. Those form letters became increasingly personal with Canada as well as a Wednesday note that put a 50% tariff on Brazil for the ongoing trial of its former President Jair Bolsonaro for trying to stay in office after his 2022 election loss. Trump was similarly indicted for his efforts to overturn his 2020 election loss to Democrat Joe Biden.\nTrump administration officials have said that Trump was seeking to isolate its geopolitical rival China with the tariffs, but the latest tariffs have undermined that message. Brazil's largest trading partner is China, not the U.S., and Chinese government officials have framed his import taxes as a form of bullying.\n“Sovereign equality and non-interference in internal affairs are important principles of the U.N. Charter and basic norms governing international relations,\" said Mao Ning, the Chinese Foreign Ministry spokesman. “Tariffs should not be used as a tool for coercion, bullying and interference in the internal affairs of other countries.”\nThe letters reflect the inability of Trump to finalize the dozens of trade frameworks that he claimed would be easy to negotiate. Shortly after unveiling his April 2 “Liberation Day” tariffs, a financial market selloff caused Trump to announce a 90-day negotiating period during which a 10% baseline tariff would be charged on most imported goods.\nBut Trump has indicated that the 10% tariff rates are largely disappearing as he resets the rates with his letters.\n“We’re just going to say all of the remaining countries are going to pay, whether it’s 20% or 15%,” Trump said in a phone interview with NBC News.\nTrump has announced trade frameworks with the U.K. and Vietnam, as well as a separate deal with China to enable continued trade talks. Trump jacked up import taxes on Chinese goods to as much as 145%, but after talks he has said China faces total tariffs of 55%.\nIn June, Trump said he was suspending trade talks with Canada over its plans to continue its digital services tax, which would hit U.S. technology companies. A few days later, talks resumed when Carney rescinded the tax.\nUnder the current tariff structure, the 2020 United States Mexico Canada Agreement has protected eligible goods from Trump's tariffs. But a review of the pact is scheduled for 2026.\n___\nJim Morris contributed to this report from Vancouver, British Columbia.\nCopyright 2025 Associated Press. All rights reserved. This material may not be published, broadcast, rewritten, or redistributed."
       ],
       "source": "Streamlit"
     }
