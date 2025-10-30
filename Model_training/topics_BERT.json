@@ -158,7 +158,7 @@
     },
     {
       "topic": 21,
-      "name": "Council Planning and Housing",
+      "name": "Student Housing",
       "keywords": "ref, council, planning, housing, homes, road, property, development, turnover, st",
       "documents": []
     },
@@ -290,7 +290,7 @@
     },
     {
       "topic": 43,
-      "name": "COVID-19 Vaccine Recommendations",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "vaccine, vaccines, covid, covid19, shots, recommendations, vaccinated, cdc, covid19 vaccines, flu",
       "documents": []
     },
@@ -575,7 +575,7 @@
     },
     {
       "topic": 68,
-      "name": "AI Chatbots and Teen Mental Health",
+      "name": "AI and Wellness",
       "keywords": [
         "c",
         "h",
@@ -667,13 +667,13 @@
     },
     {
       "topic": 69,
-      "name": "Autism and Acetaminophen Use During Pregnancy",
+      "name": "Medical Misinformation",
       "keywords": "autism, tylenol, acetaminophen, pregnancy, pregnant, pregnant women, paracetamol, fever, women, autistic",
       "documents": []
     },
     {
       "topic": 70,
-      "name": "CDC Leadership and Personnel",
+      "name": "CDC Involvement in Higher Education",
       "keywords": "monarez, cdc, kennedy, susan monarez, susan, cdc director, director, health, houry, vaccine",
       "documents": []
     },
@@ -1067,7 +1067,7 @@
     },
     {
       "topic": 118,
-      "name": "Astronomy and Space Telescopes",
+      "name": "Astronomy Discoveries",
       "keywords": "telescope, stars, planet, webb, planets, black hole, space telescope, asteroid, astronomers, star",
       "documents": []
     },
@@ -1103,7 +1103,7 @@
     },
     {
       "topic": 124,
-      "name": "AI and Job Skills",
+      "name": "AI Skills in the Job Market",
       "keywords": [
         "a",
         "i",
@@ -1191,7 +1191,7 @@
     },
     {
       "topic": 126,
-      "name": "AI in Health Tech",
+      "name": "AI and Wellness",
       "keywords": "ai, health tech, stat, health, patient, sign delivered, reading web, web edition, youre reading, stats",
       "documents": []
     },
@@ -1263,7 +1263,7 @@
     },
     {
       "topic": 138,
-      "name": "Climate and Emissions Targets",
+      "name": "Climate Crisis",
       "keywords": "emissions, climate, 2035, net zero, target, australia, zero, 2050, carbon, net",
       "documents": []
     },
@@ -1524,7 +1524,7 @@
     },
     {
       "topic": 168,
-      "name": "AI and Energy Sector Investing",
+      "name": "AI and Energy and Climate",
       "keywords": "ai, energy, readership, premium, infrastructure, nuclear energy, 30day, stock, owns, guarantee",
       "documents": []
     },
@@ -1728,7 +1728,7 @@
     },
     {
       "topic": 202,
-      "name": "California Governor Gavin Newsom",
+      "name": "Politics in California Universities",
       "keywords": "newsom, newsoms, california, gavin, gavin newsom, governor, redistricting, gov gavin, newsom said, california gov",
       "documents": []
     },
@@ -1800,7 +1800,7 @@
     },
     {
       "topic": 214,
-      "name": "Bloomberg Markets News",
+      "name": "Wall Street Relevant Updates",
       "keywords": "bloomberg markets, markets, bloomberg, bringing important, markets news, focused bringing, important global, markets bloomberg, news information, global business",
       "documents": []
     },
@@ -1902,7 +1902,7 @@
     },
     {
       "topic": 231,
-      "name": "AI-Generated Content about Hakeem Jeffries",
+      "name": "Cyberattacks",
       "keywords": "jeffries, hakeem jeffries, hakeem, video, aigenerated, minority leader, house minority, minority, mustache, memes",
       "documents": []
     },
@@ -2034,7 +2034,7 @@
     },
     {
       "topic": 253,
-      "name": "COVID-19 Vaccine Advisory Panels",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "vaccine, vaccines, kennedy, covid, acip, covid19, placebo, panel, rfk, committee",
       "documents": []
     },
@@ -2052,7 +2052,7 @@
     },
     {
       "topic": 256,
-      "name": "Climate Change and Emissions",
+      "name": "Climate Crisis",
       "keywords": "climate, greenhouse, pollution, climate change, emissions, epa, ipcc, greenhouse gas, scientists, greenhouse gases",
       "documents": []
     },
@@ -2352,7 +2352,7 @@
     },
     {
       "topic": 290,
-      "name": "Atlanta CDC Campus Shooting",
+      "name": "Non-School shootings",
       "keywords": "cdc, atlanta, shooter, campus, shooting, dekalb county, dekalb, cdc campus, officer david, police officer",
       "documents": []
     },
@@ -2466,7 +2466,7 @@
     },
     {
       "topic": 309,
-      "name": "Clairton Coke Plant Explosion",
+      "name": "Infrastructure Collapse",
       "keywords": "explosion, clairton, steel, plant, coke, allegheny, steel plant, pennsylvania, clairton coke, pittsburgh",
       "documents": []
     },
@@ -2514,7 +2514,7 @@
     },
     {
       "topic": 317,
-      "name": "Autism Diagnosis and Spectrum",
+      "name": "Medical Studies Findings",
       "keywords": "autism, autistic, autistic people, diagnosed, diagnosed autism, disorder, autism spectrum, spectrum, diagnosis, pregnancy",
       "documents": []
     },
@@ -2605,7 +2605,7 @@
     },
     {
       "topic": 328,
-      "name": "Data Center Resource Consumption",
+      "name": "AI and Energy and Climate",
       "keywords": "data centers, data center, data, centers, data centres, electricity, center, centres, water, power",
       "documents": []
     },
@@ -2725,7 +2725,7 @@
     },
     {
       "topic": 348,
-      "name": "Belarusian Political Prisoners",
+      "name": "Students and Faculty as Political Prisoners",
       "keywords": "belarus, lukashenko, belarusian, prisoners, political prisoners, lithuania, opposition, 52, czech, human rights",
       "documents": []
     },
@@ -2809,7 +2809,7 @@
     },
     {
       "topic": 362,
-      "name": "Auto and Horse Racing",
+      "name": "Racing News",
       "keywords": "horse, racing, race, nascar, bowman, playoffs, travers, jockey, larson, penske",
       "documents": []
     },
@@ -2935,7 +2935,7 @@
     },
     {
       "topic": 369,
-      "name": "Airport Cyberattacks",
+      "name": "Cloud Services Outages",
       "keywords": "checkin, airports, cyberattack, heathrow, airport, collins aerospace, airport said, brussels, european airports, flights",
       "documents": []
     },
@@ -2965,7 +2965,7 @@
     },
     {
       "topic": 374,
-      "name": "American Flag Burning Protests",
+      "name": "American Flag Protests",
       "keywords": "flag, american flag, burning, flag burning, park, yosemite, capitan, el capitan, executive order, amendment",
       "documents": []
     },
@@ -3073,7 +3073,7 @@
     },
     {
       "topic": 392,
-      "name": "Death Penalty in Florida",
+      "name": "Death Penalty News",
       "keywords": "florida, execution, death, bates, desantis, pittman, executions, executed, death penalty, convicted",
       "documents": []
     },
@@ -3204,7 +3204,7 @@
     },
     {
       "topic": 399,
-      "name": "Charlie Kirk Assassination Attempt",
+      "name": "Charlie Kirk and Political Violence",
       "keywords": "charlie, charlie kirk, kirk assassination, kirk shooting, kirk, assassination, shooting, 0244, utah gov, utah",
       "documents": []
     },
@@ -3258,7 +3258,7 @@
     },
     {
       "topic": 408,
-      "name": "Breast Cancer and Survivorship",
+      "name": "Cancer and Surgery developments",
       "keywords": "breast, breast cancer, cancer, munn, cancer survivor, watts, pain, survivor, menopause, doctors",
       "documents": []
     },
@@ -3432,7 +3432,7 @@
     },
     {
       "topic": 418,
-      "name": "Booing at Tennis Matches",
+      "name": "Sport rallies",
       "keywords": "booed, boos, match, open, mens final, tennis, ashe, crowd, tournament, mens",
       "documents": []
     },
@@ -3618,7 +3618,7 @@
     },
     {
       "topic": 449,
-      "name": "College Admissions for Hispanic Students",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "hispanic, colleges, students, hsi, instate, unconstitutional, tuition, admissions, universities, program",
       "documents": []
     },
@@ -3774,13 +3774,13 @@
     },
     {
       "topic": 475,
-      "name": "AI and Cheating in Education",
+      "name": "Use of AI in Higher Education",
       "keywords": "ai, students, cheating, use ai, education, faculty, essay, chatgpt, educators, students say",
       "documents": []
     },
     {
       "topic": 476,
-      "name": "Christian Religious Liberty",
+      "name": "Religious Freedom in Higher Education",
       "keywords": "religious, religious liberty, liberty, prayer, christian, museum bible, liberty commission, faith, commission, zionists",
       "documents": []
     },
@@ -3912,7 +3912,7 @@
     },
     {
       "topic": 498,
-      "name": "China's Climate Pledges",
+      "name": "Climate Crisis",
       "keywords": "emissions, climate, chinas, china, xi, president xi, 2035, carbon, degrees, climate change",
       "documents": []
     },
@@ -4008,7 +4008,7 @@
     },
     {
       "topic": 514,
-      "name": "Al Jazeera Journalists in Gaza",
+      "name": "Israel-Palestine Conflict Journalism Presence",
       "keywords": "jazeera, al jazeera, alsharif, journalists, al, sharif, anas, gaza, anas alsharif, israeli",
       "documents": []
     },
@@ -4098,7 +4098,7 @@
     },
     {
       "topic": 529,
-      "name": "Antisemitism at UC Berkeley",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "antisemitism, jewish, butler, berkeley, uc, uc berkeley, judith, antisemitic, students faculty, university",
       "documents": []
     },
@@ -4165,7 +4165,7 @@
     },
     {
       "topic": 536,
-      "name": "Congressional Delegation to China",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "smith, delegation, china, beijing, adam smith, visit china, smith said, congressional delegation, house armed, services committee",
       "documents": []
     },
@@ -4177,7 +4177,7 @@
     },
     {
       "topic": 538,
-      "name": "Accusations Against George Soros",
+      "name": "Trump and Civil Rights",
       "keywords": "soros, george soros, open society, terrorism, society foundations, george, violent protests, foundations, society, racketeering",
       "documents": []
     },
@@ -4195,7 +4195,7 @@
     },
     {
       "topic": 541,
-      "name": "Auckland Bathroom Renovations",
+      "name": "Historical site renovations",
       "keywords": "bathroom, auckland, renovations, renovation, architecture, design, renovating, hello, bathrooms, fixtures",
       "documents": []
     },
@@ -4207,7 +4207,7 @@
     },
     {
       "topic": 543,
-      "name": "California Law Enforcement and Mandates",
+      "name": "ICE and Immigration Officer Presence",
       "keywords": "masks, agents, california, enforcement, ban, immigration, federal agents, law enforcement, newsom, officers",
       "documents": []
     },
@@ -4237,7 +4237,7 @@
     },
     {
       "topic": 548,
-      "name": "Apple Watch Health and Fitness Features",
+      "name": "Technology and Fitness",
       "keywords": "fitness, apple watch, watch, apple, smartwatch, heart rate, sleep, trackers, features, battery life",
       "documents": []
     },
