@@ -33,7 +33,7 @@
       },
       {
         "topic_id": 449,
-        "label": "College Admissions for Hispanic Students"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 502,
@@ -59,7 +59,7 @@
       },
       {
         "topic_id": 529,
-        "label": "Antisemitism at UC Berkeley"
+        "label": "Antisemitism, Racism, and Free Speech in Universities"
       }
     ]
   },
@@ -73,7 +73,7 @@
       },
       {
         "topic_id": 43,
-        "label": "COVID-19 Vaccine Recommendations"
+        "label": "Immunization and Public Health Concerns"
       },
       {
         "topic_id": 50,
@@ -81,7 +81,7 @@
       },
       {
         "topic_id": 70,
-        "label": "CDC Leadership and Personnel"
+        "label": "CDC Involvement in Higher Education"
       },
       {
         "topic_id": 95,
@@ -97,7 +97,7 @@
       },
       {
         "topic_id": 126,
-        "label": "AI in Health Tech"
+        "label": "AI and Wellness"
       },
       {
         "topic_id": 136,
@@ -117,7 +117,7 @@
       },
       {
         "topic_id": 253,
-        "label": "COVID-19 Vaccine Advisory Panels"
+        "label": "Immunization and Public Health Concerns"
       },
       {
         "topic_id": 254,
@@ -158,10 +158,6 @@
       {
         "topic_id": 535,
         "label": "Debate on COVID-19 Vaccines"
-      },
-      {
-        "topic_id": 591,
-        "label": "Global HIV Prevention"
       }
     ]
   },
@@ -247,7 +243,7 @@
       },
       {
         "topic_id": 69,
-        "label": "Autism and Acetaminophen Use During Pregnancy"
+        "label": "Medical Misinformation"
       },
       {
         "topic_id": 142,
@@ -259,11 +255,11 @@
       },
       {
         "topic_id": 317,
-        "label": "Autism Diagnosis and Spectrum"
+        "label": "Medical Studies Findings"
       },
       {
         "topic_id": 408,
-        "label": "Breast Cancer and Survivorship"
+        "label": "Cancer and Surgery developments"
       },
       {
         "topic_id": 417,
@@ -297,15 +293,15 @@
       },
       {
         "topic_id": 68,
-        "label": "AI Chatbots and Teen Mental Health"
+        "label": "AI and Wellness"
       },
       {
         "topic_id": 124,
-        "label": "AI and Job Skills"
+        "label": "AI Skills in the Job Market"
       },
       {
         "topic_id": 168,
-        "label": "AI and Energy Sector Investing"
+        "label": "AI and Energy and Climate"
       },
       {
         "topic_id": 210,
@@ -321,11 +317,11 @@
       },
       {
         "topic_id": 475,
-        "label": "AI and Cheating in Education"
+        "label": "Use of AI in Higher Education"
       },
       {
         "topic_id": 548,
-        "label": "Apple Watch Health and Fitness Features"
+        "label": "Technology and Fitness"
       },
       {
         "topic_id": 556,
@@ -391,7 +387,7 @@
       },
       {
         "topic_id": 309,
-        "label": "Clairton Coke Plant Explosion"
+        "label": "Infrastructure Collapse"
       },
       {
         "topic_id": 316,
@@ -433,7 +429,7 @@
       },
       {
         "topic_id": 21,
-        "label": "Council Planning and Housing"
+        "label": "Student Housing"
       },
       {
         "topic_id": 167,
@@ -705,7 +701,7 @@
       },
       {
         "topic_id": 118,
-        "label": "Astronomy and Space Telescopes"
+        "label": "Astronomy Discoveries"
       },
       {
         "topic_id": 188,
@@ -747,7 +743,7 @@
       },
       {
         "topic_id": 541,
-        "label": "Auckland Bathroom Renovations"
+        "label": "Historical site renovations"
       },
       {
         "topic_id": 559,
@@ -793,7 +789,7 @@
       },
       {
         "topic_id": 138,
-        "label": "Climate and Emissions Targets"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 146,
@@ -829,7 +825,7 @@
       },
       {
         "topic_id": 256,
-        "label": "Climate Change and Emissions"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 261,
@@ -885,7 +881,7 @@
       },
       {
         "topic_id": 498,
-        "label": "China's Climate Pledges"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 500,
@@ -897,7 +893,11 @@
       },
       {
         "topic_id": 536,
-        "label": "Congressional Delegation to China"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
+      },
+      {
+        "topic_id": 591,
+        "label": "Trump Threatens 35% Tariffs on Canadian Goods"
       }
     ]
   },
@@ -1027,7 +1027,7 @@
       },
       {
         "topic_id": 214,
-        "label": "Bloomberg Markets News"
+        "label": "Wall Street Relevant Updates"
       },
       {
         "topic_id": 259,
@@ -1035,7 +1035,7 @@
       },
       {
         "topic_id": 328,
-        "label": "Data Center Resource Consumption"
+        "label": "AI and Energy and Climate"
       },
       {
         "topic_id": 338,
@@ -1115,7 +1115,7 @@
       },
       {
         "topic_id": 369,
-        "label": "Airport Cyberattacks"
+        "label": "Cloud Services Outages"
       },
       {
         "topic_id": 396,
@@ -1177,7 +1177,7 @@
       },
       {
         "topic_id": 543,
-        "label": "California Law Enforcement and Mandates"
+        "label": "ICE and Immigration Officer Presence"
       },
       {
         "topic_id": 547,
@@ -1277,7 +1277,7 @@
       },
       {
         "topic_id": 202,
-        "label": "California Governor Gavin Newsom"
+        "label": "Politics in California Universities"
       },
       {
         "topic_id": 217,
@@ -1395,7 +1395,7 @@
       },
       {
         "topic_id": 418,
-        "label": "Booing at Tennis Matches"
+        "label": "Sport rallies"
       },
       {
         "topic_id": 467,
@@ -1713,7 +1713,7 @@
       },
       {
         "topic_id": 399,
-        "label": "Charlie Kirk Assassination Attempt"
+        "label": "Charlie Kirk and Political Violence"
       },
       {
         "topic_id": 27,
@@ -1769,7 +1769,7 @@
       },
       {
         "topic_id": 290,
-        "label": "Atlanta CDC Campus Shooting"
+        "label": "Non-School shootings"
       },
       {
         "topic_id": 308,
@@ -1789,7 +1789,7 @@
       },
       {
         "topic_id": 392,
-        "label": "Death Penalty in Florida"
+        "label": "Death Penalty News"
       },
       {
         "topic_id": 400,
@@ -1863,7 +1863,7 @@
       },
       {
         "topic_id": 348,
-        "label": "Belarusian Political Prisoners"
+        "label": "Students and Faculty as Political Prisoners"
       },
       {
         "topic_id": 398,
@@ -1993,7 +1993,7 @@
       },
       {
         "topic_id": 514,
-        "label": "Al Jazeera Journalists in Gaza"
+        "label": "Israel-Palestine Conflict Journalism Presence"
       }
     ]
   },
@@ -2223,7 +2223,7 @@
       },
       {
         "topic_id": 362,
-        "label": "Auto and Horse Racing"
+        "label": "Racing News"
       },
       {
         "topic_id": 367,
@@ -2369,7 +2369,7 @@
       },
       {
         "topic_id": 476,
-        "label": "Christian Religious Liberty"
+        "label": "Religious Freedom in Higher Education"
       }
     ]
   },
