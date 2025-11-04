@@ -2426,5 +2426,15 @@
         "label": "United Nations and Global Crises"
       }
     ]
+  },
+  {
+    "main_topic_id": 104,
+    "main_label": "Louisiana State Policy and Projects",
+    "subtopics": [
+      {
+        "topic_id": 599,
+        "label": "Louisiana State Policy and Projects"
+      }
+    ]
   }
 ]
