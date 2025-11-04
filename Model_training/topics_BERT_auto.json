@@ -420,10 +420,6 @@
       {
         "topic_id": 566,
         "label": "Glacial Flooding in Alaska"
-      },
-      {
-        "topic_id": 601,
-        "label": "Dust Storms and Extreme Weather Events"
       }
     ]
   },
@@ -466,10 +462,6 @@
       {
         "topic_id": 598,
         "label": "Local Government and Transport"
-      },
-      {
-        "topic_id": 600,
-        "label": "Trump's Lawsuit and Settlement with YouTube"
       }
     ]
   },
@@ -1548,6 +1540,10 @@
       {
         "topic_id": 592,
         "label": "Sri Lanka's Economic and Fiscal Policy"
+      },
+      {
+        "topic_id": 600,
+        "label": "US-China Space Race"
       }
     ]
   },
