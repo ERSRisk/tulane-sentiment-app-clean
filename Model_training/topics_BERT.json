@@ -44,13 +44,13 @@
     },
     {
       "topic": 2,
-      "name": "Charlie Kirk and Political Violence",
+      "name": "Political Violence",
       "keywords": "kirk, charlie, kirks, charlie kirk, utah, violence, assassination, turning point, robinson, political",
       "documents": []
     },
     {
       "topic": 3,
-      "name": "Washington D.C. Crime and Policing",
+      "name": "Police Takeover of Cities",
       "keywords": "dc, crime, national guard, guard, washington, police, bowser, takeover, police department, troops",
       "documents": []
     },
@@ -86,7 +86,7 @@
     },
     {
       "topic": 9,
-      "name": "Putin and International Summits",
+      "name": "University Campus Shootings and Violence",
       "keywords": "putin, alaska, summit, ukraine, meeting, russian, russia, vladimir, vladimir putin, trump putin",
       "documents": []
     },
@@ -170,7 +170,7 @@
     },
     {
       "topic": 23,
-      "name": "South Korean Labor Raid",
+      "name": "ICE and Immigration Officer Presence",
       "keywords": "korean, raid, south korean, south, hyundai, south korea, korea, workers, georgia, detained",
       "documents": []
     },
@@ -188,13 +188,13 @@
     },
     {
       "topic": 26,
-      "name": "H-1B Visa Fees",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "h1b, visa, fee, h1b visa, visas, h1b visas, workers, 100000, visa fee, 100000 fee",
       "documents": []
     },
     {
       "topic": 27,
-      "name": "Police Shootings",
+      "name": "Non-School Shootings",
       "keywords": "shooting, police, officers, suspect, man, scene, shot, county, york county, victim",
       "documents": []
     },
@@ -218,7 +218,7 @@
     },
     {
       "topic": 31,
-      "name": "Ukraine War and Security Guarantees",
+      "name": "Russian Attacks on Ukraine",
       "keywords": "ukraine, russia, putin, zelenskyy, russian, security guarantees, guarantees, ukrainian, european, peace",
       "documents": []
     },
@@ -242,7 +242,7 @@
     },
     {
       "topic": 35,
-      "name": "Jobs and Unemployment",
+      "name": "Job Insecurity",
       "keywords": "jobs, unemployment, labor, job, labor market, unemployment rate, jobs report, jobless, revisions, hiring",
       "documents": []
     },
@@ -260,7 +260,7 @@
     },
     {
       "topic": 38,
-      "name": "Texas Redistricting",
+      "name": "Texas Higher Education News",
       "keywords": "texas, redistricting, map, maps, democrats, congressional, abbott, seats, republicans, special session",
       "documents": []
     },
@@ -284,7 +284,7 @@
     },
     {
       "topic": 42,
-      "name": "Harvard University and Antisemitism",
+      "name": "Legal Action taken Against Antisemitism and DEI and its Effects",
       "keywords": "harvard, antisemitism, harvards, harvard university, burroughs, university, funding, trump administration, administration, grants",
       "documents": []
     },
@@ -302,7 +302,7 @@
     },
     {
       "topic": 45,
-      "name": "Recognition of Palestinian Statehood",
+      "name": "Israel-Hamas Conflict",
       "keywords": "palestinian, palestinian state, recognition, palestine, israel, statehood, netanyahu, recognise, gaza, hamas",
       "documents": []
     },
@@ -437,7 +437,7 @@
     },
     {
       "topic": 53,
-      "name": "Hurricanes and Tropical Storms",
+      "name": "Natural Disasters",
       "keywords": "hurricane, tropical, storm, erin, atlantic, tropical storm, winds, storms, mph, kph",
       "documents": []
     },
@@ -461,13 +461,13 @@
     },
     {
       "topic": 57,
-      "name": "Pete Hegseth and Military Leadership",
+      "name": "Higher Education Leadership",
       "keywords": "hegseth, military, pete, defense secretary, generals, pete hegseth, hegseths, secretary pete, pentagon, defense",
       "documents": []
     },
     {
       "topic": 58,
-      "name": "Gender-Affirming Care for Minors",
+      "name": "Transgender Issues in Higher Education",
       "keywords": "transgender, gender, genderaffirming, genderaffirming care, trans, care, texas, minors, gender identity, sex",
       "documents": []
     },
@@ -715,7 +715,7 @@
     },
     {
       "topic": 77,
-      "name": "Israeli Military Offensive in Gaza",
+      "name": "Israel-Hamas Conflict",
       "keywords": "gaza city, gaza, israeli, city, israel, palestinians, hamas, offensive, israeli military, hostages",
       "documents": []
     },
@@ -727,7 +727,7 @@
     },
     {
       "topic": 79,
-      "name": "Deportation of Kilmar Abrego Garcia",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "abrego, abrego garcia, garcia, kilmar, el salvador, kilmar abrego, salvador, uganda, garcias, deported",
       "documents": []
     },
@@ -739,7 +739,7 @@
     },
     {
       "topic": 81,
-      "name": "Earthquakes and Tsunamis",
+      "name": "Natural Disasters",
       "keywords": "earthquake, magnitude, tsunami, quake, earthquakes, bogo, cebu, eruption, struck, damage",
       "documents": []
     },
@@ -875,13 +875,13 @@
     },
     {
       "topic": 86,
-      "name": "ICE Immigration Arrests",
+      "name": "ICE and Immigration Officer Presence",
       "keywords": "ice, immigration, agents, enforcement, home depot, arrests, arrested, depot, officers, dhs",
       "documents": []
     },
     {
       "topic": 87,
-      "name": "Traffic Accidents",
+      "name": "Transportation Incidents",
       "keywords": "crash, driver, scene, vehicle, highway, road, truck, injuries, eastbound, pedestrian",
       "documents": []
     },
@@ -1073,13 +1073,13 @@
     },
     {
       "topic": 119,
-      "name": "Water Management and Drought",
+      "name": "Climate Crisis",
       "keywords": "water, river, dams, rivers, drought, rainwater, colorado, dam, reservoirs, irrigation",
       "documents": []
     },
     {
       "topic": 120,
-      "name": "New Mexico Medicaid and SNAP Policies",
+      "name": "Changes in healthcare",
       "keywords": "medicaid, new mexico, care, snap, health, health care, work requirements, cuts, immigrants, legal status",
       "documents": []
     },
@@ -1203,13 +1203,13 @@
     },
     {
       "topic": 128,
-      "name": "Global Plastic Pollution Treaty",
+      "name": "Climate Crisis",
       "keywords": "plastic, plastics, treaty, chemicals, plastic pollution, pollution, recycling, geneva, pfas, waste",
       "documents": []
     },
     {
       "topic": 129,
-      "name": "Renewable and Clean Energy",
+      "name": "Climate Crisis",
       "keywords": "energy, coal, solar, wind solar, wind, environmental, renewable, clean energy, shall, renewable energy",
       "documents": []
     },
@@ -1221,7 +1221,7 @@
     },
     {
       "topic": 131,
-      "name": "Google Antitrust Lawsuit",
+      "name": "AI Implementation in Higher Education",
       "keywords": "google, googles, search, monopoly, antitrust, otter, chrome, search engine, advertising, mehta",
       "documents": []
     },
@@ -1233,7 +1233,7 @@
     },
     {
       "topic": 133,
-      "name": "Florida Detention Centers",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "everglades, alligator alcatraz, alcatraz, alligator, detainees, detention, facility, florida, detention center, environmental",
       "documents": []
     },
@@ -1422,7 +1422,7 @@
     },
     {
       "topic": 151,
-      "name": "The Supreme Court",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "supreme, court, supreme court, judges, barrett, courts, rulings, justices, cullen, judge",
       "documents": []
     },
@@ -1488,7 +1488,7 @@
     },
     {
       "topic": 162,
-      "name": "Famine and Starvation in Gaza",
+      "name": "Israel-Hamas Conflict",
       "keywords": "famine, gaza, ipc, starvation, malnutrition, aid, humanitarian, children, gaza city, food",
       "documents": []
     },
@@ -1512,7 +1512,7 @@
     },
     {
       "topic": 166,
-      "name": "Parasitic Infections and Diseases",
+      "name": "Disease Outbreaks",
       "keywords": "scholar, doipubmedgoogle scholar, doipubmedgoogle, parasite, infection, disease, et al, humans, larvae, dis",
       "documents": []
     },
@@ -1536,13 +1536,13 @@
     },
     {
       "topic": 170,
-      "name": "Federal Reserve Interest Rate Policy",
+      "name": "Federal Reserve Policy",
       "keywords": "fed, powell, rates, rate, inflation, feds, federal reserve, cut, reserve, rate cut",
       "documents": []
     },
     {
       "topic": 171,
-      "name": "The Smithsonian Institution",
+      "name": "Historical Misinformation",
       "keywords": "smithsonian, museum, museums, history, institution, smithsonian institution, slavery, american history, national museum, smithsonians",
       "documents": []
     },
@@ -1572,7 +1572,7 @@
     },
     {
       "topic": 176,
-      "name": "Phishing and Data Scams",
+      "name": "Data Security",
       "keywords": "scammers, scam, phishing, scams, breach, personal information, passwords, data, emails, personal",
       "documents": []
     },
@@ -1590,13 +1590,13 @@
     },
     {
       "topic": 179,
-      "name": "Media Defamation Lawsuits",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "newsmax, lawsuit, defamation, york times, dominion, lawsuit new, fox, defamation lawsuit, election, libel",
       "documents": []
     },
     {
       "topic": 180,
-      "name": "Withholding Foreign Aid",
+      "name": "Scientific Research Funding",
       "keywords": "foreign aid, aid, foreign, withhold, rescission, freeze, court, congress, spend, appropriated",
       "documents": []
     },
@@ -1614,19 +1614,19 @@
     },
     {
       "topic": 183,
-      "name": "US Policy on the Israel-Gaza Conflict",
+      "name": "Higher Education Leadership",
       "keywords": "rubio, israel, gaza, qatar, israeli, hamas, netanyahu, israels, state department, visas",
       "documents": []
     },
     {
       "topic": 184,
-      "name": "Student Academic Performance and Test Scores",
+      "name": "Student Success",
       "keywords": "school, students, reading, math, scores, spp, schools, grade, maths, high school",
       "documents": []
     },
     {
       "topic": 185,
-      "name": "Higher Education Enrollment and Admissions",
+      "name": "Decline of Higher Education Enrollment and Admissions",
       "keywords": "higher education, enrollment, undergraduate enrollment, education, institutions, athletic, higher, shutterstock, undergraduate, acceptance",
       "documents": []
     },
@@ -1638,7 +1638,7 @@
     },
     {
       "topic": 187,
-      "name": "mRNA Vaccine Technology",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "mrna, vaccines, vaccine, mrna vaccines, mrna technology, mrna vaccine, bhattacharya, kennedy, flu, covid",
       "documents": []
     },
@@ -1656,7 +1656,7 @@
     },
     {
       "topic": 190,
-      "name": "Deportation of African Migrants",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "deportees, ghana, deported, eswatini, african, west african, uganda, countries, migrants, africans",
       "documents": []
     },
@@ -1668,7 +1668,7 @@
     },
     {
       "topic": 192,
-      "name": "Extreme Heat and Heatwaves",
+      "name": "Climate Crisis",
       "keywords": "heat, temperatures, extreme heat, extreme, climate, summer, heatrelated, temperature, heatwaves, deaths",
       "documents": []
     },
@@ -1716,13 +1716,13 @@
     },
     {
       "topic": 200,
-      "name": "Temporary Protected Status for Venezuelans",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "tps, venezuelans, protections, protected status, temporary protected, temporary, status, protected, migrants, court",
       "documents": []
     },
     {
       "topic": 201,
-      "name": "Federal Agency Leadership and Quorums",
+      "name": "Higher Education Leadership",
       "keywords": "ftc, fec, irs, commissioner, slaughter, quorum, supreme, federal trade, commissioners, supreme court",
       "documents": []
     },
@@ -1752,7 +1752,7 @@
     },
     {
       "topic": 206,
-      "name": "Florida Vaccine Mandates",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "ladapo, mandates, vaccine mandates, vaccine, florida, vaccines, surgeon general, floridas, surgeon, desantis",
       "documents": []
     },
@@ -1764,7 +1764,7 @@
     },
     {
       "topic": 208,
-      "name": "Oracle Stock Surge",
+      "name": "Political Violence",
       "keywords": "story appeared, stock surge, oracles, 20250911, caused, stock, appeared, tariffs impact, surge, oracles stock",
       "documents": []
     },
@@ -1782,13 +1782,13 @@
     },
     {
       "topic": 211,
-      "name": "Postal Shipping Exemptions",
+      "name": "Decline of Higher Education Enrollment and Admissions",
       "keywords": "postal, exemption, minimis, shipments, packages, postal service, postal services, parcels, duties, minimis exemption",
       "documents": []
     },
     {
       "topic": 212,
-      "name": "University Campus Threats",
+      "name": "University Campus Schootings and Violence",
       "keywords": "lockdown, threats, naval academy, swatting, campus, active shooter, naval, academy, villanova, university",
       "documents": []
     },
@@ -1806,7 +1806,7 @@
     },
     {
       "topic": 215,
-      "name": "Sovereign Credit Ratings",
+      "name": "Decline of Higher Education Enrollment and Admissions",
       "keywords": "moodys, fitch, polands, downgrade, melonis, rating, ratings, italy, meloni, outlook",
       "documents": []
     },
@@ -1830,7 +1830,7 @@
     },
     {
       "topic": 219,
-      "name": "Immigration Detention in Louisiana",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "detention, angola, facility, detainees, ice, louisiana, prison, immigration, landry, camp",
       "documents": []
     },
@@ -1872,7 +1872,7 @@
     },
     {
       "topic": 226,
-      "name": "US Immigration and Visas",
+      "name": "International Student Enrollment",
       "keywords": "immigrants, immigration, uscis, visas, visa, citizenship, vetting, visa holders, 55 million, holders",
       "documents": []
     },
@@ -1914,7 +1914,7 @@
     },
     {
       "topic": 233,
-      "name": "Higher Education and University Compacts",
+      "name": "Legal Action taken Against Antisemitism and DEI and its Effects",
       "keywords": "compact, universities, admissions, higher education, education, university, colleges, higher, campuses, faculty",
       "documents": []
     },
@@ -1926,7 +1926,7 @@
     },
     {
       "topic": 235,
-      "name": "Palestine Action Protests and Proscription",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "palestine action, palestine, protest, action, kneecap, proscription, support palestine, terrorism, proscribed, arrested",
       "documents": []
     },
@@ -1968,7 +1968,7 @@
     },
     {
       "topic": 242,
-      "name": "Minneapolis Catholic School Shooting",
+      "name": "University Campus Shootings and Violence",
       "keywords": "minneapolis, catholic school, annunciation, catholic, school, shooting, church, westman, shooter, ohara",
       "documents": []
     },
@@ -2046,7 +2046,7 @@
     },
     {
       "topic": 255,
-      "name": "Trade Tariffs",
+      "name": "Trump's Tariffs",
       "keywords": "sectors, tariff rate, tariff, goods, effective, targeted, average, rate, details, furniture",
       "documents": []
     },
@@ -2082,13 +2082,13 @@
     },
     {
       "topic": 261,
-      "name": "India's Trade and Tariffs",
+      "name": "Trump's Tariffs",
       "keywords": "india, indias, tariffs, trade, tariff, indian, modi, 50, russian oil, goods",
       "documents": []
     },
     {
       "topic": 262,
-      "name": "Mosquito-Borne Diseases",
+      "name": "Disease Outbreaks",
       "keywords": "chikungunya, cases, dengue, virus, mosquito, cas, mosquitoes, fever, west nile, chikungunya virus",
       "documents": []
     },
@@ -2124,7 +2124,7 @@
     },
     {
       "topic": 268,
-      "name": "Designating Antifa as a Terrorist Organization",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "antifa, terrorist organization, terrorist, organization, designating, major terrorist, designate, designate antifa, designating antifa, domestic",
       "documents": []
     },
@@ -2136,7 +2136,7 @@
     },
     {
       "topic": 270,
-      "name": "Measles",
+      "name": "Immunization and Public Health Concerns",
       "keywords": "que, la, en, el, measles, su, una, por, banda, del",
       "documents": []
     },
@@ -2340,7 +2340,7 @@
     },
     {
       "topic": 288,
-      "name": "Israel-Gaza Conflict and Genocide Allegations",
+      "name": "Israel-Hamas Conflict",
       "keywords": "genocide, israel, gaza, israels, israeli, palestinian, palestinians, genocidal, international, para",
       "documents": []
     },
@@ -2364,13 +2364,13 @@
     },
     {
       "topic": 292,
-      "name": "Gun Rights and Second Amendment",
+      "name": "Gun Violence",
       "keywords": "gun, guns, firearms, second amendment, firearm, gun rights, gun violence, amendment, violence, appeals",
       "documents": []
     },
     {
       "topic": 293,
-      "name": "Fat Bear Week",
+      "name": "Wildlife Incidents",
       "keywords": "bear, bears, cougar, fat bear, chunk, fat, bear week, burro, animal, wildlife",
       "documents": []
     },
@@ -2388,7 +2388,7 @@
     },
     {
       "topic": 296,
-      "name": "Immigration Raids and Legal Challenges",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "immigration, agents, supreme, los angeles, angeles, supreme court, raids, reasonable suspicion, court, los",
       "documents": []
     },
@@ -2496,7 +2496,7 @@
     },
     {
       "topic": 314,
-      "name": "US-China Trade Truce",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "truce, china, tariffs, trade, 90 days, tariff, tariff truce, 90, chinese, pause",
       "documents": []
     },
@@ -2629,7 +2629,7 @@
     },
     {
       "topic": 332,
-      "name": "Pentagon Media Restrictions",
+      "name": "Scientific Research Funding",
       "keywords": "pentagon, unclassified, restrictions, journalists, reporters, hegseth, media restrictions, credentialed, access, information",
       "documents": []
     },
@@ -2671,7 +2671,7 @@
     },
     {
       "topic": 339,
-      "name": "Melting Glaciers and Sea Ice",
+      "name": "Climate Crisis",
       "keywords": "glaciers, glacier, ice, sea ice, sea, antarctica, melting, co2, warming, arctic",
       "documents": []
     },
@@ -2689,7 +2689,7 @@
     },
     {
       "topic": 342,
-      "name": "Supreme Court Rulings on DEI and Grants",
+      "name": "Rulings on DEI and Grants",
       "keywords": "grants, court, supreme court, supreme, dei, nih, research grants, antidei, judges, cuts",
       "documents": []
     },
@@ -2791,13 +2791,13 @@
     },
     {
       "topic": 359,
-      "name": "Student Loan Forgiveness",
+      "name": "Financial Aid and Student Loan Forgiveness Obstacles",
       "keywords": "borrowers, student loan, loan, forgiveness, repayment, student, loans, debt, loan forgiveness, federal student",
       "documents": []
     },
     {
       "topic": 360,
-      "name": "Louisiana National Guard",
+      "name": "Louisiana's Universities News",
       "keywords": "landry, louisiana, national guard, guard, orleans, baton rouge, baton, new orleans, rouge, louisiana national",
       "documents": []
     },
@@ -2827,7 +2827,7 @@
     },
     {
       "topic": 365,
-      "name": "Uvalde School Shooting",
+      "name": "University Campus Shootings and Violence",
       "keywords": "uvalde, school, shooting, evergreen, school shooting, holly, high school, school district, kelley, records",
       "documents": []
     },
@@ -2953,7 +2953,7 @@
     },
     {
       "topic": 372,
-      "name": "Letitia James Legal Cases",
+      "name": "Leadership Resignations",
       "keywords": "siebert, james, attorney, letitia james, letitia, eastern district, district virginia, virginia, general letitia, fraud",
       "documents": []
     },
@@ -3192,7 +3192,7 @@
     },
     {
       "topic": 397,
-      "name": "US Public Broadcasting",
+      "name": "US General Free Speech Restrictions",
       "keywords": "cpb, npr, rank, public media, stations, friendliness, economic opportunities, public radio, pbs, public broadcasting",
       "documents": []
     },
@@ -3204,7 +3204,7 @@
     },
     {
       "topic": 399,
-      "name": "Charlie Kirk and Political Violence",
+      "name": "Political Violence",
       "keywords": "charlie, charlie kirk, kirk assassination, kirk shooting, kirk, assassination, shooting, 0244, utah gov, utah",
       "documents": []
     },
@@ -3246,7 +3246,7 @@
     },
     {
       "topic": 406,
-      "name": "Digital ID and Facial Recognition",
+      "name": "Digital and Cybersecurity",
       "keywords": "digital id, id, digital, cards, facial recognition, wallet, ids, morph, facial, id card",
       "documents": []
     },
@@ -3300,7 +3300,7 @@
     },
     {
       "topic": 415,
-      "name": "Social Security Data Security",
+      "name": "Data Security",
       "keywords": "doge, social security, borges, whistleblower, sensitive, ssa, complaint, data, security data, sensitive data",
       "documents": []
     },
@@ -3444,7 +3444,7 @@
     },
     {
       "topic": 420,
-      "name": "Tommy Robinson and UK Far-Right Activism",
+      "name": "Protests and Rallies",
       "keywords": "robinson, tommy robinson, farright, rally, tommy, unite kingdom, london, antiimmigration, yaxleylennon, stephen yaxleylennon",
       "documents": []
     },
@@ -3468,7 +3468,7 @@
     },
     {
       "topic": 424,
-      "name": "Israel-Palestine and Sudan Conflicts",
+      "name": "Israel-Hamas Conflict",
       "keywords": "israel, palestinians, gaza, south sudan, israels, israeli, sudan, palestinian, netanyahu, south sudanese",
       "documents": []
     },
@@ -3576,7 +3576,7 @@
     },
     {
       "topic": 442,
-      "name": "Texas Politics and Nicole Collier",
+      "name": "Antisemitism, Racism, and Free Speech in Universities",
       "keywords": "collier, texas, democrats, nicole collier, rep nicole, burrows, texas house, redistricting, nicole, rep",
       "documents": []
     },
@@ -3678,13 +3678,13 @@
     },
     {
       "topic": 459,
-      "name": "Des Moines, Iowa School District",
+      "name": "Job Insecurity",
       "keywords": "roberts, moines, des moines, superintendent, des, iowa, school district, norris, ice, ian",
       "documents": []
     },
     {
       "topic": 460,
-      "name": "Generations in the Workforce",
+      "name": "Job Insecurity",
       "keywords": "gen, generation, zers, gen zers, workforce, millennials, slang, boomers, sutter, wagon",
       "documents": []
     },
@@ -3816,7 +3816,7 @@
     },
     {
       "topic": 482,
-      "name": "Virginia Politics",
+      "name": "Higher Education Leadership",
       "keywords": "jones, virginia, spanberger, earlesears, gilbert, jay, miyares, winsome, abigail, texts",
       "documents": []
     },
@@ -3936,7 +3936,7 @@
     },
     {
       "topic": 502,
-      "name": "First-Generation Student Success",
+      "name": "Student Success",
       "keywords": "students, firstgeneration, firstgeneration students, percent, academic, student, student voice, success, college, percent students",
       "documents": []
     },
@@ -3984,7 +3984,7 @@
     },
     {
       "topic": 510,
-      "name": "Hurricane Katrina in New Orleans",
+      "name": "Natural disasters and financial risk in New Orleans",
       "keywords": "katrina, orleans, new orleans, salter, hurricane katrina, teacher, school, blanco, teachers, remember",
       "documents": []
     },
@@ -4183,7 +4183,7 @@
     },
     {
       "topic": 539,
-      "name": "Mike Waltz UN Ambassador Nomination",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "waltz, mike waltz, ambassador, united nations, ambassador united, senate, mike, security adviser, confirmation, general assembly",
       "documents": []
     },
@@ -4231,7 +4231,7 @@
     },
     {
       "topic": 547,
-      "name": "ICE Detention of a Journalist",
+      "name": "DEI and Immigration Effects on Student Enrollment and Retention",
       "keywords": "guevara, journalist, mario, immigration, deportation, ice, detention, ice custody, custody, el salvador",
       "documents": []
     },
@@ -4285,7 +4285,7 @@
     },
     {
       "topic": 556,
-      "name": "OpenAI and ChatGPT",
+      "name": "Use of AI in Higher Education",
       "keywords": [
         "o",
         "p",
