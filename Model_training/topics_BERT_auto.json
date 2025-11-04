@@ -9,15 +9,15 @@
       },
       {
         "topic_id": 184,
-        "label": "Student Academic Performance and Test Scores"
+        "label": "Student Success"
       },
       {
         "topic_id": 185,
-        "label": "Higher Education Enrollment and Admissions"
+        "label": "Decline of Higher Education Enrollment and Admissions"
       },
       {
         "topic_id": 233,
-        "label": "Higher Education and University Compacts"
+        "label": "Legal Action taken Against Antisemitism and DEI and its Effects"
       },
       {
         "topic_id": 310,
@@ -25,11 +25,11 @@
       },
       {
         "topic_id": 342,
-        "label": "Supreme Court Rulings on DEI and Grants"
+        "label": "Rulings on DEI and Grants"
       },
       {
         "topic_id": 359,
-        "label": "Student Loan Forgiveness"
+        "label": "Financial Aid and Student Loan Forgiveness Obstacles"
       },
       {
         "topic_id": 449,
@@ -37,7 +37,7 @@
       },
       {
         "topic_id": 502,
-        "label": "First-Generation Student Success"
+        "label": "Student Success"
       }
     ]
   },
@@ -51,11 +51,11 @@
       },
       {
         "topic_id": 42,
-        "label": "Harvard University and Antisemitism"
+        "label": "Legal Action taken Against Antisemitism and DEI and its Effects"
       },
       {
         "topic_id": 180,
-        "label": "Withholding Foreign Aid"
+        "label": "Scientific Research Funding"
       },
       {
         "topic_id": 529,
@@ -93,7 +93,7 @@
       },
       {
         "topic_id": 120,
-        "label": "New Mexico Medicaid and SNAP Policies"
+        "label": "Changes in healthcare"
       },
       {
         "topic_id": 126,
@@ -105,11 +105,11 @@
       },
       {
         "topic_id": 187,
-        "label": "mRNA Vaccine Technology"
+        "label": "Immunization and Public Health Concerns"
       },
       {
         "topic_id": 206,
-        "label": "Florida Vaccine Mandates"
+        "label": "Immunization and Public Health Concerns"
       },
       {
         "topic_id": 243,
@@ -167,7 +167,7 @@
     "subtopics": [
       {
         "topic_id": 58,
-        "label": "Gender-Affirming Care for Minors"
+        "label": "Transgender Issues in Higher Education"
       },
       {
         "topic_id": 106,
@@ -217,7 +217,7 @@
       },
       {
         "topic_id": 397,
-        "label": "US Public Broadcasting"
+        "label": "US General Free Speech Restrictions"
       },
       {
         "topic_id": 413,
@@ -325,7 +325,7 @@
       },
       {
         "topic_id": 556,
-        "label": "OpenAI and ChatGPT"
+        "label": "Use of AI in Higher Education"
       },
       {
         "topic_id": 585,
@@ -359,7 +359,7 @@
       },
       {
         "topic_id": 53,
-        "label": "Hurricanes and Tropical Storms"
+        "label": "Natural Disasters"
       },
       {
         "topic_id": 78,
@@ -367,7 +367,7 @@
       },
       {
         "topic_id": 81,
-        "label": "Earthquakes and Tsunamis"
+        "label": "Natural Disasters"
       },
       {
         "topic_id": 91,
@@ -379,11 +379,11 @@
       },
       {
         "topic_id": 119,
-        "label": "Water Management and Drought"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 192,
-        "label": "Extreme Heat and Heatwaves"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 220,
@@ -415,7 +415,7 @@
       },
       {
         "topic_id": 510,
-        "label": "Hurricane Katrina in New Orleans"
+        "label": "Natural disasters and financial risk in New Orleans"
       },
       {
         "topic_id": 566,
@@ -639,7 +639,7 @@
       },
       {
         "topic_id": 460,
-        "label": "Generations in the Workforce"
+        "label": "Job Insecurity"
       },
       {
         "topic_id": 101,
@@ -765,7 +765,7 @@
       },
       {
         "topic_id": 26,
-        "label": "H-1B Visa Fees"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 49,
@@ -781,11 +781,11 @@
       },
       {
         "topic_id": 128,
-        "label": "Global Plastic Pollution Treaty"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 129,
-        "label": "Renewable and Clean Energy"
+        "label": "Climate Crisis"
       },
       {
         "topic_id": 135,
@@ -809,7 +809,7 @@
       },
       {
         "topic_id": 211,
-        "label": "Postal Shipping Exemptions"
+        "label": "Decline of Higher Education Enrollment and Admissions"
       },
       {
         "topic_id": 222,
@@ -825,7 +825,7 @@
       },
       {
         "topic_id": 255,
-        "label": "Trade Tariffs"
+        "label": "Trump's Tariffs"
       },
       {
         "topic_id": 256,
@@ -833,7 +833,7 @@
       },
       {
         "topic_id": 261,
-        "label": "India's Trade and Tariffs"
+        "label": "Trump's Tariffs"
       },
       {
         "topic_id": 266,
@@ -857,7 +857,7 @@
       },
       {
         "topic_id": 314,
-        "label": "US-China Trade Truce"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 326,
@@ -1007,7 +1007,7 @@
       },
       {
         "topic_id": 131,
-        "label": "Google Antitrust Lawsuit"
+        "label": "AI Implementation in Higher Education"
       },
       {
         "topic_id": 148,
@@ -1027,7 +1027,7 @@
       },
       {
         "topic_id": 208,
-        "label": "Oracle Stock Surge"
+        "label": "Political Violence"
       },
       {
         "topic_id": 214,
@@ -1111,7 +1111,7 @@
       },
       {
         "topic_id": 176,
-        "label": "Phishing and Data Scams"
+        "label": "Data Security"
       },
       {
         "topic_id": 194,
@@ -1127,7 +1127,7 @@
       },
       {
         "topic_id": 406,
-        "label": "Digital ID and Facial Recognition"
+        "label": "Digital and Cybersecurity"
       },
       {
         "topic_id": 483,
@@ -1145,23 +1145,23 @@
     "subtopics": [
       {
         "topic_id": 86,
-        "label": "ICE Immigration Arrests"
+        "label": "ICE and Immigration Officer Presence"
       },
       {
         "topic_id": 190,
-        "label": "Deportation of African Migrants"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 200,
-        "label": "Temporary Protected Status for Venezuelans"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 219,
-        "label": "Immigration Detention in Louisiana"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 226,
-        "label": "US Immigration and Visas"
+        "label": "International Student Enrollment"
       },
       {
         "topic_id": 252,
@@ -1169,7 +1169,7 @@
       },
       {
         "topic_id": 296,
-        "label": "Immigration Raids and Legal Challenges"
+        "label": "Antisemitism, Racism, and Free Speech in Universities"
       },
       {
         "topic_id": 464,
@@ -1185,7 +1185,7 @@
       },
       {
         "topic_id": 547,
-        "label": "ICE Detention of a Journalist"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       },
       {
         "topic_id": 549,
@@ -1193,7 +1193,7 @@
       },
       {
         "topic_id": 79,
-        "label": "Deportation of Kilmar Abrego Garcia"
+        "label": "DEI and Immigration Effects on Student Enrollment and Retention"
       }
     ]
   },
@@ -1203,7 +1203,7 @@
     "subtopics": [
       {
         "topic_id": 3,
-        "label": "Washington D.C. Crime and Policing"
+        "label": "Police Takeover of Cities"
       },
       {
         "topic_id": 75,
@@ -1215,7 +1215,7 @@
       },
       {
         "topic_id": 360,
-        "label": "Louisiana National Guard"
+        "label": "Louisiana's Universities News"
       },
       {
         "topic_id": 454,
@@ -1241,11 +1241,11 @@
       },
       {
         "topic_id": 35,
-        "label": "Jobs and Unemployment"
+        "label": "Job Insecurity"
       },
       {
         "topic_id": 38,
-        "label": "Texas Redistricting"
+        "label": "Texas Higher Education News"
       },
       {
         "topic_id": 80,
@@ -1265,7 +1265,7 @@
       },
       {
         "topic_id": 151,
-        "label": "The Supreme Court"
+        "label": "Antisemitism, Racism, and Free Speech in Universities"
       },
       {
         "topic_id": 154,
@@ -1321,11 +1321,11 @@
       },
       {
         "topic_id": 442,
-        "label": "Texas Politics and Nicole Collier"
+        "label": "Antisemitism, Racism, and Free Speech in Universities"
       },
       {
         "topic_id": 459,
-        "label": "Des Moines, Iowa School District"
+        "label": "Job Insecurity"
       },
       {
         "topic_id": 463,
@@ -1333,7 +1333,7 @@
       },
       {
         "topic_id": 482,
-        "label": "Virginia Politics"
+        "label": "Higher Education Leadership"
       },
       {
         "topic_id": 512,
@@ -1354,6 +1354,10 @@
       {
         "topic_id": 589,
         "label": "Biden Autopen Pardons Investigation"
+      },
+      {
+        "topic_id": 596,
+        "label": "Trump's Handling of the Economy"
       }
     ]
   },
@@ -1375,7 +1379,7 @@
       },
       {
         "topic_id": 171,
-        "label": "The Smithsonian Institution"
+        "label": "Historical Misinformation"
       },
       {
         "topic_id": 175,
@@ -1483,7 +1487,7 @@
       },
       {
         "topic_id": 23,
-        "label": "South Korean Labor Raid"
+        "label": "ICE and Immigration Officer Presence"
       },
       {
         "topic_id": 76,
@@ -1549,7 +1553,7 @@
       },
       {
         "topic_id": 170,
-        "label": "Federal Reserve Interest Rate Policy"
+        "label": "Federal Reserve Policy"
       },
       {
         "topic_id": 193,
@@ -1561,7 +1565,7 @@
       },
       {
         "topic_id": 215,
-        "label": "Sovereign Credit Ratings"
+        "label": "Decline of Higher Education Enrollment and Admissions"
       },
       {
         "topic_id": 224,
@@ -1631,15 +1635,15 @@
     "subtopics": [
       {
         "topic_id": 166,
-        "label": "Parasitic Infections and Diseases"
+        "label": "Disease Outbreaks"
       },
       {
         "topic_id": 262,
-        "label": "Mosquito-Borne Diseases"
+        "label": "Disease Outbreaks"
       },
       {
         "topic_id": 270,
-        "label": "Measles"
+        "label": "Immunization and Public Health Concerns"
       },
       {
         "topic_id": 291,
@@ -1691,7 +1695,7 @@
       },
       {
         "topic_id": 293,
-        "label": "Fat Bear Week"
+        "label": "Wildlife Incidents"
       },
       {
         "topic_id": 390,
@@ -1717,15 +1721,15 @@
     "subtopics": [
       {
         "topic_id": 2,
-        "label": "Charlie Kirk and Political Violence"
+        "label": "Political Violence"
       },
       {
         "topic_id": 399,
-        "label": "Charlie Kirk and Political Violence"
+        "label": "Political Violence"
       },
       {
         "topic_id": 27,
-        "label": "Police Shootings"
+        "label": "Non-School Shootings"
       },
       {
         "topic_id": 72,
@@ -1733,7 +1737,7 @@
       },
       {
         "topic_id": 87,
-        "label": "Traffic Accidents"
+        "label": "Transportation Incidents"
       },
       {
         "topic_id": 97,
@@ -1753,7 +1757,7 @@
       },
       {
         "topic_id": 212,
-        "label": "University Campus Threats"
+        "label": "University Campus Schootings and Violence"
       },
       {
         "topic_id": 228,
@@ -1761,7 +1765,7 @@
       },
       {
         "topic_id": 242,
-        "label": "Minneapolis Catholic School Shooting"
+        "label": "University Campus Shootings and Violence"
       },
       {
         "topic_id": 247,
@@ -1793,7 +1797,7 @@
       },
       {
         "topic_id": 365,
-        "label": "Uvalde School Shooting"
+        "label": "University Campus Shootings and Violence"
       },
       {
         "topic_id": 392,
@@ -1827,7 +1831,7 @@
     "subtopics": [
       {
         "topic_id": 9,
-        "label": "Putin and International Summits"
+        "label": "University Campus Shootings and Violence"
       },
       {
         "topic_id": 14,
@@ -1835,7 +1839,7 @@
       },
       {
         "topic_id": 31,
-        "label": "Ukraine War and Security Guarantees"
+        "label": "Russian Attacks on Ukraine"
       },
       {
         "topic_id": 60,
@@ -1909,7 +1913,7 @@
       },
       {
         "topic_id": 45,
-        "label": "Recognition of Palestinian Statehood"
+        "label": "Israel-Hamas Conflict"
       },
       {
         "topic_id": 74,
@@ -1917,7 +1921,7 @@
       },
       {
         "topic_id": 77,
-        "label": "Israeli Military Offensive in Gaza"
+        "label": "Israel-Hamas Conflict"
       },
       {
         "topic_id": 121,
@@ -1933,11 +1937,11 @@
       },
       {
         "topic_id": 162,
-        "label": "Famine and Starvation in Gaza"
+        "label": "Israel-Hamas Conflict"
       },
       {
         "topic_id": 183,
-        "label": "US Policy on the Israel-Gaza Conflict"
+        "label": "Higher Education Leadership"
       },
       {
         "topic_id": 232,
@@ -1945,11 +1949,11 @@
       },
       {
         "topic_id": 235,
-        "label": "Palestine Action Protests and Proscription"
+        "label": "Antisemitism, Racism, and Free Speech in Universities"
       },
       {
         "topic_id": 288,
-        "label": "Israel-Gaza Conflict and Genocide Allegations"
+        "label": "Israel-Hamas Conflict"
       },
       {
         "topic_id": 298,
@@ -1969,11 +1973,11 @@
       },
       {
         "topic_id": 420,
-        "label": "Tommy Robinson and UK Far-Right Activism"
+        "label": "Protests and Rallies"
       },
       {
         "topic_id": 424,
-        "label": "Israel-Palestine and Sudan Conflicts"
+        "label": "Israel-Hamas Conflict"
       },
       {
         "topic_id": 439,
@@ -2161,7 +2165,7 @@
       },
       {
         "topic_id": 339,
-        "label": "Melting Glaciers and Sea Ice"
+        "label": "Climate Crisis"
       }
     ]
   },
