@@ -466,10 +466,6 @@
       {
         "topic_id": 598,
         "label": "Local Government and Transport"
-      },
-      {
-        "topic_id": 603,
-        "label": "Grand Jury Indictments and Prosecutions"
       }
     ]
   },
@@ -1916,6 +1912,10 @@
       {
         "topic_id": 558,
         "label": "Nord Stream Pipeline Explosions"
+      },
+      {
+        "topic_id": 604,
+        "label": "Starmer and Trump Discuss Gaza and Ukraine"
       }
     ]
   },
