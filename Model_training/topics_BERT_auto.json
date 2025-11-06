@@ -1568,6 +1568,10 @@
       {
         "topic_id": 600,
         "label": "US-China Space Race"
+      },
+      {
+        "topic_id": 611,
+        "label": "Hong Kong-Mainland China Border Reopening"
       }
     ]
   },
