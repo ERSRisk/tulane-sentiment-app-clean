@@ -346,6 +346,10 @@
       {
         "topic_id": 606,
         "label": "AI and Social Life"
+      },
+      {
+        "topic_id": 608,
+        "label": "Humanoid Robots"
       }
     ]
   },
@@ -1374,10 +1378,6 @@
       {
         "topic_id": 605,
         "label": "Federal-State Funding and Authority Disputes"
-      },
-      {
-        "topic_id": 607,
-        "label": "Erika Kirk Leads Turning Point USA After Husband's Death"
       }
     ]
   },
