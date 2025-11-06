@@ -162,6 +162,10 @@
       {
         "topic_id": 601,
         "label": "Government Reporting on Food Insecurity"
+      },
+      {
+        "topic_id": 609,
+        "label": "Health News and Medical Advice"
       }
     ]
   },
