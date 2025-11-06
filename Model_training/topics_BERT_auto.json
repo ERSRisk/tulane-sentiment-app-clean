@@ -354,6 +354,10 @@
       {
         "topic_id": 608,
         "label": "Humanoid Robots"
+      },
+      {
+        "topic_id": 610,
+        "label": "Tech Industry Leaders"
       }
     ]
   },
