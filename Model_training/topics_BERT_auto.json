@@ -366,6 +366,10 @@
       {
         "topic_id": 618,
         "label": "LLM Vulnerabilities and Exploits"
+      },
+      {
+        "topic_id": 619,
+        "label": "Food Delivery Robots"
       }
     ]
   },
