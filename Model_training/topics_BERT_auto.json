@@ -362,6 +362,10 @@
       {
         "topic_id": 614,
         "label": "Trump Blames AI for Negative Footage"
+      },
+      {
+        "topic_id": 618,
+        "label": "LLM Vulnerabilities and Exploits"
       }
     ]
   },
