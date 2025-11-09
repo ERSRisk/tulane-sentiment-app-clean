@@ -38,6 +38,10 @@
       {
         "topic_id": 502,
         "label": "Student Success"
+      },
+      {
+        "topic_id": 620,
+        "label": "University Tutoring Program Cuts"
       }
     ]
   },
