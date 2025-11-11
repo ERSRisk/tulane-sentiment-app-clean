@@ -1254,10 +1254,6 @@
       {
         "topic_id": 615,
         "label": "DOJ Investigation into George Mason University's DEI Practices"
-      },
-      {
-        "topic_id": 628,
-        "label": "Nebraska ICE Detention Facility (Cornhusker Clink)"
       }
     ]
   },
@@ -1438,10 +1434,6 @@
       {
         "topic_id": 626,
         "label": "Human Rights Reporting Changes Under Trump Administration"
-      },
-      {
-        "topic_id": 627,
-        "label": "Trump Administration's Homelessness Policy"
       }
     ]
   },
@@ -2450,6 +2442,10 @@
       {
         "topic_id": 561,
         "label": "Bridget Phillipson and Labour Deputy Leadership"
+      },
+      {
+        "topic_id": 627,
+        "label": "Italian News Archive"
       }
     ]
   },
