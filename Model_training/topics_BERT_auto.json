@@ -170,6 +170,10 @@
       {
         "topic_id": 609,
         "label": "Health News and Medical Advice"
+      },
+      {
+        "topic_id": 624,
+        "label": "Childhood Vaccine Recommendations and Policy"
       }
     ]
   },
