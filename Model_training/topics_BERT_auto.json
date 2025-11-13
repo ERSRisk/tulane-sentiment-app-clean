@@ -182,6 +182,10 @@
       {
         "topic_id": 641,
         "label": "Pharmaceutical Pricing and Policy"
+      },
+      {
+        "topic_id": 642,
+        "label": "Vaccine and Health Misinformation"
       }
     ]
   },
