@@ -178,6 +178,10 @@
       {
         "topic_id": 629,
         "label": "Healthcare Fraud Takedown"
+      },
+      {
+        "topic_id": 641,
+        "label": "Pharmaceutical Pricing and Policy"
       }
     ]
   },
