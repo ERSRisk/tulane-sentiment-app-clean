@@ -6211,6 +6211,28 @@
         "Continuing resolution ‘not the worst thing in the world,’ says House Republican. IE 11 is not supported. For an optimal experience visit our site on another browser.\nSteve Kornacki: Divided opposition is 'sustaining Mamdani' in NYC mayoral race\n03:23\nRepublicans are 'leading us' to a shutdown, says chair of House Democratic campaign arm\n08:31\nNow PlayingContinuing resolution ‘not the worst thing in the world,’ says House Republican\n08:29\n-\nUP NEXT‘Pure politics’: Missouri congressman responds to Republicans' redistricting effort\n07:44\n-\nKornacki: Gen Z women ‘the most anti-Trump group’ in new NBC News Decision Desk poll\n09:59\nWhite House says it’s not the president’s signature in photo of Epstein birthday letter\n10:53\nSen. Cory Booker says ‘all’ of Trump’s Cabinet should resign: Full interview\n09:28\nSen. Cory Booker says engagement is ‘biggest blessing I've received in my life’\n00:59\nGov. Wes Moore welcomes ‘federal support’ but not National Guard to Baltimore: Full interview\n08:11\nSec. Scott Bessent calls for 'good data' after weak jobs report: Full interview\n13:35\nSec. Scott Bessent says tariffs are not a tax on the American people\n01:52\nGov. Wes Moore rules out running for president in 2028\n00:41\nSteve Kornacki: Trump gets low marks on handling inflation in new poll\n02:44\nHard to ‘plumb the depths’ of ‘stupidity’ of Dept. of War rebrand: Top Armed Services Cmte. Democrat\n07:00\n‘I don’t see any sign of recession,’ says NEC Director Hassett despite weak jobs report\n09:44\nTrump urges European leaders to stop buying Russian oil\n03:50\nRFK Jr. is ‘dangerous’ and ‘shouldn't be in this position,' Sen. Cortez Masto says\n29:56\nSen. Tina Smith says she ‘will not vote for a spending bill that is not bipartisan’\n07:55\n'Put it all out there': Speaker Johnson says Trump wants to release Epstein files\n07:15\nKornacki: 2025 election results could serve as a ‘referendum’ on Trump\n05:44\nMeet the Press\nRep. Marlin Stutzman (R-Ind.) joins Meet the Press NOW to react to the new tranche of documents released by the House Oversight Committee related to Jeffrey Epstein. Rep. Stutzman also discusses Republicans’ plan to keep the government funded.Sept. 9, 2025\nSteve Kornacki: Divided opposition is 'sustaining Mamdani' in NYC mayoral race\n03:23\nRepublicans are 'leading us' to a shutdown, says chair of House Democratic campaign arm\n08:31\nNow PlayingContinuing resolution ‘not the worst thing in the world,’ says House Republican\n08:29\n-\nUP NEXT‘Pure politics’: Missouri congressman responds to Republicans' redistricting effort\n07:44\n-\nKornacki: Gen Z women ‘the most anti-Trump group’ in new NBC News Decision Desk poll\n09:59\nWhite House says it’s not the president’s signature in photo of Epstein birthday letter\n10:53"
       ],
       "source": "Streamlit"
+    },
+    {
+      "topic": 635,
+      "name": "Business and Tech News Headlines",
+      "keywords": [
+        "bytedances",
+        "330b",
+        "20250828",
+        "why",
+        "rebranding",
+        "cracker",
+        "suspending",
+        "postal",
+        "dcs",
+        "nvidias"
+      ],
+      "documents": [
+        "India’s Top Online Beauty Retailer Eyes Growth in UK and Beyond. Why was the CDC director fired after one month?\nHow did Trump's 50% tariffs impact India exports?\nWhy is Nvidia's stock dropping after earnings beat?\nWhat caused Cracker Barrel to reverse rebranding plans?\nHow is TikTok owner ByteDance's valuation reaching $330B?\nWhat effects will federal takeover have on DC's Union Station?\nWhy are global postal services suspending shipments to the US?\nIndia’s Top Online Beauty Retailer Eyes Growth in UK and Beyond\nbloomberg.com/news/articles/2025-08-28/india-s-top-online-beauty-retailer-eyes-growth-in-uk-and-beyond\nThis story appeared on bloomberg.com, 2025-08-28 04:43:41.136000.",
+        "Tax Breaks on Books Won’t Save Reading From a Slow Death. Why was the CDC director fired after one month?\nHow did Trump's 50% tariffs impact India exports?\nWhy is Nvidia's stock dropping after earnings beat?\nWhat caused Cracker Barrel to reverse rebranding plans?\nHow is TikTok owner ByteDance's valuation reaching $330B?\nWhat effects will federal takeover have on DC's Union Station?\nWhy are global postal services suspending shipments to the US?\nTax Breaks on Books Won’t Save Reading From a Slow Death\nbloomberg.com/opinion/articles/2025-08-28/denmark-s-tax-cut-on-books-won-t-save-reading-from-a-slow-death\nThis story appeared on bloomberg.com, 2025-08-28 04:00:18.958000.",
+        "How the world’s biggest carmakers are falling behind in software. Why was the CDC director fired after one month?\nHow did Trump's 50% tariffs impact India exports?\nWhy is Nvidia's stock dropping after earnings beat?\nWhat caused Cracker Barrel to reverse rebranding plans?\nHow is TikTok owner ByteDance's valuation reaching $330B?\nWhat effects will federal takeover have on DC's Union Station?\nWhy are global postal services suspending shipments to the US?\nHow the world’s biggest carmakers are falling behind in software\nft.com/content/d5d5b7fb-30fc-4f32-86d2-7499bcc433b6The shift from a manufacturing model to a digital one is proving difficult and expensive for many of the industry’s traditional companies\nThis story appeared on ft.com, 2025-08-28 04:00:06."
+      ],
+      "source": "Streamlit"
     }
   ]
 }
