@@ -1164,6 +1164,10 @@
       {
         "topic_id": 638,
         "label": "Robinhood Stock Analysis and Performance"
+      },
+      {
+        "topic_id": 639,
+        "label": "Mining Stocks"
       }
     ]
   },
