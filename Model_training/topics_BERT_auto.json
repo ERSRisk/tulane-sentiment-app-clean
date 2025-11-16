@@ -546,6 +546,10 @@
       {
         "topic_id": 646,
         "label": "Local News and Community Life"
+      },
+      {
+        "topic_id": 648,
+        "label": "Women in Virginia Politics"
       }
     ]
   },
