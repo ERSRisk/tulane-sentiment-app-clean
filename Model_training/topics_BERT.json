@@ -6441,6 +6441,28 @@
         "China’s Financial Flows Exceed Trade for First Time. More From The China Show\n05:18What’s at Stake as UK Holds Trade Talks With China\n-\n07:273C AGI Partners CEO on AI Opportunities\n-\n05:22Hummingbird Bioscience CEO on Biotech Outlook\n-\n08:47Infineon CEO on How AI Applications Are Evolving\n-\nBloomberg Technology\nThe only daily news program focused exclusively on technology, innovation and the future of business from San Francisco. Hosted by Emily Chang."
       ],
       "source": "Streamlit"
+    },
+    {
+      "topic": 645,
+      "name": "Stock Market Analysis and Causality",
+      "keywords": [
+        "why",
+        "did",
+        "stock",
+        "oracles",
+        "how",
+        "surge",
+        "20250911",
+        "what",
+        "appeared",
+        "caused"
+      ],
+      "documents": [
+        "’s MET-233i Shows 8% Weight Loss in Phase 1. Why did Oracle briefly become world's richest company?\nHow will Trump tariffs impact US inflation?\nWhat caused Klarna's stock to surge post-IPO?\nWhy is Fed expected to cut interest rates soon?\nHow is AI driving Oracle's record stock rally?\nWhat effect did immigration raids have on South Korea investment?\nWhy did Opendoor's stock soar after CEO change?\n’s MET-233i Shows 8% Weight Loss in Phase 1\nfinance.yahoo.com/news/metsera-inc-mtsr-met-233i-151436454.html\nIn this article, we will be taking a look at the 11 Best Performing Biotech Stocks So Far in 2025. Metsera, Inc. is one of them.\nMetsera, Inc. (NASDAQ:MTSR), a clinical-stage biotech based in New York, is emerging as an innovative player in obesity and metabolic disease treatments. The…\nThis story appeared on finance.yahoo.com, 2025-09-11 15:14:36.",
+        "Stock Market Today: Dow Jumps Despite Inflation Data; Blackstone Breaks Out (Live Coverage). Why did Oracle briefly become world's richest company?\nHow will Trump tariffs impact US inflation?\nWhat caused Klarna's stock to surge post-IPO?\nWhy is Fed expected to cut interest rates soon?\nHow is AI driving Oracle's record stock rally?\nWhat effect did immigration raids have on South Korea investment?\nWhy did Opendoor's stock soar after CEO change?\nStock Market Today: Dow Jumps Despite Inflation Data; Blackstone Breaks Out (Live Coverage)\ninvestors.com/market-trend/stock-market-today/stock-market-today-cpi-inflation-data-nvidia-nvda-palantir-pltr-tesla-tslaThe Dow Jones Industrial Average got off to a bullish start Thursday, powered in part by financial firms, as Wall Street looked past signs of lingering inflation at the consumer price level, stoked in part by global tariffs. Meanwhile, Blackstone (BX) was one of several financial firms…\nThis story appeared on investors.com, 2025-09-11 15:49:26.309000.",
+        "Micron Gains on Anticipation of Big Boost From Data Center Chips. Why did Oracle briefly become world's richest company?\nHow will Trump tariffs impact US inflation?\nWhat caused Klarna's stock to surge post-IPO?\nWhy is Fed expected to cut interest rates soon?\nHow is AI driving Oracle's record stock rally?\nWhat effect did immigration raids have on South Korea investment?\nWhy did Opendoor's stock soar after CEO change?\nMicron Gains on Anticipation of Big Boost From Data Center Chips\nbloomberg.com/news/articles/2025-09-11/micron-gains-on-anticipation-of-big-boost-from-data-center-chips\nThis story appeared on bloomberg.com, 2025-09-11 15:16:26.658000."
+      ],
+      "source": "Streamlit"
     }
   ]
 }
