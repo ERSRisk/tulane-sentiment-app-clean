@@ -1322,6 +1322,10 @@
       {
         "topic_id": 649,
         "label": "Automotive Manufacturing Plants"
+      },
+      {
+        "topic_id": 653,
+        "label": "Automotive Plant Disruptions"
       }
     ]
   },
