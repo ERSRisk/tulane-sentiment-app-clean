@@ -42,10 +42,6 @@
       {
         "topic_id": 620,
         "label": "University Tutoring Program Cuts"
-      },
-      {
-        "topic_id": 648,
-        "label": "Infectious Disease Research"
       }
     ]
   },
@@ -546,6 +542,10 @@
       {
         "topic_id": 632,
         "label": "Florida Governor DeSantis Appoints New Lieutenant Governor"
+      },
+      {
+        "topic_id": 646,
+        "label": "Local News and Community Life"
       }
     ]
   },
@@ -1606,10 +1606,6 @@
       {
         "topic_id": 644,
         "label": "China's Technology, Business, and Trade"
-      },
-      {
-        "topic_id": 647,
-        "label": "US-China Tech and Trade Competition"
       }
     ]
   },
@@ -2420,10 +2416,6 @@
       {
         "topic_id": 455,
         "label": "MLB Game Broadcasts and Schedules"
-      },
-      {
-        "topic_id": 646,
-        "label": "Women's Sports and Politics"
       }
     ]
   },
