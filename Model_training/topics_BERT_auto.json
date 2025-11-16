@@ -1594,6 +1594,10 @@
       {
         "topic_id": 640,
         "label": "China Industrial Profits and Consumption"
+      },
+      {
+        "topic_id": 644,
+        "label": "China's Technology, Business, and Trade"
       }
     ]
   },
