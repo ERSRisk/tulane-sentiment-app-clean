@@ -546,10 +546,6 @@
       {
         "topic_id": 646,
         "label": "Local News and Community Life"
-      },
-      {
-        "topic_id": 650,
-        "label": "Women's Rights and Roles in the US"
       }
     ]
   },
@@ -1192,10 +1188,6 @@
       {
         "topic_id": 645,
         "label": "Stock Market Analysis and Causality"
-      },
-      {
-        "topic_id": 652,
-        "label": "Financial Regulation of Digital Assets"
       }
     ]
   },
@@ -1314,18 +1306,6 @@
       {
         "topic_id": 615,
         "label": "DOJ Investigation into George Mason University's DEI Practices"
-      },
-      {
-        "topic_id": 647,
-        "label": "H-1B Visa Fee Increase"
-      },
-      {
-        "topic_id": 649,
-        "label": "Automotive Manufacturing Plants"
-      },
-      {
-        "topic_id": 653,
-        "label": "Automotive Plant Disruptions"
       }
     ]
   },
@@ -2194,10 +2174,6 @@
       {
         "topic_id": 630,
         "label": "Gaza War and Hostage Crisis"
-      },
-      {
-        "topic_id": 651,
-        "label": "Greta Thunberg and the Gaza Flotilla"
       }
     ]
   },
@@ -2600,6 +2576,10 @@
       {
         "topic_id": 584,
         "label": "Political and Economic News Analysis"
+      },
+      {
+        "topic_id": 648,
+        "label": "Economic Commentary and Analysis"
       }
     ]
   },
