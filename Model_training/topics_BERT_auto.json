@@ -1542,6 +1542,10 @@
       {
         "topic_id": 666,
         "label": "Federal Crackdown in Washington DC"
+      },
+      {
+        "topic_id": 668,
+        "label": "HHS Removes Union Rights for Federal Health Workers"
       }
     ]
   },
