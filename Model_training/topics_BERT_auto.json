@@ -1530,6 +1530,10 @@
       {
         "topic_id": 634,
         "label": "US Politics and Elections"
+      },
+      {
+        "topic_id": 665,
+        "label": "Texas Congressional Redistricting"
       }
     ]
   },
