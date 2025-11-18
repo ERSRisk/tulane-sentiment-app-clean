@@ -1534,6 +1534,10 @@
       {
         "topic_id": 665,
         "label": "Texas Congressional Redistricting"
+      },
+      {
+        "topic_id": 666,
+        "label": "Federal Crackdown in Washington DC"
       }
     ]
   },
