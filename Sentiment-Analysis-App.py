@@ -119,7 +119,7 @@ if selection == "Risk Analysis Dashboard":
     
     st.set_page_config(layout="wide")
     
-    with open('topic_BERT.json', 'r', encoding = 'utf-8') as f:
+    with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
         topic_names = json.load(f)
     
     topic_dict = {item['topic']: item['name'] for item in topic_names['topics']}
