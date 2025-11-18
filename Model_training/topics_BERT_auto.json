@@ -410,6 +410,10 @@
       {
         "topic_id": 636,
         "label": "Business and Tech News Headlines"
+      },
+      {
+        "topic_id": 657,
+        "label": "OpenAI's Infrastructure and Corporate Strategy"
       }
     ]
   },
