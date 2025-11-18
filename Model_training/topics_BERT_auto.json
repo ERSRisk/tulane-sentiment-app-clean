@@ -1010,6 +1010,10 @@
       {
         "topic_id": 650,
         "label": "Gold Tariff Confusion"
+      },
+      {
+        "topic_id": 661,
+        "label": "Retail Price Fluctuations and Tariffs"
       }
     ]
   },
