@@ -554,10 +554,6 @@
       {
         "topic_id": 646,
         "label": "Local News and Community Life"
-      },
-      {
-        "topic_id": 656,
-        "label": "VA-11 Special Election: Walkinshaw vs. Whitson"
       }
     ]
   },
@@ -1204,10 +1200,6 @@
       {
         "topic_id": 645,
         "label": "Stock Market Analysis and Causality"
-      },
-      {
-        "topic_id": 657,
-        "label": "Tech Company IPOs"
       }
     ]
   },
@@ -1326,10 +1318,6 @@
       {
         "topic_id": 615,
         "label": "DOJ Investigation into George Mason University's DEI Practices"
-      },
-      {
-        "topic_id": 658,
-        "label": "NH Youth Detention Center Abuse Settlement Controversy"
       }
     ]
   },
@@ -2620,6 +2608,10 @@
       {
         "topic_id": 648,
         "label": "Economic Commentary and Analysis"
+      },
+      {
+        "topic_id": 656,
+        "label": "Economic Policy and Challenges"
       }
     ]
   },
