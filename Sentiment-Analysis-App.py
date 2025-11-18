@@ -17,6 +17,7 @@ import altair as alt
 import pdfplumber
 import docx
 from sentence_transformers import SentenceTransformer, util
+from google import genai
 
 def _github_token() -> str:
     # Secret Manager can add a trailing newline; strip it
