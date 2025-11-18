@@ -79,7 +79,682 @@ if st.session_state.current_tab != selection:
             del st.session_state[key]
     st.session_state.current_tab = selection
 if selection == "Risk Analysis Dashboard":
-    st.write("WIP")
+    api_key = os.getenv('GEMINI_API_FREE')
+    OWNER = 'ERSRisk'
+    REPO = 'Tulane-Sentiment-Analysis'
+    TAG = 'BERTopic_results'
+    ASSET = 'BERTopic_Streamlit.csv.gz'
+    client = genai.Client(api_key = api_key)
+
+    @st.cache_data(show_spinner=True, ttl=1800)
+    def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
+        token = _github_token()
+        if not token:
+            raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
+
+        headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {token}",
+        }
+        rel = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}",
+        headers=headers, timeout=60
+        )
+        if rel.status_code != 200:
+        # show the real reason (401, 404, permissions)
+            raise RuntimeError(f"Release lookup {rel.status_code}: {rel.text[:300]}")
+
+        rel_json = rel.json()
+        asset_obj = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
+        if not asset_obj:
+            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'.")
+
+        url = asset_obj['browser_download_url']
+        r = requests.get(url, headers={"Authorization": f"token {token}", "Accept": "application/octet-stream"}, timeout=120)
+        if r.status_code != 200:
+            raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
+        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    
+    df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+    
+    st.set_page_config(layout="wide")
+    
+    with open('topic_BERT.json', 'r', encoding = 'utf-8') as f:
+        topic_names = json.load(f)
+    
+    topic_dict = {item['topic']: item['name'] for item in topic_names['topics']}
+    df['Topic_names'] = df['Topic'].map(topic_dict)
+    df['Published_utc'] = pd.to_datetime(df['Published_utc'], errors='coerce', utc=True)
+    df = df[['Published_utc', 'Title', 'Predicted_Risks_new', 'Topic', 'Topic_names', 'Risk_Score', 'Location']]
+    df = df.drop_duplicates(subset = ['Title'])
+    
+    metric_df = df.copy()
+    start_date = st.sidebar.date_input('Start date', date.today() - timedelta(days=30))
+    end_date = st.sidebar.date_input('End date', date.today())
+    filtered_df = df[(df['Published_utc'] >= pd.to_datetime(start_date).tz_localize('UTC')) & (df['Published_utc'] <= pd.to_datetime(end_date).tz_localize('UTC'))]
+    
+    today = pd.to_datetime(date.today()).tz_localize('UTC')
+    recent_start = today - pd.Timedelta(days=30)
+    baseline_start = today - pd.Timedelta(days=90)
+    baseline_end = recent_start
+    
+    view = st.sidebar.radio('Select View', options = ['Topics'] + ['Risks'], index=0, key='detailed_topic_select')
+    
+    st.title('Risk and Topic Trends Dashboard')
+    if view == 'Topics':
+        for topic in metric_df['Topic_names'].unique():
+            recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
+            baseline_mean = (metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
+            if baseline_mean == 0:
+                if recent_mean == 0:
+                    percent_change = 0
+                continue
+            percent_change = ((recent_mean - baseline_mean) / baseline_mean * 100 if baseline_mean != 0 else float('inf'))
+            if percent_change >= 50:
+                st.warning(f'Topic "{topic}" is experiencing a significant increase in article volume: {percent_change:.2f}% increase compared to baseline.', icon="⚠️")
+        with st.expander('View Full Topics Trend', expanded = False):
+            topic_rows = []
+            for topic in metric_df['Topic_names'].unique():
+                recent_count = metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Topic_names'] == topic)].shape[0]
+                baseline_count = metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Topic_names'] == topic)].shape[0]
+                recent_mean = recent_count / 30
+                baseline_mean = baseline_count / 30
+                
+                if baseline_mean == 0:
+                    if recent_mean == 0:
+                        continue
+                    status = 'Emerging'
+                else:
+                    percentage_change = ((recent_mean - baseline_mean) / baseline_mean * 100) 
+                
+                    if percentage_change >= 50:
+                        status = 'Rising'
+                    elif percentage_change <= -30:
+                        status = 'Falling'
+                    else:
+                        status = 'Stable'
+                topic_rows.append({
+                    'Topic': topic,
+                    'Recent Count (Last 30 days)': recent_count,
+                    'Baseline Count (30-90 days ago)': baseline_count,
+                    'Percentage Change (%)': f'{percentage_change:.2f}%' if baseline_mean != 0 else 'N/A',
+                    'Status': status
+                })
+            topic_trend_df = pd.DataFrame(topic_rows)
+            st.dataframe(topic_trend_df.sort_values(by='Percentage Change (%)', ascending=False), use_container_width=True, hide_index = True)
+    if view == 'Risks':
+        for risk in metric_df['Predicted_Risks_new'].unique():
+            recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
+            baseline_mean = (metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
+            if baseline_mean == 0:
+                if recent_mean == 0:
+                    percent_change = 0
+                continue
+            percent_change = ((recent_mean - baseline_mean) / baseline_mean * 100 if baseline_mean != 0 else float('inf'))
+            if percent_change >= 50:
+                st.warning(f'Risk "{risk}" is experiencing a significant increase in article volume: {percent_change:.2f}% increase compared to baseline.', icon="⚠️")
+        with st.expander('View Full Topics Trend', expanded = False):
+            risk_rows = []
+            for risk in metric_df['Predicted_Risks_new'].unique():
+                if risk == 'No Risk':
+                    continue
+                recent_count = metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Predicted_Risks_new'] == risk)].shape[0]
+                baseline_count = metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Predicted_Risks_new'] == risk)].shape[0]
+                recent_mean = recent_count / 30
+                baseline_mean = baseline_count / 30
+                
+                if baseline_mean == 0:
+                    if recent_mean == 0:
+                        continue
+                    status = 'Emerging'
+                else:
+                    percentage_change = ((recent_mean - baseline_mean) / baseline_mean * 100) 
+                
+                    if percentage_change >= 50:
+                        status = 'Rising'
+                    elif percentage_change <= -30:
+                        status = 'Falling'
+                    else:
+                        status = 'Stable'
+                risk_rows.append({
+                    'Risk': risk,
+                    'Recent Count (Last 30 days)': recent_count,
+                    'Baseline Count (30-90 days ago)': baseline_count,
+                    'Percentage Change (%)': f'{percentage_change:.2f}%' if baseline_mean != 0 else 'N/A',
+                    'Status': status
+                })
+            risk_trend_df = pd.DataFrame(risk_rows)
+            st.dataframe(risk_trend_df.sort_values(by='Percentage Change (%)', ascending=False), use_container_width=True, hide_index = True)
+                
+    
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        aggregation = st.radio('Select Metric Aggregation', ['Count', 'Cumulative', 'Weighted Severity'], index=0, key='metric_aggregation')
+    with col2:
+        frequency = st.radio('Select Time Frequency', ['Daily', 'Weekly'], index=1, key='time_frequency')
+        if frequency == 'Daily':
+            freq = 'D'
+        elif frequency == 'Weekly':
+            freq = 'W'
+    
+    #give me a line chart that shows the count of articles per day for each topic over time
+    
+    
+    # Drop rows where date or topic is missing
+    filtered_df = filtered_df.dropna(subset=['Published_utc', 'Topic'])
+    
+    if aggregation == 'Weighted Severity':
+        weighted_df = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq = freq)])['Risk_Score'].sum().reset_index(name = 'Weighted_Severity')
+        top_topics = (weighted_df.groupby('Topic_names')['Weighted_Severity']
+                    .sum()
+                    .nlargest(5)
+                    .index)
+        data = weighted_df[weighted_df['Topic_names'].isin(top_topics)]
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader('Topic Trends Over Time')
+            chart = (
+                alt.Chart(data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Weighted_Severity:Q', title='Weighted Severity'),
+                    color = alt.Color('Topic_names:N', title='Topic', legend=alt.Legend(orient='bottom', direction = 'vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+        risk_trends = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq=freq)])['Risk_Score'].sum().reset_index(name = 'Weighted_Severity')
+        recent_risk_data = risk_trends.copy()
+        recent_risk_data = recent_risk_data[~(recent_risk_data['Predicted_Risks_new'] == 'No Risk')]
+        top_risks = (recent_risk_data.groupby('Predicted_Risks_new')['Weighted_Severity']
+                    .sum()
+                    .nlargest(5)
+                    .index)
+        recent_risk_data = recent_risk_data[recent_risk_data['Predicted_Risks_new'].isin(top_risks)]
+        with col2:
+            st.subheader('Risk Trends Over Time')
+            chart = (
+                alt.Chart(recent_risk_data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Weighted_Severity:Q', title='Weighted Severity'),
+                    color = alt.Color('Predicted_Risks_new:N', title='Risk', legend=alt.Legend(orient='bottom', direction='vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+    
+    if aggregation == 'Count':
+        daily_counts = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq=freq)]).size().reset_index(name='Article_Count')
+        recent_data = daily_counts.copy()
+        #keep only top 5 topics by total article count in recent data
+        top_topics = (recent_data.groupby('Topic_names')['Article_Count']
+                    .sum()
+                    .nlargest(5)
+                    .index)
+        data = recent_data[recent_data['Topic_names'].isin(top_topics)]
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader('Topic Trends Over Time')
+            chart = (
+                alt.Chart(data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Article_Count:Q', title='Number of Articles'),
+                    color = alt.Color('Topic_names:N', title='Topic', legend=alt.Legend(orient='bottom', direction = 'vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+    
+        risk_trends = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq=freq)]).size().reset_index(name='Article_Count')
+        recent_risk_data = risk_trends.copy()
+        recent_risk_data = recent_risk_data[~(recent_risk_data['Predicted_Risks_new'] == 'No Risk')]
+        top_risks = (recent_risk_data.groupby('Predicted_Risks_new')['Article_Count']
+                    .sum()
+                    .nlargest(5)
+                    .index)
+        recent_risk_data = recent_risk_data[recent_risk_data['Predicted_Risks_new'].isin(top_risks)]
+        with col2:
+            st.subheader('Risk Trends Over Time')
+            chart = (
+                alt.Chart(recent_risk_data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Article_Count:Q', title='Number of Articles'),
+                    color = alt.Color('Predicted_Risks_new:N', title='Risk', legend=alt.Legend(orient='bottom', direction='vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+    
+    if aggregation == 'Cumulative':
+        cumulative_counts = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq=freq)]).size().groupby(level=0).cumsum().reset_index(name='Cumulative_Article_Count')
+        recent_data = cumulative_counts.copy()
+        #keep only top 5 topics by total article count in recent data
+        top_topics = (recent_data.groupby('Topic_names')['Cumulative_Article_Count']
+                    .max()
+                    .nlargest(5)
+                    .index)
+        data = recent_data[recent_data['Topic_names'].isin(top_topics)]
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader('Cumulative Topic Trends Over Time')
+            chart = (
+                alt.Chart(data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Cumulative_Article_Count:Q', title='Cumulative Number of Articles'),
+                    color = alt.Color('Topic_names:N', title='Topic', legend=alt.Legend(orient='bottom', direction = 'vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+    
+        risk_trends = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq=freq)]).size().groupby(level=0).cumsum().reset_index(name='Cumulative_Article_Count')
+        recent_risk_data = risk_trends.copy()
+        recent_risk_data = recent_risk_data[~(recent_risk_data['Predicted_Risks_new'] == 'No Risk')]
+        top_risks = (recent_risk_data.groupby('Predicted_Risks_new')['Cumulative_Article_Count']
+                    .max()
+                    .nlargest(5)
+                    .index)
+        recent_risk_data = recent_risk_data[recent_risk_data['Predicted_Risks_new'].isin(top_risks)]
+        with col2:
+            st.subheader('Cumulative Risk Trends Over Time')
+            chart = (
+                alt.Chart(recent_risk_data)
+                .mark_line(point = True)
+                .encode(
+                    x = alt.X('Published_utc:T', title='Date'),
+                    y = alt.Y('Cumulative_Article_Count:Q', title='Cumulative Number of Articles'),
+                    color = alt.Color('Predicted_Risks_new:N', title='Risk', legend=alt.Legend(orient='bottom', direction='vertical', labelLimit = 0, labelFontSize=12, symbolSize=100) ),
+                )
+                .properties(width=600, height=400)
+            )
+            st.altair_chart(chart, use_container_width=True)
+    
+    def sparkline(data, ycol = 'Value'):
+            return(alt.Chart(data).mark_area(opacity = 0.25).encode(x= alt.X('Date:T'), y= alt.Y(f'{ycol}:Q')).properties(height=40, width=150))
+    st.markdown("""
+        <style>
+        .kpi-card > div { padding: 1.2rem 1rem; border:1px solid #313131; border-radius:12px; }
+        .kpi-title { margin:0; font-size:0.9rem; color:#9aa0a6; }
+        .kpi-value { font-size:1.8rem; font-weight:700; line-height:1; margin: 0.25rem 0 0.5rem; }
+        .kpi-delta { font-size:0.9rem; opacity:0.85; margin-bottom:0.25rem; }
+        .kpi-spacer { height: 4px; }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    def kpi_card(title, value, delta_text=None, data=None, axis='Value'):
+        with st.container(border=False):
+            # apply visual shell to the *inner* container only
+            st.markdown('<div class="kpi-card">', unsafe_allow_html=True)
+            with st.container(border=True):
+                # header
+                st.markdown(f'<div class="kpi-title">{title}</div>', unsafe_allow_html=True)
+                # value + optional delta (no arrow)
+                cols = st.columns([3,1])
+                with cols[0]:
+                    st.markdown(f'<div class="kpi-value">{value}</div>', unsafe_allow_html=True)
+                    if delta_text:
+                        st.markdown(f'<div class="kpi-delta">{delta_text}</div>', unsafe_allow_html=True)
+                with cols[1]:
+                    st.empty()
+                # sparkline (stays inside because it's inside this container)
+                if data is not None and not data.empty:
+                    st.altair_chart(sparkline(data, ycol=axis), use_container_width=True)
+                else:
+                    st.markdown('<div class="kpi-spacer"></div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+    
+    if view == 'Topics':
+        topic = st.selectbox('Select Topic', options = sorted(filtered_df['Topic_names'].unique()), key='selected_topic')
+        st.subheader(f'Topic: {topic}')
+    
+    
+        recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
+        baseline_mean = (metric_df[(df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
+        percent_change = ((recent_mean - baseline_mean) / baseline_mean * 100 if baseline_mean != 0 else float('inf'))
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            kpi_card("Articles in Last 30 Days", f"{recent_mean * 30:.0f}")
+        with col2:
+            if percent_change >= 0.2 and percent_change != float('inf'):
+                kpi_card("30-Day Change", f"{percent_change:.2f}%", delta_text = "Increasing")
+            elif percent_change <= -0.2 and percent_change != float('inf'):
+                kpi_card("30-Day Change", f"{percent_change:.2f}%", delta_text = "Decreasing")
+            elif percent_change == float('inf'):
+                kpi_card("30-Day Change", "N/A")
+        with col3:
+            average_risk_score = filtered_df[filtered_df['Topic_names'] == topic]['Risk_Score'].mean()
+            kpi_card("Average Risk Score", f"{average_risk_score:.2f}")
+        with col4:
+            local_mask = filtered_df[(filtered_df['Topic_names'] == topic) & (filtered_df['Location'].fillna(0).astype(int) >= 3)].shape[0]
+            kpi_card("Local Mentions", f"{local_mask}")
+    
+    
+        if aggregation == 'Count':
+            daily_counts = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq=freq)]).size().reset_index(name='Article_Count')
+            topic_data = daily_counts[daily_counts['Topic_names'] == topic]
+            value_col = '__count__'
+    
+        if aggregation == 'Cumulative':
+            cumulative_counts = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq=freq)]).size().groupby(level=0).cumsum().reset_index(name='Cumulative_Article_Count')
+            topic_data = cumulative_counts[cumulative_counts['Topic_names'] == topic]
+            value_col = 'Cumulative'
+    
+        if aggregation == 'Weighted Severity':
+            weighted_df = filtered_df.groupby(['Topic_names', pd.Grouper(key='Published_utc', freq = freq)])['Risk_Score'].sum().reset_index(name = 'Weighted_Severity')
+            topic_data = weighted_df[weighted_df['Topic_names'] == topic]
+            value_col = 'Risk_Score'
+    
+    
+        def prepare_series(df, group_col, value_col, start = None, end = None, freq = freq):
+            s = df.copy()
+            s['Published_utc'] = pd.to_datetime(s['Published_utc'], errors='coerce', utc=True).dt.normalize()
+            if start is not None:
+                s = s[s['Published_utc'] >= pd.to_datetime(date.today() - timedelta(days=180)).tz_localize('UTC')]
+            if end is not None:
+                s = s[s['Published_utc'] <= pd.to_datetime(end).tz_localize('UTC')]
+            
+            if value_col == '__count__':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq)).size().rename('Value').to_frame())
+            if value_col == 'Risk_Score':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq))[value_col].sum().rename('Value').to_frame())
+            if value_col == 'Cumulative':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq)).size().rename('Value').to_frame())
+                ts['Value'] = ts['Value'].cumsum()
+            
+            today = pd.to_datetime(date.today()).tz_localize('UTC')
+            #if not ts.empty:
+                #full_idx = pd.date_range(start=ts.index.min(), end=today, freq=freq, tz='UTC')
+                #ts = ts.reindex(full_idx, fill_value=0)
+            ts.index.name = 'Date'
+            if freq == 'D':
+                window_size = 7
+            else:
+                window_size = 4
+            
+            ts = ts.reset_index()
+            return ts
+    
+        def forecast_ets(ts_df, horizon = 2, seasonal = None):
+            if ts_df.empty or len(ts_df) < 4:
+                return ts_df.assign(kind='actual'), pd.DataFrame(), None
+            y = ts_df['Value'].astype(float).values
+    
+            model = ExponentialSmoothing(y, trend='add', seasonal=seasonal, seasonal_periods=None).fit(optimized = True)
+            fitted_vals = model.fittedvalues
+            fcst_vals = model.forecast(horizon)
+    
+    
+            #Approximate 95% CI from residuals
+            resid = model.resid
+            sigma = np.nanstd(resid)
+            lower = fcst_vals - 1.96 * sigma
+            upper = fcst_vals + 1.96 * sigma
+    
+            last_date = ts_df['Date'].iloc[-1]
+            inferred = pd.infer_freq(ts_df['Date'])
+            freq = inferred if inferred else 'W'
+            future_idx = pd.date_range(start=last_date + pd.tseries.frequencies.to_offset(freq), periods = horizon, freq = freq)
+            fcst_df = pd.DataFrame({
+                'Date': future_idx,
+                'yhat': fcst_vals,
+                'yhat_lower': np.maximum(0, lower),
+                'yhat_upper': np.maximum(0, upper),
+                'kind': 'forecast'
+            }) 
+            actual_df = ts_df.copy()
+            actual_df['kind'] = 'actual'
+            cutoff = last_date
+            return actual_df, fcst_df, cutoff
+    
+        def layered_forecast_chart(actual_df, fcst_df, title =None):
+            actual_line = alt.Chart(actual_df).mark_line(strokeWidth=2, point = True).encode(
+                x = 'Date:T', y = 'Value:Q',
+                color = alt.value('lightblue'),
+                tooltip = [alt.Tooltip('Date:T'), alt.Tooltip('Value:Q', format = ',')]
+            ).properties(title=title)
+    
+            
+            layers = [actual_line]
+    
+            if fcst_df.empty:
+                return actual_line
+            
+            band = alt.Chart(fcst_df).mark_area(opacity=0.15).encode(
+                x = 'Date:T',
+                y = 'yhat_lower:Q',
+                y2 = 'yhat_upper:Q',
+                color = alt.value('orange')
+            )
+            fcst_line = alt.Chart(fcst_df).mark_line(strokeDash=[6,4], strokeWidth=2).encode(
+                x = 'Date:T',
+                y = 'yhat:Q',
+                color = alt.value('orange'),
+                tooltip = [alt.Tooltip('Date:T'), alt.Tooltip('yhat:Q', format = ',')]
+            )
+            layers.append(band)
+            layers.append(fcst_line)
+            return alt.layer(*layers).properties(title=title).resolve_scale(y='shared')
+    
+        forecast_on = st.checkbox('Enable Forecasting', value = True, key='forecast_toggle')
+        ts = prepare_series(filtered_df[filtered_df['Topic_names'] == topic], group_col = 'Topic_names', value_col = value_col, start = start_date, end = end_date, freq = freq)
+        if forecast_on:
+            actual_df, fcst_df, cutoff = forecast_ets(ts, horizon = 2)
+            title = f'Forecast for Topic: {topic}'
+        else:
+            actual_df = ts.copy()
+            actual_df['kind'] = 'actual'
+            fcst_df = pd.DataFrame()
+    
+            title = f'Time Series for Topic: {topic}'
+    
+        chart = layered_forecast_chart(actual_df, fcst_df, title=title)
+        st.altair_chart(chart, use_container_width=True)
+    
+        if st.button('Generate AI Summary', key = 'AI_insight'):
+            prompt = f"Provide a concise summary of the recent trends for the topic '{topic}' based on the articles found here: {filtered_df[filtered_df['Topic_names'] == topic]['Title'].tolist()}. Highlight any significant trends or changes in sentiment and focus your response to higher education risks this topic poses. Also, provide the titles of the articles you reference. Keep your responses less than 200 words long."
+            response = client.models.generate_content(
+                model = 'gemini-2.5-flash',
+                contents = prompt
+            )
+            st.subheader('AI-Generated Summary')
+            st.write(response.text)
+        
+        def associated_risks(topic):
+            risks = filtered_df[filtered_df['Topic_names'] == topic]['Predicted_Risks_new'].value_counts()
+            return risks
+    
+        st.subheader('Associated Risks')
+        data = associated_risks(topic).reset_index()
+        chart = alt.Chart(data).mark_bar().encode(
+            y = alt.Y('Predicted_Risks_new:N', title='Risk', axis=alt.Axis(labelLimit=0)),
+            x = alt.X('count:Q', title='Count of Articles'),
+            tooltip = [alt.Tooltip('Predicted_Risks_new:N', title='Risk'),
+                    alt.Tooltip('count:Q', title='Count')]
+        ).properties(width=800, height=max(240, 22*len(data)))
+        st.altair_chart(chart, use_container_width=True)
+    
+    if view == 'Risks':
+        risk = st.selectbox('Select Topic', options = sorted(filtered_df['Predicted_Risks_new'].unique()), key='selected_risk')
+        st.subheader(f'Risk: {risk}')
+    
+    
+        recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
+        baseline_mean = (metric_df[(df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
+        percent_change = ((recent_mean - baseline_mean) / baseline_mean * 100 if baseline_mean != 0 else float('inf'))
+    
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            kpi_card("Articles in Last 30 Days", f"{recent_mean * 30:.0f}")
+        with col2:
+            if percent_change >= 0.2 and percent_change != float('inf'):
+                kpi_card("30-Day Change", f"{percent_change:.2f}%", delta_text = "Increasing")
+            elif percent_change <= -0.2 and percent_change != float('inf'):
+                kpi_card("30-Day Change", f"{percent_change:.2f}%", delta_text = "Decreasing")
+            elif percent_change == float('inf'):
+                kpi_card("30-Day Change", "N/A")
+        with col3:
+            average_risk_score = filtered_df[filtered_df['Predicted_Risks_new'] == risk]['Risk_Score'].mean()
+            kpi_card("Average Risk Score", f"{average_risk_score:.2f}")
+        with col4:
+            local_mask = filtered_df[(filtered_df['Predicted_Risks_new'] == risk) & (filtered_df['Location'].fillna(0).astype(int) >= 3)].shape[0]
+            kpi_card("Local Mentions", f"{local_mask}")
+    
+        if aggregation == 'Count':
+            daily_counts = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq=freq)]).size().reset_index(name='Article_Count')
+            topic_data = daily_counts[daily_counts['Predicted_Risks_new'] == risk]
+            value_col = '__count__'
+    
+        if aggregation == 'Cumulative':
+            cumulative_counts = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq=freq)]).size().groupby(level=0).cumsum().reset_index(name='Cumulative_Article_Count')
+            topic_data = cumulative_counts[cumulative_counts['Predicted_Risks_new'] == risk]
+            value_col = 'Cumulative'
+        if aggregation == 'Weighted Severity':
+            weighted_df = filtered_df.groupby(['Predicted_Risks_new', pd.Grouper(key='Published_utc', freq = freq)])['Risk_Score'].sum().reset_index(name = 'Weighted_Severity')
+            topic_data = weighted_df[weighted_df['Predicted_Risks_new'] == risk]
+            value_col = 'Risk_Score'
+    
+    
+        def prepare_series(df, group_col, value_col, start = None, end = None, freq = freq):
+            s = df.copy()
+            s['Published_utc'] = pd.to_datetime(s['Published_utc'], errors='coerce', utc=True).dt.normalize()
+            if start is not None:
+                s = s[s['Published_utc'] >= pd.to_datetime(date.today() - timedelta(days=180)).tz_localize('UTC')]
+            if end is not None:
+                s = s[s['Published_utc'] <= pd.to_datetime(end).tz_localize('UTC')]
+            
+            if value_col == '__count__':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq)).size().rename('Value').to_frame())
+            if value_col == 'Cumulative':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq)).size().rename('Value').to_frame())
+                ts['Value'] = ts['Value'].cumsum()
+            if value_col == 'Risk_Score':
+                ts = (s.groupby(pd.Grouper(key='Published_utc', freq=freq))[value_col].sum().rename('Value').to_frame())
+            
+            today = pd.to_datetime(date.today()).tz_localize('UTC')
+            #if not ts.empty:
+                #full_idx = pd.date_range(start=ts.index.min(), end=today, freq=freq, tz='UTC')
+                #ts = ts.reindex(full_idx, fill_value=0)
+            ts.index.name = 'Date'
+            if freq == 'D':
+                window_size = 7
+            else:
+                window_size = 4
+            
+            ts = ts.reset_index()
+            return ts
+    
+        def forecast_ets(ts_df, horizon = 2, seasonal = None):
+            if ts_df.empty or len(ts_df) < 4:
+                return ts_df.assign(kind='actual'), pd.DataFrame(), None
+            y = ts_df['Value'].astype(float).values
+    
+            model = ExponentialSmoothing(y, trend='add', seasonal=seasonal, seasonal_periods=None).fit(optimized = True)
+            fitted_vals = model.fittedvalues
+            fcst_vals = model.forecast(horizon)
+    
+    
+            #Approximate 95% CI from residuals
+            resid = model.resid
+            sigma = np.nanstd(resid)
+            lower = fcst_vals - 1.96 * sigma
+            upper = fcst_vals + 1.96 * sigma
+    
+            last_date = ts_df['Date'].iloc[-1]
+            inferred = pd.infer_freq(ts_df['Date'])
+            freq = inferred if inferred else 'W'
+            future_idx = pd.date_range(start=last_date + pd.tseries.frequencies.to_offset(freq), periods = horizon, freq = freq)
+            fcst_df = pd.DataFrame({
+                'Date': future_idx,
+                'yhat': fcst_vals,
+                'yhat_lower': np.maximum(0, lower),
+                'yhat_upper': np.maximum(0, upper),
+                'kind': 'forecast'
+            }) 
+            actual_df = ts_df.copy()
+            actual_df['kind'] = 'actual'
+            cutoff = last_date
+            return actual_df, fcst_df, cutoff
+    
+        def layered_forecast_chart(actual_df, fcst_df, title =None):
+            actual_line = alt.Chart(actual_df).mark_line(strokeWidth=2, point = True).encode(
+                x = 'Date:T', y = 'Value:Q',
+                color = alt.value('lightblue'),
+                tooltip = [alt.Tooltip('Date:T'), alt.Tooltip('Value:Q', format = ',')]
+            ).properties(title=title)
+    
+            
+            layers = [actual_line]
+    
+            if fcst_df.empty:
+                return actual_line
+            
+            band = alt.Chart(fcst_df).mark_area(opacity=0.15).encode(
+                x = 'Date:T',
+                y = 'yhat_lower:Q',
+                y2 = 'yhat_upper:Q',
+                color = alt.value('orange')
+            )
+            fcst_line = alt.Chart(fcst_df).mark_line(strokeDash=[6,4], strokeWidth=2).encode(
+                x = 'Date:T',
+                y = 'yhat:Q',
+                color = alt.value('orange'),
+                tooltip = [alt.Tooltip('Date:T'), alt.Tooltip('yhat:Q', format = ',')]
+            )
+            layers.append(band)
+            layers.append(fcst_line)
+            return alt.layer(*layers).properties(title=title).resolve_scale(y='shared')
+    
+        forecast_on = st.checkbox('Enable Forecasting', value = True, key='forecast_toggle')
+        ts = prepare_series(filtered_df[filtered_df['Predicted_Risks_new'] == risk], group_col = 'Predicted_Risks_new', value_col = value_col, start = start_date, end = end_date, freq = freq)
+        if forecast_on:
+            actual_df, fcst_df, cutoff = forecast_ets(ts, horizon = 2)
+            title = f'Forecast for Risk: {risk}'
+        else:
+            actual_df = ts.copy()
+            actual_df['kind'] = 'actual'
+            fcst_df = pd.DataFrame()
+    
+            title = f'Time Series for Topic: {topic}'
+    
+        chart = layered_forecast_chart(actual_df, fcst_df, title=title)
+        st.altair_chart(chart, use_container_width=True)
+    
+        if st.button('Generate AI Summary', key = 'AI_insight_risk'):
+            prompt = f"Provide a concise summary of the recent trends for the risk '{risk}' based on the articles found here: {filtered_df[filtered_df['Predicted_Risks_new'] == risk]['Title'].tolist()}. Highlight any significant trends or changes in sentiment and focus your response to higher education risks this topic poses. Also, provide the titles of the articles you reference. Keep your responses less than 200 words long."
+            response = client.models.generate_content(
+                model = 'gemini-2.5-flash',
+                contents = prompt
+            )
+            st.subheader('AI-Generated Summary')
+            st.write(response.text)
+    
+        def associated_topics(risk):
+            risks = filtered_df[filtered_df['Predicted_Risks_new'] == risk]['Topic_names'].value_counts()
+            return risks
+    
+        st.subheader('Associated Risks')
+        data = associated_topics(risk).reset_index()
+        chart = alt.Chart(data).mark_bar().encode(
+            y = alt.Y('Topic_names:N', title='Topic', axis=alt.Axis(labelLimit=0)),
+            x = alt.X('count:Q', title='Count of Articles'),
+            tooltip = [alt.Tooltip('Topic_names:N', title='Topic'),
+                    alt.Tooltip('count:Q', title='Count')]
+        ).properties(width=800, height=max(240, 22*len(data)))
+        st.altair_chart(chart, use_container_width=True)
+
+
+
 if selection == "Unmatched Topic Analysis":
     from typing import Iterable, Any
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
