@@ -515,7 +515,7 @@ if selection == "Article Risk Review":
     OWNER = 'ERSRisk'
     REPO = 'Tulane-Sentiment-Analysis'
     TAG = 'BERTopic_results'
-    ASSET = 'BERTopic_results2.csv.gz'
+    ASSET = 'BERTopic_Streamlit.csv.gz'
     numeric_cols = ['Recency','Source_Accuracy','Impact_Score','Acceleration_value',
                 'Location','Industry_Risk','Frequency_Score','Risk_Score','Probability']
     hidden_file = Path('Model_training/hidden_topics.json')
