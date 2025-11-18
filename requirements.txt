@@ -9,3 +9,4 @@ python-docx
 sentence-transformers
 python-dateutil
 toml
+statsmodel
