@@ -68,7 +68,7 @@ def get_secrets(path, default = None):
 st.set_page_config(page_title="Tulane Risk Dashboard")
 st.sidebar.title("Navigation")
 st.sidebar.markdown("Select a tool:")
-selection = st.sidebar.selectbox("Choose a tool:", ["Article Risk Review", "Unmatched Topic Analysis", "Risk/Event Detector"])
+selection = st.sidebar.selectbox("Choose a tool:", ["Article Risk Review","Risk Analysis Dashboard", "Unmatched Topic Analysis", "Risk/Event Detector"])
 
 if "current_tab" not in st.session_state:
     st.session_state.current_tab = selection
@@ -80,7 +80,8 @@ if st.session_state.current_tab != selection:
         if key not in keys_to_keep:
             del st.session_state[key]
     st.session_state.current_tab = selection
-
+if selection == "Risk Analysis Dashboard":
+    st.write("WIP")
 if selection == "Unmatched Topic Analysis":
     from typing import Iterable, Any
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
