@@ -262,6 +262,10 @@
       {
         "topic_id": 533,
         "label": "PBS App and TV Captions"
+      },
+      {
+        "topic_id": 660,
+        "label": "Proposed Cuts to Public Broadcasting"
       }
     ]
   },
@@ -2558,10 +2562,6 @@
       {
         "topic_id": 658,
         "label": "European Central Bank and Corporate Finance"
-      },
-      {
-        "topic_id": 659,
-        "label": "UK Monetary Policy and the Pound"
       }
     ]
   },
