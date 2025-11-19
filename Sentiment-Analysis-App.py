@@ -131,6 +131,7 @@ if selection == "Risk Analysis Dashboard":
     topic_dict = {item['topic']: item['name'] for item in topic_names['topics']}
     df['Topic'] = pd.to_numeric(df['Topic'], errors = 'coerce')
     df['Topic'] = df['Topic'].round().astype('Int64')
+    df['Risk_Score'] = pd.to_numeric(df['Risk_Score'].astype(str).str.strip(), errors = 'coerce')
     df['Topic_names'] = df['Topic'].map(topic_dict)
     df['Published_utc'] = pd.to_datetime(df['Published_utc'], errors='coerce', utc=True)
     df = df[['Published_utc', 'Title', 'Predicted_Risks_new', 'Topic', 'Topic_names', 'Risk_Score', 'Location']]
