@@ -129,7 +129,8 @@ if selection == "Risk Analysis Dashboard":
         topic_names = json.load(f)
     
     topic_dict = {item['topic']: item['name'] for item in topic_names['topics']}
-    df['Topic'] = df['Topic'].astype(int)
+    df['Topic'] = pd.to_numeric(df['Topic'], errors = 'coerce')
+    df['Topic'] = df['Topic'].round().astype('Int64')
     df['Topic_names'] = df['Topic'].map(topic_dict)
     df['Published_utc'] = pd.to_datetime(df['Published_utc'], errors='coerce', utc=True)
     df = df[['Published_utc', 'Title', 'Predicted_Risks_new', 'Topic', 'Topic_names', 'Risk_Score', 'Location']]
