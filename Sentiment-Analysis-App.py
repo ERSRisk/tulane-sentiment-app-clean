@@ -120,6 +120,8 @@ if selection == "Risk Analysis Dashboard":
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
     df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+
+    st.write(df.columns.tolist())
     
     st.set_page_config(layout="wide")
     
@@ -130,7 +132,7 @@ if selection == "Risk Analysis Dashboard":
     df['Topic_names'] = df['Topic'].map(topic_dict)
     df['Published_utc'] = pd.to_datetime(df['Published_utc'], errors='coerce', utc=True)
     df = df[['Published_utc', 'Title', 'Predicted_Risks_new', 'Topic', 'Topic_names', 'Risk_Score', 'Location']]
-    df = df.drop_duplicates(subset = ['Title'])
+    df = df.drop_duplicates(subset = ['Title'], keep = 'first')
     
     metric_df = df.copy()
     start_date = st.sidebar.date_input('Start date', date.today() - timedelta(days=30))
@@ -185,7 +187,7 @@ if selection == "Risk Analysis Dashboard":
                     'Status': status
                 })
             topic_trend_df = pd.DataFrame(topic_rows)
-            st.dataframe(topic_trend_df.sort_values(by='Percentage Change (%)', ascending=False), use_container_width=True, hide_index = True)
+            st.dataframe(topic_trend_df, use_container_width=True, hide_index = True)
     if view == 'Risks':
         for risk in metric_df['Predicted_Risks_new'].unique():
             recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
