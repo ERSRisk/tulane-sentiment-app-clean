@@ -10,3 +10,4 @@ sentence-transformers
 python-dateutil
 toml
 statsmodels
+numpy
