@@ -144,8 +144,8 @@ if selection == "Risk Analysis Dashboard":
     filtered_df = df[(df['Published_utc'] >= pd.to_datetime(start_date).tz_localize('UTC')) & (df['Published_utc'] <= pd.to_datetime(end_date).tz_localize('UTC'))]
     
     today = pd.to_datetime(date.today()).tz_localize('UTC')
-    recent_start = today - pd.Timedelta(days=30)
-    baseline_start = today - pd.Timedelta(days=90)
+    recent_start = today - pd.Timedelta(days=15)
+    baseline_start = today - pd.Timedelta(days=30)
     baseline_end = recent_start
     
     view = st.sidebar.radio('Select View', options = ['Topics'] + ['Risks'], index=0, key='detailed_topic_select')
@@ -153,8 +153,8 @@ if selection == "Risk Analysis Dashboard":
     st.title('Risk and Topic Trends Dashboard')
     if view == 'Topics':
         for topic in metric_df['Topic_names'].unique():
-            recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
-            baseline_mean = (metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Topic_names'] == topic)].shape[0] / 30)
+            recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Topic_names'] == topic)].shape[0] / 15)
+            baseline_mean = (metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Topic_names'] == topic)].shape[0] / 15)
             if baseline_mean == 0:
                 if recent_mean == 0:
                     percent_change = 0
@@ -194,6 +194,8 @@ if selection == "Risk Analysis Dashboard":
             st.dataframe(topic_trend_df, use_container_width=True, hide_index = True)
     if view == 'Risks':
         for risk in metric_df['Predicted_Risks_new'].unique():
+            if risk == 'No Risk':
+                continue
             recent_mean = (metric_df[(metric_df['Published_utc'] >= recent_start) & (metric_df['Published_utc'] <= today) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
             baseline_mean = (metric_df[(metric_df['Published_utc'] >= baseline_start) & (metric_df['Published_utc'] < baseline_end) & (metric_df['Predicted_Risks_new'] == risk)].shape[0] / 30)
             if baseline_mean == 0:
