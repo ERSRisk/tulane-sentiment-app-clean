@@ -132,6 +132,14 @@ if selection == "Risk Analysis Dashboard":
     topic_dict = {item['topic']: item['name'] for item in topic_names['topics']}
     df['Topic'] = pd.to_numeric(df['Topic'], errors = 'coerce')
     df['Topic'] = df['Topic'].round().astype('Int64')
+    trash_topics = [95,94,76,75,52,44,17,10,7,0,559,527,515,503,481,474,469,462,
+                461,452,450,445,438,434,395,389,354,349,345,323,315,301,299,
+                258,257,254,249,236,234,228,224,208,198,191,188,186,178,177,
+                174,172,167,164,156,154,140,136,135,130,125,110,101,90,84,73,
+                60,59,56,54,50,24,22,18,568,565,550,526,518,505,484,477,458,
+                456,387,245,239,226,196,155,144,123,117,109,105,85,61,33,28,
+                25,16,14]
+    df = df[~(df['Topic'].isin(trash_topics))]
     df['Risk_Score'] = pd.to_numeric(df['Risk_Score'].astype(str).str.strip(), errors = 'coerce')
     df['Topic_names'] = df['Topic'].map(topic_dict)
     df['Published_utc'] = pd.to_datetime(df['Published_utc'], errors='coerce', utc=True)
@@ -148,7 +156,7 @@ if selection == "Risk Analysis Dashboard":
     baseline_start = today - pd.Timedelta(days=30)
     baseline_end = recent_start
     
-    view = st.sidebar.radio('Select View', options = ['Topics'] + ['Risks'], index=0, key='detailed_topic_select')
+    view = st.sidebar.radio('Select View', options = ['Risks'] + ['Topics'], index=0, key='detailed_topic_select')
     
     st.title('Risk and Topic Trends Dashboard')
     if view == 'Topics':
@@ -516,7 +524,7 @@ if selection == "Risk Analysis Dashboard":
             last_date = ts_df['Date'].iloc[-1]
             inferred = pd.infer_freq(ts_df['Date'])
             freq = inferred if inferred else 'W'
-            future_idx = pd.date_range(start=last_date + pd.tseries.frequencies.to_offset(freq), periods = horizon, freq = freq)
+            future_idx = pd.date_range(start=last_date, periods = horizon, freq = freq)
             fcst_df = pd.DataFrame({
                 'Date': future_idx,
                 'yhat': fcst_vals,
@@ -685,7 +693,7 @@ if selection == "Risk Analysis Dashboard":
             last_date = ts_df['Date'].iloc[-1]
             inferred = pd.infer_freq(ts_df['Date'])
             freq = inferred if inferred else 'W'
-            future_idx = pd.date_range(start=last_date + pd.tseries.frequencies.to_offset(freq), periods = horizon, freq = freq)
+            future_idx = pd.date_range(start=last_date, periods = horizon, freq = freq)
             fcst_df = pd.DataFrame({
                 'Date': future_idx,
                 'yhat': fcst_vals,
