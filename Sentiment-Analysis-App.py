@@ -1,5 +1,6 @@
 import numpy as np
-import os, io, json
+import os, io
+import json
 import time
 import random
 import base64
