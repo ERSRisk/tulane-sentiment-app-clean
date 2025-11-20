@@ -121,8 +121,6 @@ if selection == "Risk Analysis Dashboard":
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
     df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
-
-    st.write(df.columns.tolist())
     
     st.set_page_config(layout="wide")
     
@@ -138,7 +136,7 @@ if selection == "Risk Analysis Dashboard":
                 174,172,167,164,156,154,140,136,135,130,125,110,101,90,84,73,
                 60,59,56,54,50,24,22,18,568,565,550,526,518,505,484,477,458,
                 456,387,245,239,226,196,155,144,123,117,109,105,85,61,33,28,
-                25,16,14]
+                25,16,14,143]
     df = df[~(df['Topic'].isin(trash_topics))]
     df['Risk_Score'] = pd.to_numeric(df['Risk_Score'].astype(str).str.strip(), errors = 'coerce')
     df['Topic_names'] = df['Topic'].map(topic_dict)
