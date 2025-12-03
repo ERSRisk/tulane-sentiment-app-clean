@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Python junk
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local envs
+.venv/
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Other build artifacts
+.artifacts/
+dist/
+build/
