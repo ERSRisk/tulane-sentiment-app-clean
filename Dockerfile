@@ -1,9 +1,7 @@
-FROM python:3.11-slim
+FROM python:3.10-slim-bullseye AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-# You can set a default, but Cloud Run will inject PORT anyway
-ENV PORT=8080
 
 WORKDIR /app
 
@@ -12,13 +10,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt
 
+# ---------- Final image ----------
+FROM python:3.10-slim-bullseye
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+WORKDIR /app
+
+# copy installed packages from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+# now copy just your app code (filtered by .dockerignore)
 COPY . .
 
 EXPOSE 8080
 
-# Shell form so $PORT expands; binds correctly for Cloud Run
 CMD streamlit run Sentiment-Analysis-App.py \
     --server.address=0.0.0.0 \
     --server.port=$PORT \
