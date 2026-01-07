@@ -1263,6 +1263,21 @@ if selection == "Article Risk Review":
         if r.status_code != 200:
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    def get_csv_from_repo(OWNER, REPO, path):
+        headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {token}",
+        }
+        url = f"https://api.github.com/repos/{OWNER}/{REPO}/contents/{path}"
+        r = requests.get(url, headers = headers)
+        if r.status_code != 200:
+            raise RuntimeError(f"GitHub API Error {r.status_code}: {r.text}")
+
+        content = r.json()
+        if content.get("encoding") != 'base64':
+            raise RuntimeError("Unexpected encoding")
+        decoded = base64.base64decode(content['content'])
+        return pd.read_csv(io.BytesIO(decoded), compression = 'gzip')
     @st.cache_data
     def load_subtopic_to_main_label_map(auto_path: str = "Model_training/topics_BERT_auto.json") -> dict[int, str]:
         try:
@@ -1360,6 +1375,22 @@ if selection == "Article Risk Review":
         if c in st.session_state.articles.columns:
             st.session_state.articles[c] = pd.to_numeric(st.session_state.articles[c], errors = 'coerce')
 
+    stories = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_stories.csv.gz')
+    dropdown = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_dropdown.csv.gz')
+
+    dropdown['Published_utc'] = pd.to_datetime(dropdown['Published_utc'], errors = 'coerce', utc=True)
+
+    story_ids = set(stories['story_id'].dropna())
+    
+    stories_timeline = stories.copy()
+    stories_timeline['item_type'] = 'story'
+    stories_timeline['Published'] = pd.to_datetime(stories_timeline['last_seen'], utc=True)
+    stories_timeline['Title'] = stories_timeline['canonical_title']
+    stories_timeline['Content'] = stories_timeline['summary']
+    stories_timeline['Link'] = None
+    stories_timeline['Reviewed'] = pd.NA
+    stories_timeline['risk_label'] = stories_timeline.get('risk_label', None)
+
     ##adding to push changes to the Github repo
     def push_file_to_github(local_path:str, repo:str, dest_path:str, branch:str = "main", token:str|None = None):
         token = os.getenv('GITHUB_TOKEN')
@@ -1416,9 +1447,23 @@ if selection == "Article Risk Review":
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
     filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
-    filtered_df = filtered_df.drop_duplicates(subset=['Title'])
-    filtered_df = filtered_df[~(filtered_df['Predicted_Risks_new'].astype(str).str.contains(r'\bno\s*risk\b', case = False, regex = True))]
-    filtered_df = filtered_df[~(filtered_df['Predicted_Risks_new'].astype(str).str.contains(r'\bleadership\s*missteps\b', case = False, regex = True))]
+    filtered_df = filtered_df.merge(dropdown[['Link','story_id']], on = 'Link', how = 'left')
+    filtered_df['item_type'] = 'article'
+    filtered_df['claimed_by_story'] = filtered_df['story_id'].isin(story_ids)
+    filtered_df = filtered_df[
+    ~filtered_df['claimed_by_story']
+    ]
+
+    filtered_df = pd.concat(
+        [
+            stories_timeline,   # ALL stories
+            filtered_df.drop_duplicates(subset=[['Title', 'Link']], keep ='last')    # ONLY articles not in stories
+        ],
+        ignore_index=True,
+        sort=False
+    )
+
+
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
     elif status_choice == 'Reviewed only':
@@ -1510,18 +1555,104 @@ if selection == "Article Risk Review":
         except Exception as e:
             return e
 
+    articles_by_story = {
+                    k: v.sort_values('Published_utc', ascending = False) for k, v in dropdown.groupby('story_id')
+                }
+    
     for _, article in page_df.iterrows():
-        reviewed = bool(int(article.get('Reviewed', 0)))
-        badge = "✅ Reviewed" if reviewed else "Not reviewed"
-        title = str(article.get("Title", ""))[:100]
-
-
-        raw = article.get("Predicted_Risks_new", "[]")
-        if isinstance(raw, list):
-            predicted = [str(x).strip() for x in raw if str(x).strip()]
-        elif isinstance(raw, str):
-            s = raw.strip()
-            predicted = []
+        if article.get('item_type') == 'story':
+            story = article
+                
+            
+            with st.expander(f"{story['Title']}..."):
+                st.markdown(story['Content'])
+                w = {
+                'Recency': 0.15,
+                'Source_Accuracy': 0.10,
+                'Impact_Score': 0.35,
+                'Acceleration_value': 0.25,
+                'Location': 0.05,
+                'Industry_Risk': 0.05,
+                'Frequency_Score': 0.05
+                }
+                weight_sum = sum(w.values())
+        
+                num = (
+                    float(story['avg_recency']) * w['Recency'] +
+                    float(story['avg_source_accuracy']) * w['Source_Accuracy'] +
+                    float(story['avg_impact_score']) * w['Impact_Score'] +
+                    float(story['avg_acceleration']) * w['Acceleration_value'] +
+                    float(story['avg_location']) * w['Location'] +
+                    float(story['avg_industry_risk']) * w['Industry_Risk'] +
+                    float(story['avg_frequency']) * w['Frequency_Score']
+                )
+                story['Risk_Score_y'] = (num / weight_sum)
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown('**Risk Score** ')
+                    st.markdown(story['Risk_Score_y'])
+        
+                # --- Quick review toggle ---
+        
+                st.markdown("**Predicted Risks:** " + ((story['risk_label']) if story['risk_label'] else "No Risk"))
+        
+                tab1, tab2, tab3 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels', 'View Articles'])
+                with tab1:
+                    col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
+                    with col1:
+                        st.metric('Recency', story['avg_recency'])
+                    with col2:
+                        st.metric('Acceleration', story['avg_acceleration'])
+                    with col3:
+                        st.metric('Source Accuracy', story['avg_source_accuracy'])
+                    with col4:
+                        st.metric('Impact Score', story['avg_impact_score'])
+                    with col5:
+                        st.metric('Location', story['avg_location'])
+                    with col6:
+                        st.metric('Industry Risk', story['avg_industry_risk'])
+                    with col7:
+                        st.metric('Frequency', story['avg_frequency'])
+                with tab3:
+                    sid = story['story_id']
+                    if sid not in articles_by_story:
+                        st.info("No articles found for this story.")
+                    else:
+                        articles = articles_by_story[sid]
+        
+                        st.markdown(f"**{len(articles)} articles found for this story:**")
+        
+                        for _, art in articles.iterrows():
+                            st.markdown('---')
+                            st.markdown(f"### {art['Title']}")
+                            st.markdown(f"**Published:** {art['Published_utc']}")
+                            st.markdown(f"**Source:** {art.get('Source', 'Unknown')}")
+                            st.markdown(f"**Link:** {art['Link']}")
+                            if 'Risk_Score' in art:
+                                st.markdown("---")
+                                st.markdown("**Article Signals**")
+                                st.caption(
+                                    f"""
+                                    Risk: {art.get('Risk_Score', '—')} | 
+                                    Recency: {art.get('Recency', '—')} | 
+                                    Acceleration: {art.get('Acceleration_value', '—')} | 
+                                    Frequency: {art.get('Frequency_Score', '—')}
+                                    """
+                                )
+            continue
+        else:
+            row_id = hash(article.get('Link', article.get('Title')))
+            reviewed = bool(int(article.get('Reviewed', 0)))
+            badge = "✅ Reviewed" if reviewed else "Not reviewed"
+            title = str(article.get("Title", ""))[:100]
+        
+        
+            raw = article.get("Predicted_Risks_new", "[]")
+            if isinstance(raw, list):
+                predicted = [str(x).strip() for x in raw if str(x).strip()]
+            elif isinstance(raw, str):
+                s = raw.strip()
+                predicted = []
         
             # 1) Try JSON (double-quoted lists)
             if s.startswith('[') and s.endswith(']'):
@@ -1550,22 +1681,24 @@ if selection == "Article Risk Review":
             # 4) Normalize explicit "No Risk"
             if not predicted or all(p.lower() in ("no risk","none") for p in predicted):
                 predicted = ["No Risk"]
-        else:
-            predicted = ["No Risk"]
-
+            else:
+                predicted = ["No Risk"]
+    
         if not match_any(predicted, filtered_risks):
             continue
-
+    
         title = str(article.get("Title", ""))[:100]
-
+    
         if title:
-
+    
             tid = coerce_topic_scalar(article.get('Topic'))
             article['Topic'] = tid
-
+    
             article['Topic_name'] = subtopic_to_main.get(tid, name_map.get(tid, 'Unlabeled Topic'))
             if tid in hidden_topic_ids:
                 continue
+            
+        
             with st.expander(f"{badge} — {title}..."):
                 st.markdown(f"[Read full article]({article['Link']})")
                 st.write(article['Content'][:1000])
@@ -1631,137 +1764,137 @@ if selection == "Article Risk Review":
                 with c2:
                     if st.button('Hide this topic', key = f'hide_topic_{tid}_{row_id}'):
                         if tid != -1:
-                            hidden_topic_ids.add(int(tid))
-                            save_hidden_topics(hidden_topic_ids)
-                            st.success(f"Hid topic {tid} - {article['Topic_name']}")
-                            st.rerun()
-
-                shown = [str(p) for p in predicted if str(p).strip()]
-
-                st.markdown("**Predicted Risks:** " + (", ".join(shown) if shown else "No Risk"))
-
-
-                tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
-                with tab1:
-                    col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
-                    with col1:
-                        st.metric('Recency', article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency'])
-                    with col2:
-                        st.metric('Acceleration', article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value'])
-                    with col3:
-                        st.metric('Source Accuracy', article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy'])
-                    with col4:
-                        st.metric('Impact Score', article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score'])
-                    with col5:
-                        st.metric('Location', article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location'])
-                    with col6:
-                        st.metric('Industry Risk', article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk'])
-                    with col7:
-                        st.metric('Frequency', article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score'])
-
-                    with tab2:
-                        options = [0.0, 1.0,2.0,3.0,4.0,5.0]
-                        with st.form(f"manual_edit_form_{row_id}"):
-                            raw = risks_data.get('new_risks', risks_data) if isinstance(risks_data, dict) else risks_data
-                            categories = {}
-                            if isinstance(raw, list):
-                                for item in raw:
-                                    if not isinstance(item, dict):
-                                        continue
-                                    for cat, entries in item.items():
-                                        names = []
-                                        for entry in entries:
-                                            if isinstance(entry, dict) and 'name' in entry:
-                                                names.append(str(entry['name']))
-                                            elif isinstance(entry, str):
-                                                names.append(entry)
-                                        if names:
-                                            categories[str(cat)] = names
-                            else:
-                                st.error('risks.json format unexpected : new_risks is not a list')
+                                hidden_topic_ids.add(int(tid))
+                                save_hidden_topics(hidden_topic_ids)
+                                st.success(f"Hid topic {tid} - {article['Topic_name']}")
+                                st.rerun()
+    
+                    shown = [str(p) for p in predicted if str(p).strip()]
+    
+                    st.markdown("**Predicted Risks:** " + (", ".join(shown) if shown else "No Risk"))
+    
+    
+                    tab1, tab2 = st.tabs(['View Risk Labels', 'Manually Update Risk Labels'])
+                    with tab1:
+                        col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
+                        with col1:
+                            st.metric('Recency', article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency'])
+                        with col2:
+                            st.metric('Acceleration', article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value'])
+                        with col3:
+                            st.metric('Source Accuracy', article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy'])
+                        with col4:
+                            st.metric('Impact Score', article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score'])
+                        with col5:
+                            st.metric('Location', article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location'])
+                        with col6:
+                            st.metric('Industry Risk', article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk'])
+                        with col7:
+                            st.metric('Frequency', article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score'])
+    
+                        with tab2:
+                            options = [0.0, 1.0,2.0,3.0,4.0,5.0]
+                            with st.form(f"manual_edit_form_{row_id}"):
+                                raw = risks_data.get('new_risks', risks_data) if isinstance(risks_data, dict) else risks_data
                                 categories = {}
-                            pairs = [(cat, risk_name) for cat, lst in categories.items() for risk_name in lst]
-
-                            if all(risk != 'No Risk' for _, risk in pairs):
-                                pairs.append(('General', 'No Risk'))
-                            if not pairs:
-                                st.warning('No risks loaded.')
-                                selected_risks = []
-                            else:
-                                pred_set = {str(p).strip().lower() for p in predicted if isinstance(p, str)}
-                                default_pair = next((pr for pr in pairs if pr[1].strip().lower() in pred_set), None)
-                                default_index = pairs.index(default_pair) if default_pair in pairs else 0
-                                #valid_defaults = [opt for opt in all_possible_risks if any(opt.lower() == str(p).lower() for p in predicted if isinstance(p, str))]
-                                #selected_risks = st.multiselect(
-                                 #   "Edit risks if necessary:",
-                                  #  options=all_possible_risks,
-                                   # default=valid_defaults,
-                                    #key=f"edit_{idx}"
-                                #)
-                                choice = st.selectbox(
-                                    "Edit risk if necessary (one selection):",
-                                    options = pairs,
-                                    index = default_index,
-                                    format_func=lambda pr: f"{pr[0]} ▸ {pr[1]}",
-                                    key = f"edit_c_{row_id}"
-                                )
-                                selected_risks = [choice[1]]
-                            col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
-                            with col1:
-                                upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{row_id}")
-                            with col2:
-                                upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{row_id}")
-                            with col3:
-                                upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{row_id}")
-                            with col4:
-                                upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{row_id}")
-                            with col5:
-                                upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{row_id}")
-                            with col6:
-                                upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{row_id}")
-                            with col7:
-                                upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{row_id}")
-
-                            st.markdown('Please provide a reason for the changes made to the risk labels:')
-                            reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{row_id}")
-                            submitted =  st.form_submit_button("Update Risk Labels")
-                            if submitted:
-                                new_row = article.copy()
-                                new_row = new_row.to_dict()
-
-                                new_row['Predicted_Risks_Upd'] = selected_risks
-                                new_row['Recency_Upd'] = upd_recency_value
-                                new_row['Acceleration_value_Upd'] = upd_acceleration_value
-                                new_row['Source_Accuracy_Upd'] = upd_source_accuracy
-                                new_row['Impact_Score_Upd']= upd_impact_score 
-                                new_row['Location_Upd']= upd_location 
-                                new_row['Industry_Risk_Upd'] = upd_industry_risk 
-                                new_row['Frequency_Score_Upd']= upd_frequency_score
-                                new_row['Change reason'] = reason
-                                new_row['Changed_at'] = pd.Timestamp.utcnow().isoformat(timespec = 'seconds')
-                                new_row['Changed_at'] = pd.to_datetime(new_row['Changed_at'], errors = 'coerce')
-                                new_row['Reviewed'] = 1
-                                new_row['Reviewed_at'] = pd.Timestamp.utcnow()
-
-                                st.session_state.change_log = pd.concat(
-                                    [st.session_state.change_log, pd.DataFrame([new_row])],
-                                    ignore_index = True
-                                )
-
-                                st.session_state.change_log.to_csv(change_log_path, index = False)
-                                try:
-                                    resp = push_file_to_github(change_log_path, repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                              dest_path = 'Model_training/BERTopic_changes.csv', branch = 'main')
-                                    changes = pd.read_csv('Model_training/BERTopic_changes.csv')
-                                    res = pd.read_csv('BERTopic_results.csv')
-                                    Change_timestamp = 'Changed_at'
-                                    changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
-
-
-                                    st.success('Saved changes')
-                                except Exception as e:
-                                    st.error(f"Github failed to push: {e}")
-
+                                if isinstance(raw, list):
+                                    for item in raw:
+                                        if not isinstance(item, dict):
+                                            continue
+                                        for cat, entries in item.items():
+                                            names = []
+                                            for entry in entries:
+                                                if isinstance(entry, dict) and 'name' in entry:
+                                                    names.append(str(entry['name']))
+                                                elif isinstance(entry, str):
+                                                    names.append(entry)
+                                            if names:
+                                                categories[str(cat)] = names
+                                else:
+                                    st.error('risks.json format unexpected : new_risks is not a list')
+                                    categories = {}
+                                pairs = [(cat, risk_name) for cat, lst in categories.items() for risk_name in lst]
+    
+                                if all(risk != 'No Risk' for _, risk in pairs):
+                                    pairs.append(('General', 'No Risk'))
+                                if not pairs:
+                                    st.warning('No risks loaded.')
+                                    selected_risks = []
+                                else:
+                                    pred_set = {str(p).strip().lower() for p in predicted if isinstance(p, str)}
+                                    default_pair = next((pr for pr in pairs if pr[1].strip().lower() in pred_set), None)
+                                    default_index = pairs.index(default_pair) if default_pair in pairs else 0
+                                    #valid_defaults = [opt for opt in all_possible_risks if any(opt.lower() == str(p).lower() for p in predicted if isinstance(p, str))]
+                                    #selected_risks = st.multiselect(
+                                     #   "Edit risks if necessary:",
+                                      #  options=all_possible_risks,
+                                       # default=valid_defaults,
+                                        #key=f"edit_{idx}"
+                                    #)
+                                    choice = st.selectbox(
+                                        "Edit risk if necessary (one selection):",
+                                        options = pairs,
+                                        index = default_index,
+                                        format_func=lambda pr: f"{pr[0]} ▸ {pr[1]}",
+                                        key = f"edit_c_{row_id}"
+                                    )
+                                    selected_risks = [choice[1]]
+                                col1, col2, col3, col4, col5, col6, col7 =  st.columns(7)
+                                with col1:
+                                    upd_recency_value = st.number_input('Recency Risk', min_value = 0.0, max_value = 5.0, step = 1.0, value= float(article['Recency_Upd'] if pd.notna(article['Recency_Upd']) else article['Recency']), key =f"recency_input_{row_id}")
+                                with col2:
+                                    upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Acceleration_value_Upd'] if pd.notna(article['Acceleration_value_Upd']) else article['Acceleration_value']),key =f"acceleration_input_{row_id}")
+                                with col3:
+                                    upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(article['Source_Accuracy_Upd'] if pd.notna(article['Source_Accuracy_Upd']) else article['Source_Accuracy']),key =f"source_input_{row_id}")
+                                with col4:
+                                    upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Impact_Score_Upd'] if pd.notna(article['Impact_Score_Upd']) else article['Impact_Score']),key =f"impact_input_{row_id}")
+                                with col5:
+                                    upd_location=st.number_input('Location Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Location_Upd'] if pd.notna(article['Location_Upd']) else article['Location']),key =f"location_input_{row_id}")
+                                with col6:
+                                    upd_industry_risk = st.number_input('Industry Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Industry_Risk_Upd'] if pd.notna(article['Industry_Risk_Upd']) else article['Industry_Risk']),key =f"industry_input_{row_id}")
+                                with col7:
+                                    upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(article['Frequency_Score_Upd'] if pd.notna(article['Frequency_Score_Upd']) else article['Frequency_Score']),key =f"frequency_input_{row_id}")
+    
+                                st.markdown('Please provide a reason for the changes made to the risk labels:')
+                                reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{row_id}")
+                                submitted =  st.form_submit_button("Update Risk Labels")
+                                if submitted:
+                                    new_row = article.copy()
+                                    new_row = new_row.to_dict()
+    
+                                    new_row['Predicted_Risks_Upd'] = selected_risks
+                                    new_row['Recency_Upd'] = upd_recency_value
+                                    new_row['Acceleration_value_Upd'] = upd_acceleration_value
+                                    new_row['Source_Accuracy_Upd'] = upd_source_accuracy
+                                    new_row['Impact_Score_Upd']= upd_impact_score 
+                                    new_row['Location_Upd']= upd_location 
+                                    new_row['Industry_Risk_Upd'] = upd_industry_risk 
+                                    new_row['Frequency_Score_Upd']= upd_frequency_score
+                                    new_row['Change reason'] = reason
+                                    new_row['Changed_at'] = pd.Timestamp.utcnow().isoformat(timespec = 'seconds')
+                                    new_row['Changed_at'] = pd.to_datetime(new_row['Changed_at'], errors = 'coerce')
+                                    new_row['Reviewed'] = 1
+                                    new_row['Reviewed_at'] = pd.Timestamp.utcnow()
+    
+                                    st.session_state.change_log = pd.concat(
+                                        [st.session_state.change_log, pd.DataFrame([new_row])],
+                                        ignore_index = True
+                                    )
+    
+                                    st.session_state.change_log.to_csv(change_log_path, index = False)
+                                    try:
+                                        resp = push_file_to_github(change_log_path, repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                                  dest_path = 'Model_training/BERTopic_changes.csv', branch = 'main')
+                                        changes = pd.read_csv('Model_training/BERTopic_changes.csv')
+                                        res = pd.read_csv('BERTopic_results.csv')
+                                        Change_timestamp = 'Changed_at'
+                                        changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
+    
+    
+                                        st.success('Saved changes')
+                                    except Exception as e:
+                                        st.error(f"Github failed to push: {e}")
+    
 if selection == "Risk/Event Detector":
     import streamlit as st
     import pdfplumber
