@@ -1447,13 +1447,14 @@ if selection == "Article Risk Review":
     base_df = st.session_state.articles
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    filtered_df = base_df[base_df['University Label'].astype(str).str.strip().isin(["1","1.0","True","true"])].copy()
+    filtered_df = base_df.copy()
     filtered_df = filtered_df.merge(dropdown[['Link','story_id']], on = 'Link', how = 'left')
-    filtered_df['item_type'] = 'article'
     filtered_df['claimed_by_story'] = filtered_df['story_id'].isin(story_ids)
     filtered_df = filtered_df[
     ~filtered_df['claimed_by_story']
     ]
+    filtered_df['item_type'] = 'article'
+    
 
     filtered_df = pd.concat(
         [
@@ -1466,7 +1467,7 @@ if selection == "Article Risk Review":
 
 
     if status_choice == 'Unreviewed only':
-        filtered_df = filtered_df[filtered_df['Reviewed'] != 1]
+        filtered_df = filtered_df[(filtered_df['item_type'] == 'story') | (filtered_df['Reviewed'] != 1)]
     elif status_choice == 'Reviewed only':
         keys = ['Link'] if ('Link' in base_df.columns and 'Link' in st.session_state.change_log.columns) else ['Title']
         ch = st.session_state.change_log.copy()
@@ -1490,7 +1491,7 @@ if selection == "Article Risk Review":
     start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce', utc = True)
-    filtered_df = filtered_df[filtered_df['Published'].between(start_date, end_date, inclusive = 'both')]
+    filtered_df = filtered_df[(filtered_df['item_type'] == 'story')|(filtered_df['Published'].between(start_date, end_date, inclusive = 'both'))]
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
 
     with open('Model_training/risks.json', 'r') as f:
@@ -1682,11 +1683,10 @@ if selection == "Article Risk Review":
             # 4) Normalize explicit "No Risk"
             if not predicted or all(p.lower() in ("no risk","none") for p in predicted):
                 predicted = ["No Risk"]
-            else:
-                predicted = ["No Risk"]
-    
-        if not match_any(predicted, filtered_risks):
-            continue
+
+        if article['item_type'] == 'article':
+            if not match_any(predicted, filtered_risks):
+                continue
     
         title = str(article.get("Title", ""))[:100]
     
