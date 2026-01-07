@@ -1,5 +1,6 @@
 import numpy as np
-import os, io
+import os
+import io
 import json
 import time
 import random
