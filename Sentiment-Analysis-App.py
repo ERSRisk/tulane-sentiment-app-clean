@@ -1266,19 +1266,13 @@ if selection == "Article Risk Review":
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     def get_csv_from_repo(OWNER, REPO, path):
         headers = {
-        "Accept": "application/vnd.github+json",
+        "Accept": "application/vnd.github.raw",
         "Authorization": f"token {token}",
         }
-        url = f"https://api.github.com/repos/{OWNER}/{REPO}/contents/{path}"
-        r = requests.get(url, headers = headers)
-        if r.status_code != 200:
-            raise RuntimeError(f"GitHub API Error {r.status_code}: {r.text}")
-
-        content = r.json()
-        if content.get("encoding") != 'base64':
-            raise RuntimeError("Unexpected encoding")
-        decoded = base64.base64decode(content['content'])
-        return pd.read_csv(io.BytesIO(decoded), compression = 'gzip')
+        api_url = f"https://api.gthub.com/repos/{OWNER}/{REPO}/contents/{path}?ref=main"
+        r= requests.get(api_url, headers = headers)
+        r.raise_for_status()
+        return pd.read_csv(io.BytesIO(r.content), compression = 'gzip', low_memory = False)
     @st.cache_data
     def load_subtopic_to_main_label_map(auto_path: str = "Model_training/topics_BERT_auto.json") -> dict[int, str]:
         try:
