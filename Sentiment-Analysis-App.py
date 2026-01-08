@@ -1448,19 +1448,17 @@ if selection == "Article Risk Review":
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
     filtered_df = base_df.copy()
-    filtered_df = filtered_df.merge(dropdown[['Link','story_id']], on = 'Link', how = 'left')
-    filtered_df['claimed_by_story'] = filtered_df['story_id'].isin(story_ids)
-    filtered_df = filtered_df[
-    ~filtered_df['claimed_by_story']
-    ]
-    filtered_df['item_type'] = 'article'
-    
+    articles_df = articles_df.merge(dropdown[['Link', 'story_id']], on = 'Link', how = 'left')
+
+    articles_df = articles_df[~articles_df['story_id'].isin(story_ids)]
+    articles_df['item_type'] = 'article'
+
+    stories_df = stories_timeline.copy()
+    stories_df['item_type'] = 'story'
 
     filtered_df = pd.concat(
         [
-            stories_timeline,   # ALL stories
-            filtered_df.drop_duplicates(subset=[['Title', 'Link']], keep ='last')    # ONLY articles not in stories
-        ],
+            stories-df, articles_df],
         ignore_index=True,
         sort=False
     )
