@@ -1448,6 +1448,7 @@ if selection == "Article Risk Review":
     #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
     #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
     filtered_df = base_df.copy()
+    articles_df = base_df.copy()
     articles_df = articles_df.merge(dropdown[['Link', 'story_id']], on = 'Link', how = 'left')
 
     articles_df = articles_df[~articles_df['story_id'].isin(story_ids)]
