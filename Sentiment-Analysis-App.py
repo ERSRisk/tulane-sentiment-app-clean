@@ -1459,7 +1459,7 @@ if selection == "Article Risk Review":
 
     filtered_df = pd.concat(
         [
-            stories-df, articles_df],
+            stories_df, articles_df],
         ignore_index=True,
         sort=False
     )
