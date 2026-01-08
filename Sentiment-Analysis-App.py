@@ -1212,6 +1212,7 @@ if selection == "Article Risk Review":
     numeric_cols = ['Recency','Source_Accuracy','Impact_Score','Acceleration_value',
                 'Location','Industry_Risk','Frequency_Score','Risk_Score','Probability']
     hidden_file = Path('Model_training/hidden_topics.json')
+    st.sidebar.error("🚨 NEW BUILD MARKER — SHOULD BE VISIBLE 🚨")
 
     def atomic_write_json(path: Path, data: dict):
         path.parent.mkdir(parents=True, exist_ok=True)
