@@ -1441,27 +1441,27 @@ if selection == "Article Risk Review":
         ['Unreviewed only', 'Reviewed only', 'All'],
         index = 0
     )
-    base_df = st.session_state.articles
-    #articles = articles[articles['Published']> start_date.strftime('%Y-%m-%d')]
-    #articles = articles[articles['Published']< end_date.strftime('%Y-%m-%d')]
-    filtered_df = base_df.copy()
-    articles_df = base_df.copy()
-    articles_df = articles_df.merge(dropdown[['Link', 'story_id']], on = 'Link', how = 'left')
-
+    articles_df = st.session_state.articles.copy()
+    articles_df = articles_df.merge(
+    dropdown[['Link', 'story_id']],
+    on='Link',
+    how='left'
+    )
+    
+    # Remove articles that belong to a story
     articles_df = articles_df[~articles_df['story_id'].isin(story_ids)]
     articles_df['item_type'] = 'article'
-
+    
     stories_df = stories_timeline.copy()
     stories_df['item_type'] = 'story'
-
-    filtered_df = pd.concat(
-        [
-            stories_df, articles_df],
-        ignore_index=True,
-        sort=False
+    
+    timeline_df = pd.concat(
+    [stories_df, articles_df],
+    ignore_index=True,
+    sort=False
     )
 
-
+    filtered_df = timeline_df.copy()
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[(filtered_df['item_type'] == 'story') | (filtered_df['Reviewed'] != 1)]
     elif status_choice == 'Reviewed only':
@@ -1502,7 +1502,8 @@ if selection == "Article Risk Review":
         predicted = [str(p).strip().lower() for p in predicted if isinstance(p, str)]
         selected = [s.strip().lower() for s in selected]
         return any(p in selected for p in predicted)
-
+    st.sidebar.markdown("### DEBUG")
+    st.sidebar.write(filtered_df['item_type'].value_counts(dropna=False))
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
     max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
