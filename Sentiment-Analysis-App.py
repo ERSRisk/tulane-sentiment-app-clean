@@ -1379,7 +1379,10 @@ if selection == "Article Risk Review":
     
     stories_timeline = stories.copy()
     stories_timeline['item_type'] = 'story'
-    stories_timeline['Published'] = pd.to_datetime(stories_timeline['last_seen'], utc=True)
+    stories_timeline['Published'] = pd.to_datetime(stories_timeline['last_seen'], utc=True, infer_datetime_format = True)
+    if stories_timeline['Published'].isna().all():
+        st.error("All last_seen timestamps failed to parse")
+        st.stop()
     stories_timeline['Title'] = stories_timeline['canonical_title']
     stories_timeline['Content'] = stories_timeline['summary']
     stories_timeline['Link'] = None
@@ -1462,21 +1465,9 @@ if selection == "Article Risk Review":
     if status_choice == 'Unreviewed only':
         filtered_df = filtered_df[(filtered_df['item_type'] == 'story') | (filtered_df['Reviewed'] != 1)]
     elif status_choice == 'Reviewed only':
-        keys = ['Link'] if ('Link' in base_df.columns and 'Link' in st.session_state.change_log.columns) else ['Title']
-        ch = st.session_state.change_log.copy()
-
-        # ensure types
-        ch['Reviewed'] = pd.to_numeric(ch.get('Reviewed', 0), errors='coerce').fillna(0).astype(int)
-        if 'Changed_at' in ch.columns:
-            ch['Changed_at'] = pd.to_datetime(ch['Changed_at'], errors='coerce')
-
-        # keep last action per key, then only those with Reviewed==1
-        last = (ch.sort_values('Changed_at').drop_duplicates(keys, keep='last'))
-        last = last[last['Reviewed'] == 1]
-
-        # merge onto articles so schema/index are consistent for rendering
-        keep_cols = [c for c in ['Reviewed','Reviewed_at','Changed_at'] if c in last.columns]
-        filtered_df = base_df.merge(last[keys + keep_cols], on=keys, how='inner', suffixes = ('', '_chg'))
+        article_only = base_df.merge(last[keys + keep_cols], on=keys, how='inner', suffixes = ('', '_chg'))
+        article_only['item_type'] = 'article'
+        filtered_df = pd.concat([stories_df, article_only], ignore_index = True, sort = False)
         if 'Reviewed_chg' in filtered_df.columns:
             filtered_df['Reviewed'] = filtered_df['Reviewed_chg'].fillna(filtered_df.get('Reviewed', 0)).astype(int)
             filtered_df.drop(columns = [c for c in ['Reviewed_chg'] if c in filtered_df.columns], inplace = True)
@@ -1484,7 +1475,13 @@ if selection == "Article Risk Review":
     start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce', utc = True)
-    filtered_df = filtered_df[(filtered_df['item_type'] == 'story')|(filtered_df['Published'].between(start_date, end_date, inclusive = 'both'))]
+    stories_mask = filtered_df['item_type'] == 'story'
+    articles_mask = (
+        (filtered_df['item_type'] == 'article') &
+        (filtered_df['Published'].between(start_date, end_date, inclusive='both'))
+    )
+    
+    filtered_df = filtered_df[stories_mask | articles_mask]
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
 
     with open('Model_training/risks.json', 'r') as f:
