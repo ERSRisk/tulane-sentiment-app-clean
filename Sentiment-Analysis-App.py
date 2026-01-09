@@ -1271,10 +1271,10 @@ if selection == "Article Risk Review":
         "Accept": "application/vnd.github.raw",
         "Authorization": f"token {token}",
         }
-        api_url = f"https://api.gthub.com/repos/{OWNER}/{REPO}/contents/{path}?ref=main"
+        api_url = f"https://raw.githubusercontent.com/{OWNER}/{REPO}/main/{path}"
         r= requests.get(api_url, headers = headers)
         r.raise_for_status()
-        return pd.read_csv(io.BytesIO(r.content), compression = 'gzip', low_memory = False)
+        return pd.read_csv(io.BytesIO(r.content), low_memory = False)
     @st.cache_data
     def load_subtopic_to_main_label_map(auto_path: str = "Model_training/topics_BERT_auto.json") -> dict[int, str]:
         try:
