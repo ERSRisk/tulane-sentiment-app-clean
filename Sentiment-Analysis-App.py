@@ -1509,6 +1509,11 @@ if selection == "Article Risk Review":
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
     max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
+    story_positions = filtered_df.index[filtered_df['item_type'] == 'story'].tolist()
+    st.sidebar.write("First story position:", story_positions[0] if story_positions else None)
+    if story_positions:
+        first_story_page = (story_positions[0] // PAGE_SIZE) + 1
+        st.sidebar.write("First story is on page:", first_story_page)
 
     if 'page_num' not in st.session_state:
         st.session_state.page_num = 1
