@@ -1485,6 +1485,7 @@ if selection == "Article Risk Review":
     
     filtered_df = filtered_df[stories_mask | articles_mask]
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
+    filtered_df = filtered_df.reset_index(drop = True)
 
     with open('Model_training/risks.json', 'r') as f:
         risks_data = json.load(f)
@@ -1509,7 +1510,7 @@ if selection == "Article Risk Review":
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
     max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
-    story_positions = filtered_df.index[filtered_df['item_type'] == 'story'].tolist()
+    story_positions = np.flatnonzero(filtered_df['item_type'].eq('story').to_numpy()).tolist()
     st.sidebar.write("First story position:", story_positions[0] if story_positions else None)
     if story_positions:
         first_story_page = (story_positions[0] // PAGE_SIZE) + 1
@@ -1645,8 +1646,8 @@ if selection == "Article Risk Review":
                                     """
                                 )
             continue
-        if not rendered_anything:
-            st.info("No stories on this page")
+    if not rendered_anything:
+        st.info("No stories on this page")
         #else:
             #row_id = hash(article.get('Link', article.get('Title')))
             #reviewed = bool(int(article.get('Reviewed', 0)))
