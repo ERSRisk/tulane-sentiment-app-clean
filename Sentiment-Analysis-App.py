@@ -1558,13 +1558,18 @@ if selection == "Article Risk Review":
     articles_by_story = {
                     k: v.sort_values('Published_utc', ascending = False) for k, v in dropdown.groupby('story_id')
                 }
+
+    rendered_anything = False
     
     for _, article in page_df.iterrows():
         if article.get('item_type') == 'story':
+            rendered_anything = True
             story = article
-                
+            title = str(story.get('Title')).strip()
+            if not title or title.lower() == 'nan':
+                title = f"Story {story['story_id']}"
             
-            with st.expander(f"{story['Title']}..."):
+            with st.expander(title):
                 st.markdown(story['Content'])
                 w = {
                 'Recency': 0.15,
@@ -1640,6 +1645,8 @@ if selection == "Article Risk Review":
                                     """
                                 )
             continue
+        if not rendered_anything:
+            st.info("No stories on this page")
         #else:
             #row_id = hash(article.get('Link', article.get('Title')))
             #reviewed = bool(int(article.get('Reviewed', 0)))
