@@ -1561,7 +1561,7 @@ if selection == "Article Risk Review":
                 }
 
     rendered_anything = False
-    
+    page_df = page_df.drop_duplicates(subset = ['Link'], keep = 'last')
     for _, article in page_df.iterrows():
         if article.get('item_type') == 'story':
             rendered_anything = True
