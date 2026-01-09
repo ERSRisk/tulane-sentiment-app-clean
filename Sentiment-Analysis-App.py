@@ -1266,6 +1266,7 @@ if selection == "Article Risk Review":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     def get_csv_from_repo(OWNER, REPO, path):
+        token = _github_token()
         headers = {
         "Accept": "application/vnd.github.raw",
         "Authorization": f"token {token}",
