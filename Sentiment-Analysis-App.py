@@ -1561,7 +1561,26 @@ if selection == "Article Risk Review":
                 }
 
     rendered_anything = False
-    page_df = page_df.drop_duplicates(subset = ['Link'], keep = 'last')
+    page_df = page_df.copy()
+
+
+    page_df["Link_norm"] = page_df["Link"].astype(str).str.strip()
+    page_df.loc[page_df["Link"].isna(), "Link_norm"] = ""
+    page_df["dedupe_key"] = None
+    is_story = page_df["item_type"].eq("story")
+    is_article = page_df["item_type"].eq("article")
+    
+    page_df.loc[is_story, "dedupe_key"] = "story:" + page_df.loc[is_story, "story_id"].astype(str)
+    
+    page_df.loc[is_article, "dedupe_key"] = (
+        "article:" +
+        page_df.loc[is_article, "Link_norm"].where(page_df.loc[is_article, "Link_norm"] != "", None).fillna(
+            page_df.loc[is_article, "Title"].astype(str).fillna("") + "|" +
+            page_df.loc[is_article, "Published"].astype(str).fillna("")
+        )
+    )
+    
+    page_df = page_df.drop_duplicates(subset=["dedupe_key"], keep="last")
     for _, article in page_df.iterrows():
         if article.get('item_type') == 'story':
             rendered_anything = True
@@ -1644,8 +1663,7 @@ if selection == "Article Risk Review":
                                     Acceleration: {art.get('Acceleration_value', '—')} | 
                                     Frequency: {art.get('Frequency_Score', '—')}
                                     """
-                                )
-            continue    
+                                )  
         else:
             row_id = hash(article.get('Link', article.get('Title')))
             reviewed = bool(int(article.get('Reviewed', 0)))
