@@ -1722,7 +1722,7 @@ if selection == "Article Risk Review":
                         with col2:
                             upd_acceleration_value = st.number_input('Acceleration Risk',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(story['Acceleration_value_Upd'] if pd.notna(story['Acceleration_value_Upd']) else story['avg_acceleration']), key =f"acceleration_input_{story['story_id']}")
                         with col3:
-                            upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(story['Source_Accuracy_Upd'] if pd.notna(story['Source_Accuracy_Upd']) else story['avg_source_accurary']), key =f"source_input_{story['story_id']}")
+                            upd_source_accuracy =st.number_input('Source Accuracy',  min_value=0.0, max_value = 5.0, step = 1.0, value= float(story['Source_Accuracy_Upd'] if pd.notna(story['Source_Accuracy_Upd']) else story['avg_source_accuracy']), key =f"source_input_{story['story_id']}")
                         with col4:
                             upd_impact_score = st.number_input('Impact Score',  min_value=0.0, max_value = 5.0, step = 1.0, value=float(story['Impact_Score_Upd'] if pd.notna(story['Impact_Score_Upd']) else story['avg_impact_score']), key =f"impact_input_{story['story_id']}")
                         with col5:
