@@ -1507,6 +1507,26 @@ if selection == "Article Risk Review":
         return any(p in selected for p in predicted)
     st.sidebar.markdown("### DEBUG")
     st.sidebar.write(filtered_df['item_type'].value_counts(dropna=False))
+    filtered_df["Link_norm"] = filtered_df["Link"].astype(str).str.strip()
+    filtered_df.loc[filtered_df["Link"].isna(), "Link_norm"] = ""
+    
+    filtered_df["dedupe_key"] = None
+    is_story = filtered_df["item_type"].eq("story")
+    is_article = filtered_df["item_type"].eq("article")
+    
+    filtered_df.loc[is_story, "dedupe_key"] = "story:" + filtered_df.loc[is_story, "story_id"].astype(str)
+    
+    filtered_df.loc[is_article, "dedupe_key"] = (
+        "article:" +
+        filtered_df.loc[is_article, "Link_norm"].where(
+            filtered_df.loc[is_article, "Link_norm"] != "",
+            filtered_df.loc[is_article, "Title"].astype(str) + "|" +
+            filtered_df.loc[is_article, "Published"].astype(str)
+        )
+    )
+    
+    filtered_df = filtered_df.drop_duplicates(subset=["dedupe_key"], keep="last")
+
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
     max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
@@ -1559,28 +1579,15 @@ if selection == "Article Risk Review":
     articles_by_story = {
                     k: v.sort_values('Published_utc', ascending = False) for k, v in dropdown.groupby('story_id')
                 }
-
-    rendered_anything = False
-    page_df = page_df.copy()
-
-
-    page_df["Link_norm"] = page_df["Link"].astype(str).str.strip()
-    page_df.loc[page_df["Link"].isna(), "Link_norm"] = ""
-    page_df["dedupe_key"] = None
-    is_story = page_df["item_type"].eq("story")
-    is_article = page_df["item_type"].eq("article")
-    
-    page_df.loc[is_story, "dedupe_key"] = "story:" + page_df.loc[is_story, "story_id"].astype(str)
-    
-    page_df.loc[is_article, "dedupe_key"] = (
-        "article:" +
-        page_df.loc[is_article, "Link_norm"].where(page_df.loc[is_article, "Link_norm"] != "", None).fillna(
-            page_df.loc[is_article, "Title"].astype(str).fillna("") + "|" +
-            page_df.loc[is_article, "Published"].astype(str).fillna("")
+    if filtered_risks:
+        mask = (
+            (filtered_df["item_type"] == "story") |
+            filtered_df["Predicted_Risks_new"].apply(
+                lambda x: match_any(x, filtered_risks)
+            )
         )
-    )
-    
-    page_df = page_df.drop_duplicates(subset=["dedupe_key"], keep="last")
+        filtered_df = filtered_df[mask]
+    rendered_anything = False
     for _, article in page_df.iterrows():
         if article.get('item_type') == 'story':
             rendered_anything = True
@@ -1707,9 +1714,6 @@ if selection == "Article Risk Review":
                 predicted = ["No Risk"]
 
         if article['item_type'] == 'article':
-            if not match_any(predicted, filtered_risks):
-                continue
-    
         title = str(article.get("Title", ""))[:100]
     
         if title:
