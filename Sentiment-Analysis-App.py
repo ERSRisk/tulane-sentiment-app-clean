@@ -1373,15 +1373,15 @@ if selection == "Article Risk Review":
 
     stories = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_stories.csv.gz')
     dropdown = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_dropdown.csv.gz')
-    canonical_stories =get_csv_from_repo(OWNER, REPO, 'Model_training/Canonical_Stories_with_Summaries.csv')
+    #canonical_stories =get_csv_from_repo(OWNER, REPO, 'Model_training/Canonical_Stories_with_Summaries.csv')
 
     dropdown['Published_utc'] = pd.to_datetime(dropdown['Published_utc'], errors = 'coerce', utc=True)
 
     story_ids = set(stories['story_id'].dropna())
     
     stories_timeline = stories.copy()
-    stories_timeline = stories_timeline.drop(columns = ['canonical_title', 'summary'])
-    stories_timeline = stories_timeline.merge(canonical_stories[['story_id', 'canonical_title', 'summary']], on = 'story_id', how = 'left')
+    #stories_timeline = stories_timeline.drop(columns = ['canonical_title', 'summary'])
+    #stories_timeline = stories_timeline.merge(canonical_stories[['story_id', 'canonical_title', 'summary']], on = 'story_id', how = 'left')
     stories_timeline['item_type'] = 'story'
     stories_timeline['Published'] = pd.to_datetime(stories_timeline['last_seen'], utc=True, infer_datetime_format = True)
     if stories_timeline['Published'].isna().all():
