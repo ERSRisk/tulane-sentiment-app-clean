@@ -1733,7 +1733,7 @@ if selection == "Article Risk Review":
                             upd_frequency_score = st.number_input('Frequency Score', min_value=0.0, max_value = 5.0, step = 1.0, value=float(story['Frequency_Score_Upd'] if pd.notna(story['Frequency_Score_Upd']) else story['avg_frequency']), key =f"frequency_input_{story['story_id']}")
 
                         st.markdown('Please provide a reason for the changes made to the risk labels:')
-                        reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{row_id}")
+                        reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{story['story_id']}")
                         submitted =  st.form_submit_button("Update Risk Labels")
                         if submitted:
                             new_row = article.copy()
