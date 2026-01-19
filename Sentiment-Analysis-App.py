@@ -1739,27 +1739,39 @@ if selection == "Article Risk Review":
                         reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{story['story_id']}")
                         submitted =  st.form_submit_button("Update Risk Labels")
                         if submitted:
-                            new_row = article.copy()
-                            new_row = new_row.to_dict()
+                            full_df = pd.read_csv(change_log_path)
+                            mask = ((full_df['Title'] == article['Title']) &
+                                    (full_df['Content'] == article['Content']))
+                            if mask.any():
+                                base_row = full_df.loc[mask].sort_values('Changed_at').iloc[-1].to_dict()
+                            else:
+                                base_row = article.copy()
+                                if hasattr(base_row, 'to_dict'):
+                                    base_row = base_row.to_dict()
 
-                            new_row['Predicted_Risks_Upd'] = selected_risks
-                            new_row['Recency_Upd'] = upd_recency_value
-                            new_row['Acceleration_value_Upd'] = upd_acceleration_value
-                            new_row['Source_Accuracy_Upd'] = upd_source_accuracy
-                            new_row['Impact_Score_Upd']= upd_impact_score 
-                            new_row['Location_Upd']= upd_location 
-                            new_row['Industry_Risk_Upd'] = upd_industry_risk 
-                            new_row['Frequency_Score_Upd']= upd_frequency_score
-                            new_row['Change reason'] = reason
-                            new_row['Changed_at'] = pd.Timestamp.utcnow().isoformat(timespec = 'seconds')
-                            new_row['Changed_at'] = pd.to_datetime(new_row['Changed_at'], errors = 'coerce')
-                            new_row['Reviewed'] = 1
-                            new_row['Reviewed_at'] = pd.Timestamp.utcnow()
+                            base_row['Predicted_Risks_Upd'] = selected_risks
+                            base_row['Recency_Upd'] = upd_recency_value
+                            base_row['Acceleration_value_Upd'] = upd_acceleration_value
+                            base_row['Source_Accuracy_Upd'] = upd_source_accuracy
+                            base_row['Impact_Score_Upd'] = upd_impact_score
+                            base_row['Location_Upd'] = upd_location
+                            base_row['Industry_Risk_Upd'] = upd_industry_risk
+                            base_row['Frequency_Score_Upd'] = upd_frequency_score
+                            base_row['Change reason'] = reason
+                            base_row['Changed_at'] = pd.Timestamp.utcnow()
+                            base_row['Reviewed'] = 1
+                            base_row['Reviewed_at'] = pd.Timestamp.utcnow()
 
                             st.session_state.change_log = pd.concat(
-                                [st.session_state.change_log, pd.DataFrame([new_row])],
-                                ignore_index = True
+                                [st.session_state.change_log, pd.DataFrame([base_row])],
+                                ignore_index=True
                             )
+                            expected_cols = set(st.session_state.change_log.columns)
+                            row_cols = set(base_row.keys())
+                            
+                            if row_cols != expected_cols:
+                                st.error(f"Schema mismatch. Refusing to save.\nMissing: {expected_cols - row_cols}")
+                                st.stop()
 
                             st.session_state.change_log.to_csv(change_log_path, index = False)
                             try:
