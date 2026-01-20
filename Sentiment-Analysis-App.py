@@ -1756,8 +1756,7 @@ if selection == "Article Risk Review":
                         if submitted:
                             #st.write("This feature is not yet available since this is a story made up of several articles. It will be available within the next couple of days.")
                             full_story_df = pd.read_csv(story_change_log)
-                            mask = ((full_story_df['Title'] == story['Title']) &
-                                    (full_story_df['Content'] == story['Content']))
+                            mask = ((full_story_df['canonical_title'] == story['Title']))
                             if mask.any():
                                 base_row = full_story_df.loc[mask].sort_values('Changed_at').iloc[-1].to_dict()
                             else:
