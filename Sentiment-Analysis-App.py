@@ -1351,7 +1351,8 @@ if selection == "Article Risk Review":
             tmp['Reviewed_at'] = pd.NaT
             tmp['Last_changed_at'] = pd.NaT
             st.session_state.articles = tmp
-
+    stories = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_stories.csv.gz')
+    dropdown = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_dropdown.csv.gz')
     change_log_path = Path('Model_training') / 'BERTopic_changes.csv'
     change_log_path.parent.mkdir(parents=True, exist_ok = True)
     if "change_log" not in st.session_state:
@@ -1367,12 +1368,26 @@ if selection == "Article Risk Review":
                     'Change reason']
             st.session_state.change_log = pd.DataFrame(columns = base_cols + new_cols)
             st.session_state.change_log.to_csv(change_log_path, index = False)
+    story_change_log = Path('Model_training') / 'Story_changes.csv'
+    story_change_log.parent.mkdir(parents = True, exist_ok = True)
+    if "story_log" not in st.session_state:
+        if story_change_log.exists():
+            st.session_state.story_log = pd.read_csv(story_change_log)
+            for col, default in [('Reviewed', 0), ('Reviewed_at', pd.NaT)]:
+                if col not in st.session_state.story_log.columns:
+                    st.session_state.story_log[col] = default
+        else:
+            base_cols = list(stories.columns)
+            new_cols = ['Recency_Upd', 'Acceleration_value_Upd', 'Source_Accuracy_Upd',
+                    'Impact_Score_Upd', 'Location_Upd', 'Industry_Risk_Upd', 'Frequency_Score_Upd',
+                    'Change reason']
+            st.session_state.story_log = pd.DataFrame(columns = base_cols + new_cols)
+            st.session_state.story_log.to_csv(story_change_log, index = False)
     for c in numeric_cols:
         if c in st.session_state.articles.columns:
             st.session_state.articles[c] = pd.to_numeric(st.session_state.articles[c], errors = 'coerce')
 
-    stories = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_stories.csv.gz')
-    dropdown = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_dropdown.csv.gz')
+    
     #canonical_stories =get_csv_from_repo(OWNER, REPO, 'Model_training/Canonical_Stories_with_Summaries.csv')
 
     dropdown['Published_utc'] = pd.to_datetime(dropdown['Published_utc'], errors = 'coerce', utc=True)
@@ -1739,54 +1754,54 @@ if selection == "Article Risk Review":
                         reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{story['story_id']}")
                         submitted =  st.form_submit_button("Update Risk Labels")
                         if submitted:
-                            st.write("This feature is not yet available since this is a story made up of several articles. It will be available within the next couple of days.")
-                            #full_df = pd.read_csv(change_log_path)
-                            #mask = ((full_df['Title'] == article['Title']) &
-                            #        (full_df['Content'] == article['Content']))
-                            #if mask.any():
-                            #    base_row = full_df.loc[mask].sort_values('Changed_at').iloc[-1].to_dict()
-                            #else:
-                            #    base_row = article.copy()
-                            #    if hasattr(base_row, 'to_dict'):
-                            #        base_row = base_row.to_dict()
+                            #st.write("This feature is not yet available since this is a story made up of several articles. It will be available within the next couple of days.")
+                            full_story_df = pd.read_csv(story_change_log)
+                            mask = ((full_story_df['Title'] == article['Title']) &
+                                    (full_story_df['Content'] == article['Content']))
+                            if mask.any():
+                                base_row = full_story_df.loc[mask].sort_values('Changed_at').iloc[-1].to_dict()
+                            else:
+                                base_row = article.copy()
+                                if hasattr(base_row, 'to_dict'):
+                                    base_row = base_row.to_dict()
 
-                            #base_row['Predicted_Risks_Upd'] = selected_risks
-                            #base_row['Recency_Upd'] = upd_recency_value
-                            #base_row['Acceleration_value_Upd'] = upd_acceleration_value
-                            #base_row['Source_Accuracy_Upd'] = upd_source_accuracy
-                            #base_row['Impact_Score_Upd'] = upd_impact_score
-                            #base_row['Location_Upd'] = upd_location
-                            #base_row['Industry_Risk_Upd'] = upd_industry_risk
-                            #base_row['Frequency_Score_Upd'] = upd_frequency_score
-                            #base_row['Change reason'] = reason
-                            #base_row['Changed_at'] = pd.Timestamp.utcnow()
-                            #base_row['Reviewed'] = 1
-                            #base_row['Reviewed_at'] = pd.Timestamp.utcnow()
+                            base_row['Predicted_Risks_Upd'] = selected_risks
+                            base_row['Recency_Upd'] = upd_recency_value
+                            base_row['Acceleration_value_Upd'] = upd_acceleration_value
+                            base_row['Source_Accuracy_Upd'] = upd_source_accuracy
+                            base_row['Impact_Score_Upd'] = upd_impact_score
+                            base_row['Location_Upd'] = upd_location
+                            base_row['Industry_Risk_Upd'] = upd_industry_risk
+                            base_row['Frequency_Score_Upd'] = upd_frequency_score
+                            base_row['Change reason'] = reason
+                            base_row['Changed_at'] = pd.Timestamp.utcnow()
+                            base_row['Reviewed'] = 1
+                            base_row['Reviewed_at'] = pd.Timestamp.utcnow()
 
-                            #st.session_state.change_log = pd.concat(
-                            #    [st.session_state.change_log, pd.DataFrame([base_row])],
-                            #    ignore_index=True
-                            #)
-                            #expected_cols = set(st.session_state.change_log.columns)
-                            #row_cols = set(base_row.keys())
-                           # 
-                            #if row_cols != expected_cols:
-                            #    st.error(f"Schema mismatch. Refusing to save.\nMissing: {expected_cols - row_cols}")
-                            #    st.stop()
+                            st.session_state.story_log = pd.concat(
+                                [st.session_state.story_log, pd.DataFrame([base_row])],
+                                ignore_index=True
+                            )
+                            expected_cols = set(st.session_state.story_log.columns)
+                            row_cols = set(base_row.keys())
+                            
+                            if row_cols != expected_cols:
+                                st.error(f"Schema mismatch. Refusing to save.\nMissing: {expected_cols - row_cols}")
+                                st.stop()
 
-                            #st.session_state.change_log.to_csv(change_log_path, index = False)
-                            #try:
-                            #    resp = push_file_to_github(change_log_path, repo = 'ERSRisk/tulane-sentiment-app-clean',
-                            #                              dest_path = 'Model_training/BERTopic_changes.csv', branch = 'main')
-                            #    changes = pd.read_csv('Model_training/BERTopic_changes.csv')
-                            #    res = pd.read_csv('BERTopic_results.csv')
-                            #    Change_timestamp = 'Changed_at'
-                            #    changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
+                            st.session_state.story_log.to_csv(story_change_log, index = False)
+                            try:
+                                resp = push_file_to_github(story_change_log, repo = 'ERSRisk/tulane-sentiment-app-clean',
+                                                          dest_path = 'Model_training/Story_changes.csv', branch = 'main')
+                                changes = pd.read_csv('Model_training/Story_changes.csv')
+                                res = pd.read_csv('BERTopic_results.csv')
+                                Change_timestamp = 'Changed_at'
+                                changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
 
 
-                            #    st.success('Saved changes')
-                            #except Exception as e:
-                            #    st.error(f"Github failed to push: {e}")
+                                st.success('Saved changes')
+                            except Exception as e:
+                                st.error(f"Github failed to push: {e}")
             continue
         
         row_id = hash(article.get('Link', article.get('Title')))
