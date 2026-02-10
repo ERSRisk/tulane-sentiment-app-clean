@@ -1606,8 +1606,24 @@ if selection == "Article Risk Review":
     rendered_anything = False
     for _, article in page_df.iterrows():
         if article.get('item_type') == 'story':
+            
             rendered_anything = True
             story = article
+            raw = story.get("Predicted_Risks_new", "[]")
+
+            predicted = []
+            
+            if isinstance(raw, list):
+                predicted = [str(x).strip() for x in raw if str(x).strip()]
+            elif isinstance(raw, str):
+                s = raw.strip()
+                try:
+                    predicted = json.loads(s) if s.startswith('[') else [s]
+                except Exception:
+                    predicted = [s]
+            
+            if not predicted:
+                predicted = ["No Risk"]
             title = str(story.get('Title')).strip()
             if not title or title.lower() == 'nan':
                 title = f"Story {story['story_id']}"
