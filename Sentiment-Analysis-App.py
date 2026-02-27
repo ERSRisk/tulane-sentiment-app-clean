@@ -285,7 +285,7 @@ if selection == "External Risk Snapshot":
     if risk_events.empty:
         st.write("No events found for this risk category in the selected period.")
     else:
-        grouped = risk_events.groupby('Event_Label')
+        grouped = risk_events.groupby('Event_Label', sort = False)
     
         for event_label, group in grouped:
             row = group.iloc[0]  # event-level info
