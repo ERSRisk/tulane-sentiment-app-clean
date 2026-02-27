@@ -177,6 +177,8 @@ if selection == "External Risk Snapshot":
     high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
     emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
     persistent_count = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)].shape[0]
+    persistent_risks = snapshop[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Predicted_Risks_new']
+    persistent_risks_names = persistent_risks if len(persistent_risks) else "-"
     top_trending = snapshot.sort_values('trend', ascending=False).head(5)
     top_high = snapshot.sort_values('current_score', ascending=False).head(8)
     
@@ -196,7 +198,7 @@ if selection == "External Risk Snapshot":
     col1.metric("Total Events for Period", total_events)
     col2.metric("Highest Risk", f"{top_risk_score:.2f}", help = top_risk_name)
     col3.metric("Fastest Growth", f"{fastest_delta:.2f}", help = fastest_name)
-    col4.metric("Persistent High Risks", persistent_count)
+    col4.metric("Persistent High Risks", persistent_count, help = persistent_risks_names)
     
     st.divider()
     
@@ -310,6 +312,8 @@ if selection == "External Risk Snapshot":
                         st.markdown(f"**{article_row['Title']}**")
                     if pd.notna(article_row.get('Published_utc')):
                         st.caption(f"Published: {article_row['Published_utc']}")
+                    if pd.notna(article_row.get('Link')):
+                        st.markdown(f"**Link:** {article_row['Link']}")
                     if pd.notna(article_row.get('Content')):
                         st.write(article_row['Content'])
     
