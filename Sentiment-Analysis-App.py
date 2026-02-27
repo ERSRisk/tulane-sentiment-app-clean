@@ -73,7 +73,7 @@ def get_secrets(path, default = None):
 st.set_page_config(page_title="Tulane Risk Dashboard")
 st.sidebar.title("Navigation")
 st.sidebar.markdown("Select a tool:")
-selection = st.sidebar.selectbox("Choose a tool:", ["Article Risk Review","Risk Analysis Dashboard", "Unmatched Topic Analysis", "Risk/Event Detector"])
+selection = st.sidebar.selectbox("Choose a tool:", ["Article Risk Review","External Risk Snapshot", "Unmatched Topic Analysis", "Risk/Event Detector"])
 
 if "current_tab" not in st.session_state:
     st.session_state.current_tab = selection
@@ -85,6 +85,240 @@ if st.session_state.current_tab != selection:
         if key not in keys_to_keep:
             del st.session_state[key]
     st.session_state.current_tab = selection
+
+if selection == "External Risk Snapshot":
+    OWNER = 'ERSRisk'
+    REPO = 'Tulane-Sentiment-Analysis'
+    TAG = 'BERTopic_results'
+    ASSET = 'BERTopic_Streamlit.csv.gz'
+
+    @st.cache_data(show_spinner=True, ttl=1800)
+    def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
+        token = _github_token()
+        if not token:
+            raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
+
+        headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {token}",
+        }
+        rel = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}",
+        headers=headers, timeout=60
+        )
+        if rel.status_code != 200:
+        # show the real reason (401, 404, permissions)
+            raise RuntimeError(f"Release lookup {rel.status_code}: {rel.text[:300]}")
+
+        rel_json = rel.json()
+        asset_obj = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
+        if not asset_obj:
+            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'.")
+
+        url = asset_obj['browser_download_url']
+        r = requests.get(url, headers={"Authorization": f"token {token}", "Accept": "application/octet-stream"}, timeout=120)
+        if r.status_code != 200:
+            raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
+        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    
+    articles = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+    df = pd.read_csv("Model_training/final_risk_scores1.csv")
+    df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
+    
+    events = pd.read_csv("Model_training/ranked_events_risks1.csv")
+    events['Window'] = pd.to_datetime(events['Window'], errors = 'coerce')
+    
+    now = df['Window'].max()
+    
+    st.title('External Risk Snapshot')
+    
+    period_map = {
+        "Last Week": 7,
+        "Last Month": 30,
+        "Last 3 Months": 90,
+        "Last 6 Months": 180,
+        "Last Year": 365
+    }
+    
+    def severity_bucket(x: float) -> str:
+        if pd.isna(x):
+            return "-"
+        if x >= 4.0: return "Critical"
+        if x >= 3.0: return "Elevated"
+        if x >= 2.0: return "Monitor"
+        return "Low"
+    
+    time = st.sidebar.selectbox('Time period', ['Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
+    delta_days = period_map[time]
+    delta = timedelta(days = delta_days)
+    cutoff = pd.to_datetime(datetime.now()-delta)
+    
+    
+    
+    total_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')].shape[0]
+    
+    current_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')]
+    events_summary = current_events.groupby(['Window','Predicted_Risks_new'])['Title'].count().reset_index().rename(columns={'Title': 'Event_Count'})
+    
+    current_period = df[df['Window'] >= cutoff.strftime('%Y-%m-%d')]
+    previous_period = df[(df['Window'] >= (datetime.now() - 2*delta).strftime('%Y-%m-%d')) & (df['Window'] < (datetime.now() - delta).strftime('%Y-%m-%d'))]
+    current_scores = current_period.groupby('Predicted_Risks_new')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'current_score'})
+    previous_scores = previous_period.groupby('Predicted_Risks_new')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'previous_score'})
+    
+    snapshot = current_scores.merge(previous_scores, on='Predicted_Risks_new', how='left')
+    snapshot['trend'] = snapshot['current_score'] - snapshot['previous_score']
+    snapshot['is_new'] = snapshot['previous_score'].isna()
+    snapshot.loc[snapshot['previous_score'].isna(), 'trend'] = 0
+    snapshot['trend_display'] = snapshot['trend'].apply(lambda x: '🔺' if x > 0.2 else ('🔻' if x < -0.2 else ' '))
+    snapshot['severity_band'] = snapshot['current_score'].apply(severity_bucket)
+    snapshot = snapshot.merge(events_summary.groupby('Predicted_Risks_new')['Event_Count'].sum().reset_index(), on='Predicted_Risks_new', how='left')
+    
+    snapshot['risk_share_pct'] = (snapshot['current_score'] / snapshot['current_score'].sum()) * 100
+    total_score = snapshot['current_score'].sum()
+    high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
+    emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
+    persistent_count = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)].shape[0]
+    top_trending = snapshot.sort_values('trend', ascending=False).head(5)
+    top_high = snapshot.sort_values('current_score', ascending=False).head(8)
+    
+    df = df.merge(snapshot[['Predicted_Risks_new', 'trend_display', 'risk_share_pct', 'current_score']], on='Predicted_Risks_new', how='left')
+    df = df.merge(events_summary[['Predicted_Risks_new', 'Window', 'Event_Count']], on=['Predicted_Risks_new', 'Window'], how='left')
+    
+    top_risk = snapshot.sort_values('current_score', ascending=False).head(1)
+    top_risk_name = top_risk['Predicted_Risks_new'].iloc[0] if len(top_risk) else "-"
+    top_risk_score = top_risk['current_score'].iloc[0] if len(top_risk) else 0
+    
+    fastest = snapshot.sort_values('trend', ascending=False).head(1)
+    fastest_name = fastest['Predicted_Risks_new'].iloc[0] if len(fastest) else "-"
+    fastest_delta = fastest['trend'].iloc[0] if len(fastest) else 0
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    col1.metric("Total Events for Period", total_events)
+    col2.metric("Highest Risk", f"{top_risk_score:.2f}", help = top_risk_name)
+    col3.metric("Fastest Growth", f"{fastest_delta:.2f}", help = fastest_name)
+    col4.metric("Persistent High Risks", persistent_count)
+    
+    st.divider()
+    
+    st.subheader("Trending Risks")
+    trend_cols = st.columns(5)
+    for i, (_, row) in enumerate(top_trending.iterrows()):
+        if row['trend'] == 0:
+            continue
+        with trend_cols[i]:
+            st.metric(
+                label = row['Predicted_Risks_new'],
+                value = f"{row['current_score']:.2f}",
+                delta = f"{row['trend']:.2f}",
+            )
+    st.divider()
+    
+    new_risks = (
+        snapshot[snapshot['is_new']]
+        .sort_values('current_score', ascending=False)
+        .head(5)
+    )
+    
+    st.divider()
+    st.subheader("Newly Emerging Risks (Early Warning)")
+    
+    if new_risks.empty:
+        st.write("No new risks detected in this period.")
+    else:
+        new_cols = st.columns(min(5, len(new_risks)))
+    
+        for i, (_, row) in enumerate(new_risks.iterrows()):
+            with new_cols[i]:
+                st.metric(
+                    label=row['Predicted_Risks_new'],
+                    value=f"{row['current_score']:.2f}",
+                    delta="New",
+                )
+    
+    st.markdown('---')
+    st.markdown('### Risk Overview')
+    
+    table = snapshot.copy()
+    table = table[['Predicted_Risks_new', 'severity_band', 'current_score', 'trend_display', 'risk_share_pct', 'Event_Count', 'trend']]
+    table = table.sort_values(['current_score', 'trend'], ascending=[False, False])
+    
+    st.dataframe(
+        table, use_container_width = True, hide_index = True
+    )
+    
+    st.divider()
+    left, right = st.columns([1,2])
+    
+    with left:
+        selected_risk = st.selectbox('Select Risk Category', table['Predicted_Risks_new'].unique())
+        min_sev = st.slider('Minimum event severity', 0.0, 5.0, 2.5, 0.1)
+        search = st.text_input("Search headlines", "")
+    
+    with right:
+        rrow = snapshot[snapshot['Predicted_Risks_new'] == selected_risk].head()
+        if len(rrow):
+            rrow = rrow.iloc[0]
+            st.markdown(
+                f"**{selected_risk}** \nSeverity: {rrow['current_score']:.2f} ({rrow['severity_band']}) \nTrend vs Prior Period: {rrow['trend']} \n Event Count: {int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0} \n Share of Risk Signal: {rrow['risk_share_pct']:.1f}%"
+            )
+    
+    st.divider()
+    risk_events = events[(events['Predicted_Risks_new'] == selected_risk) & (events['Window'] >= (datetime.now() - delta).strftime('%Y-%m-%d'))]
+    
+    
+    if search.strip():
+        risk_events = risk_events[risk_events['Title'].str.contains(search, case=False, na=False)]
+    
+    driver_cols = ['Acceleration_value', 'Recency', 'Source_Accuracy', 'Impact_Score', 'Location', 'Industry_Risk', 'Frequency_Score']
+    
+    if driver_cols:
+        st.markdown("### What is driving this signal")
+        driver_summary = risk_events[driver_cols].mean().reset_index().rename(columns={'index': 'Driver', 0: 'Average_Contribution'})
+        st.dataframe(driver_summary, use_container_width=True)
+        
+    st.markdown('### Top Events Driving Signal')
+    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    
+    risk_events = risk_events.merge(articles[['Title', 'Content', 'Published_utc', 'Event_Label', 'Acceleration_value', 'Recency', 'Impact_Score', 'Industry_Risk', 'Location']], on='Event_Label', how='left')
+    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    
+    if risk_events.empty:
+        st.write("No events found for this risk category in the selected period.")
+    else:
+        grouped = risk_events.groupby('Event_Label')
+    
+        for event_label, group in grouped:
+            row = group.iloc[0]  # event-level info
+    
+            sev = float(row['Event_Severity'])
+            sev_tag = severity_bucket(sev)
+    
+            st.markdown(f"**{event_label}**")
+            st.caption(f"Severity: {sev:.2f} ({sev_tag})")
+            if "Content_trunc" in row.index and pd.notna(row['Content_trunc']):
+                st.write(row['Content_trunc'])
+            chips = []
+            for c in ['Acceleration_value', "Recency", "Impact_Score", "Industry_Risk", "Location"]:
+                if c in row.index and pd.notna(row[c]):
+                    chips.append(f"{c}: {row[c]:.2f}")
+            if chips:
+                st.caption(" | ".join(chips))
+    
+            with st.expander(f"Show {len(group)} Articles"):
+                for _, article_row in group.iterrows():
+                    if pd.notna(article_row.get('Title')):
+                        st.markdown(f"**{article_row['Title']}**")
+                    if pd.notna(article_row.get('Published_utc')):
+                        st.caption(f"Published: {article_row['Published_utc']}")
+                    if pd.notna(article_row.get('Content')):
+                        st.write(article_row['Content'])
+    
+                    st.markdown('---')
+    
+            st.markdown('---')
+        
+
 if selection == "Risk Analysis Dashboard":
     api_key = os.getenv('GEMINI_API_FREE')
     OWNER = 'ERSRisk'
