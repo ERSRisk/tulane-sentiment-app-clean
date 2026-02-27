@@ -1755,7 +1755,6 @@ if selection == "Article Risk Review":
         predicted = [str(p).strip().lower() for p in predicted if isinstance(p, str)]
         selected = [s.strip().lower() for s in selected]
         return any(p in selected for p in predicted)
-    st.sidebar.markdown("### DEBUG")
     filtered_df["Link_norm"] = filtered_df["Link"].astype(str).str.strip()
     filtered_df.loc[filtered_df["Link"].isna(), "Link_norm"] = ""
     
@@ -2134,10 +2133,6 @@ if selection == "Article Risk Review":
                     with col1:
                         st.markdown('**Risk Score** ')
                         st.markdown(article['Risk_Score_y'])
-                    with col2:
-                        st.markdown("**Topic:** ")
-                        st.markdown(article['Topic_name'])
-                    # --- Quick review toggle ---
                     c1, c2 = st.columns(2)
                     with c1:
                         if not reviewed:
