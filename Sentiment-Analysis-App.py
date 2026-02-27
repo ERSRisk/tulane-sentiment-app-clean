@@ -133,7 +133,6 @@ if selection == "External Risk Snapshot":
     st.title('External Risk Snapshot')
     
     period_map = {
-        "Last Week": 7,
         "Last Month": 30,
         "Last 3 Months": 90,
         "Last 6 Months": 180,
@@ -148,7 +147,7 @@ if selection == "External Risk Snapshot":
         if x >= 2.0: return "Monitor"
         return "Low"
     
-    time = st.sidebar.selectbox('Time period', ['Last Week', 'Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
+    time = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
     delta_days = period_map[time]
     delta = timedelta(days = delta_days)
     cutoff = pd.to_datetime(datetime.now()-delta)
