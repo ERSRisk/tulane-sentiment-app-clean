@@ -198,7 +198,7 @@ if selection == "External Risk Snapshot":
     col1.metric("Total Events for Period", total_events)
     col2.metric("Highest Risk", f"{top_risk_score:.2f}", help = top_risk_name)
     col3.metric("Fastest Growth", f"{fastest_delta:.2f}", help = fastest_name)
-    col4.metric("Persistent High Risks", persistent_count, help = persistent_risks_names)
+    col4.metric("Persistent High Risks", persistent_count)
     
     st.divider()
     
