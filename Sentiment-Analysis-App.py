@@ -177,7 +177,7 @@ if selection == "External Risk Snapshot":
     high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
     emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
     persistent_count = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)].shape[0]
-    persistent_risks = snapshop[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Predicted_Risks_new']
+    persistent_risks = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Predicted_Risks_new']
     persistent_risks_names = persistent_risks if len(persistent_risks) else "-"
     top_trending = snapshot.sort_values('trend', ascending=False).head(5)
     top_high = snapshot.sort_values('current_score', ascending=False).head(8)
