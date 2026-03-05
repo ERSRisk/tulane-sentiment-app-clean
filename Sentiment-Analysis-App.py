@@ -1535,13 +1535,13 @@ if selection == "Article Risk Review":
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
-                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability']
+                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability'. 'Assigned_how']
         try:
             results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols=usecols)
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
             st.stop()
-        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability']
+        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability', 'Assigned_how']
         use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
         changes_df = None
 
@@ -2137,6 +2137,8 @@ if selection == "Article Risk Review":
                     with col1:
                         st.markdown('**Risk Score** ')
                         st.markdown(article['Risk_Score_y'])
+                    with col2:
+                        st.markdown(article['Assigned_how'])
                     c1, c2 = st.columns(2)
                     with c1:
                         if not reviewed:
