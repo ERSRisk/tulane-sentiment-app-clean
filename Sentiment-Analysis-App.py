@@ -21,6 +21,41 @@ import pdfplumber
 import docx
 from sentence_transformers import SentenceTransformer, util
 from google import genai
+from google.cloud import storage
+
+def get_gcs_client():
+    return storage.Client()
+
+def download_blob(blob_path: str, local_path: str, bucket_name = 'tulane-risk-data') -> str:
+    client = get_gcs_client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_path)
+
+    local_file = Path(local_path)
+    local_file.parent.mkdir(parents = True, exist_ok=True)
+    blob.download_to_filename(str(local_file))
+    return str(local_file)
+
+def blob_exists(blob_path: str, bucket_name: 'tulane-risk-data') -> bool:
+    client = get_gcs_client()
+    bucket = clien.bucket(bucket_name)
+    blob = bucket.blob(blob_path)
+    return blob.exists()
+
+def ensure_local_file(blob_path: str, local_path: str, bucket_name = 'tulane-risk-data', force: bool = False) -> str:
+    p = Path(local_path)
+    if force or not p.exists():
+        download_blob(blob_path, local_path)
+    return str(p)
+
+def load_csv_gz_from_gcs(blob_path: str, local_path:str, bucket_name = 'tulane-risk-data', **read_csv_kwargs):
+    ensure_local_file(blob_path, local_path)
+    return pd.read_csv(local_path, compression = 'gzip', low_memory = False, **read_csv_kwargs)
+
+def load_json_from_gcs(blob_path: str, local_path:str, bucket_name='tulane-risk-data'):
+    ensure_local_file(blob_path, local_path)
+    with open(local_path, 'r', encoding = 'utf-8') as f:
+        return json.load(f)
 
 def _github_token() -> str:
     # Secret Manager can add a trailing newline; strip it
@@ -121,7 +156,7 @@ if selection == "External Risk Snapshot":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
-    articles = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+    articles = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
     df = pd.read_csv("Model_training/final_risk_scores1.csv")
     df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
@@ -359,7 +394,7 @@ if selection == "Risk Analysis Dashboard":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
-    df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
+    df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
     
     st.set_page_config(layout="wide")
     
@@ -1537,7 +1572,7 @@ if selection == "Article Risk Review":
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability'. 'Assigned_how']
         try:
-            results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET, usecols=usecols)
+            results_df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
             st.stop()
