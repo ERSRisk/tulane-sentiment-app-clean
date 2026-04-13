@@ -156,7 +156,8 @@ if selection == "External Risk Snapshot":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
-    articles = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+    #articles = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+    articles = get_csv_from_release(OWNER, RAPO, TAG, ASSET)
     df = pd.read_csv("Model_training/final_risk_scores1.csv")
     df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
@@ -394,8 +395,8 @@ if selection == "Risk Analysis Dashboard":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
-    df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
-    
+    #df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+    df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
     st.set_page_config(layout="wide")
     
     with open('Model_training/topics_BERT.json', 'r', encoding = 'utf-8') as f:
@@ -1572,7 +1573,8 @@ if selection == "Article Risk Review":
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability'. 'Assigned_how']
         try:
-            results_df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+            #results_df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+            results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
             st.stop()
