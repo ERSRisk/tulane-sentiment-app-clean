@@ -1625,10 +1625,10 @@ if selection == "Article Risk Review":
             tmp['Reviewed_at'] = pd.NaT
             tmp['Last_changed_at'] = pd.NaT
             st.session_state.articles = tmp
-    stories = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_stories.csv.gz')
+    stories = get_csv_from_repo(OWNER, REPO, 'pipeline/resources/dashboard_stories.csv.gz')
     stories = stories[~stories['canonical_title'].str.match(r'^Story \d+', na=False)]
     
-    dropdown = get_csv_from_repo(OWNER, REPO, 'Model_training/dashboard_dropdown.csv.gz')
+    dropdown = get_csv_from_repo(OWNER, REPO, 'pipeline/resources/dashboard_dropdown.csv.gz')
     change_log_path = Path('Model_training') / 'BERTopic_changes.csv'
     change_log_path.parent.mkdir(parents=True, exist_ok = True)
     if "change_log" not in st.session_state:
