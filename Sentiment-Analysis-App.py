@@ -49,11 +49,11 @@ def ensure_local_file(blob_path: str, local_path: str, bucket_name = 'tulane-ris
     return str(p)
 
 def load_csv_gz_from_gcs(blob_path: str, local_path:str, bucket_name = 'tulane-risk-data', **read_csv_kwargs):
-    ensure_local_file(blob_path, local_path)
+    ensure_local_file(blob_path, local_path, force = True)
     return pd.read_csv(local_path, compression = 'gzip', low_memory = False, **read_csv_kwargs)
 
 def load_json_from_gcs(blob_path: str, local_path:str, bucket_name='tulane-risk-data'):
-    ensure_local_file(blob_path, local_path)
+    ensure_local_file(blob_path, local_path, force = True)
     with open(local_path, 'r', encoding = 'utf-8') as f:
         return json.load(f)
 
