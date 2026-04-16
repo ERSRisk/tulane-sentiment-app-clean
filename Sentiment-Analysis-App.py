@@ -1737,6 +1737,7 @@ if selection == "Article Risk Review":
         index = 0
     )
     articles_df = st.session_state.articles.copy()
+    articles_df = articles_df.drop(columns = 'story_id')
     articles_df = articles_df.merge(
     dropdown[['Link', 'story_id']],
     on='Link',
