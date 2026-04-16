@@ -1571,7 +1571,7 @@ if selection == "Article Risk Review":
     required_keys = {'Title', 'Content'}
     if 'articles' not in st.session_state:
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
-                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability'. 'Assigned_how']
+                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability', 'Assigned_how']
         try:
             results_df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
             #results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
