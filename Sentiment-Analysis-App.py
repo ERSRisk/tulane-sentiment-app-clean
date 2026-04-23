@@ -2101,14 +2101,14 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
     
     
-       raw = article.get("Predicted_Risks_new", "[]")
-
-       predicted = []
+        raw = article.get("Predicted_Risks_new", "[]")
         
-       if isinstance(raw, list):
+        predicted = []
+        
+        if isinstance(raw, list):
             predicted = [str(x).strip() for x in raw if str(x).strip()]
         
-       elif isinstance(raw, str):
+        elif isinstance(raw, str):
             s = raw.strip()
             predicted = []
         
