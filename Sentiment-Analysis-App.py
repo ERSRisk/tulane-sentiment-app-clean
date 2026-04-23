@@ -2101,21 +2101,24 @@ if selection == "Article Risk Review":
         title = str(article.get("Title", ""))[:100]
     
     
-        raw = article.get("Predicted_Risks_new", "[]")
-        if isinstance(raw, list):
+       raw = article.get("Predicted_Risks_new", "[]")
+
+       predicted = []
+        
+       if isinstance(raw, list):
             predicted = [str(x).strip() for x in raw if str(x).strip()]
-        elif isinstance(raw, str):
+        
+       elif isinstance(raw, str):
             s = raw.strip()
             predicted = []
-    
-            # 1) Try JSON (double-quoted lists)
+        
+            # 1) Try JSON
             if s.startswith('[') and s.endswith(']'):
                 try:
                     j = json.loads(s)
                     if isinstance(j, list):
                         predicted = [str(x).strip() for x in j if str(x).strip()]
                 except Exception:
-                    # 2) Try Python literal (single-quoted lists)
                     try:
                         import ast
                         j = ast.literal_eval(s)
@@ -2124,17 +2127,20 @@ if selection == "Article Risk Review":
                     except Exception:
                         pass
         
-            # 3) If still not parsed, accept delimited strings (semicolon OR comma)
+            # 3) fallback parsing
             if not predicted and s:
                 sep = ';' if ';' in s else (',' if ',' in s else None)
                 if sep:
                     predicted = [p.strip() for p in s.split(sep) if p.strip()]
                 else:
-                    predicted = [s]  # single label string
+                    predicted = [s]
         
-            # 4) Normalize explicit "No Risk"
-            if not predicted or all(p.lower() in ("no risk","none") for p in predicted):
+            # 4) normalize
+            if not predicted or all(p.lower() in ("no risk", "none") for p in predicted):
                 predicted = ["No Risk"]
+        else:
+            predicted = raw
+           
             
 
         if article['item_type'] == 'article':
