@@ -1819,6 +1819,33 @@ if selection == "Article Risk Review":
     
     filtered_df = filtered_df.drop_duplicates(subset=["dedupe_key"], keep="last")
 
+    def normalize_risk(x):
+        if pd.isna(x):
+            return "No Risk"
+    
+        s = str(x).strip().lower()
+    
+        bad = {
+            '',
+            'no risk',
+            'none',
+            'nan',
+            '[]',
+            "['no risk']"
+        }
+    
+        return "No Risk" if s in bad else s
+    
+    filtered_df['Risk_Normalized'] = (
+        filtered_df['Predicted_Risks_new']
+        .apply(normalize_risk)
+    )
+    
+    filtered_df = filtered_df[
+        (filtered_df['item_type'] == 'story') |
+        (filtered_df['Risk_Normalized'] != 'No Risk')
+    ]
+
     PAGE_SIZE = st.sidebar.selectbox('Items per Page', [10, 20, 30, 50], index =1)
     total = len(filtered_df)
     max_page = max(1, (total + PAGE_SIZE - 1)//PAGE_SIZE)
