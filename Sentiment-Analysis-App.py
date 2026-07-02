@@ -38,7 +38,7 @@ def download_blob(blob_path: str, local_path: str, bucket_name = 'tulane-risk-da
 
 def blob_exists(blob_path: str, bucket_name: 'tulane-risk-data') -> bool:
     client = get_gcs_client()
-    bucket = clien.bucket(bucket_name)
+    bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_path)
     return blob.exists()
 
@@ -51,6 +51,10 @@ def ensure_local_file(blob_path: str, local_path: str, bucket_name = 'tulane-ris
 def load_csv_gz_from_gcs(blob_path: str, local_path:str, bucket_name = 'tulane-risk-data', **read_csv_kwargs):
     ensure_local_file(blob_path, local_path, force = True)
     return pd.read_csv(local_path, compression = 'gzip', low_memory = False, **read_csv_kwargs)
+
+def load_csv_from_gcs(blob_path: str, local_path: str, bucket_name='tulane-risk-data', **read_csv_kwargs):
+    ensure_local_file(blob_path, local_path, bucket_name=bucket_name, force=True)
+    return pd.read_csv(local_path, low_memory=False, **read_csv_kwargs)
 
 def load_json_from_gcs(blob_path: str, local_path:str, bucket_name='tulane-risk-data'):
     ensure_local_file(blob_path, local_path, force = True)
@@ -156,12 +160,22 @@ if selection == "External Risk Snapshot":
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
     
-    articles = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
-    #articles = get_csv_from_release(OWNER, RAPO, TAG, ASSET)
-    df = pd.read_csv("Model_training/final_risk_scores1.csv")
+    articles = load_csv_gz_from_gcs(
+        'latest/topics/BERTopic_Streamlit.csv.gz',
+        'pipeline/resources/BERTopic_Streamlit.csv.gz'
+    )
+    
+    df = load_csv_from_gcs(
+        'latest/scores/final_risk_scores1.csv',
+        'pipeline/resources/final_risk_scores1.csv'
+    )
+    
+    events = load_csv_from_gcs(
+        'latest/scores/ranked_events_risks1.csv',
+        'pipeline/resources/ranked_events_risks1.csv'
+    )
     df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
-    events = pd.read_csv("Model_training/ranked_events_risks1.csv")
     events['Window'] = pd.to_datetime(events['Window'], errors = 'coerce')
     
     now = df['Window'].max()
