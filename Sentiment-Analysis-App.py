@@ -196,6 +196,15 @@ if selection == "External Risk Snapshot":
         if x >= 3.0: return "Elevated"
         if x >= 2.0: return "Monitor"
         return "Low"
+
+    def action_label(score, trend, event_count):
+        event_count = 0 if pd.isna(event_count) else event_count
+    
+        if score >= 4 or (score >= 3 and trend > 0.3):
+            return "Escalate"
+        if score >= 2 or trend > 0.2 or event_count >= 3:
+            return "Monitor"
+        return "Watch"
     
     time = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
     delta_days = period_map[time]
@@ -215,14 +224,37 @@ if selection == "External Risk Snapshot":
     previous_scores = previous_period.groupby('Predicted_Risks_new')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'previous_score'})
     
     snapshot = current_scores.merge(previous_scores, on='Predicted_Risks_new', how='left')
-    snapshot['trend'] = snapshot['current_score'] - snapshot['previous_score']
+
     snapshot['is_new'] = snapshot['previous_score'].isna()
-    snapshot.loc[snapshot['previous_score'].isna(), 'trend'] = 0
-    snapshot['trend_display'] = snapshot['trend'].apply(lambda x: '🔺' if x > 0.2 else ('🔻' if x < -0.2 else ' '))
-    snapshot['severity_band'] = snapshot['current_score'].apply(severity_bucket)
-    snapshot = snapshot.merge(events_summary.groupby('Predicted_Risks_new')['Event_Count'].sum().reset_index(), on='Predicted_Risks_new', how='left')
+    snapshot['previous_score'] = snapshot['previous_score'].fillna(0)
     
-    snapshot['risk_share_pct'] = (snapshot['current_score'] / snapshot['current_score'].sum()) * 100
+    snapshot['trend'] = snapshot['current_score'] - snapshot['previous_score']
+    snapshot.loc[snapshot['is_new'], 'trend'] = snapshot.loc[snapshot['is_new'], 'current_score']
+    
+    snapshot['trend_display'] = snapshot['trend'].apply(
+        lambda x: '🔺' if x > 0.2 else ('🔻' if x < -0.2 else ' ')
+    )
+    
+    snapshot['severity_band'] = snapshot['current_score'].apply(severity_bucket)
+    
+    event_counts = (
+        events_summary
+        .groupby('Predicted_Risks_new')['Event_Count']
+        .sum()
+        .reset_index()
+    )
+    
+    snapshot = snapshot.merge(event_counts, on='Predicted_Risks_new', how='left')
+    snapshot['Event_Count'] = snapshot['Event_Count'].fillna(0).astype(int)
+    
+    snapshot['action'] = snapshot.apply(
+        lambda r: action_label(r['current_score'], r['trend'], r['Event_Count']),
+        axis=1
+    )
+    
+    snapshot['risk_share_pct'] = (
+        snapshot['current_score'] / snapshot['current_score'].sum()
+    ) * 100
     total_score = snapshot['current_score'].sum()
     high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
     emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
@@ -291,7 +323,17 @@ if selection == "External Risk Snapshot":
     st.markdown('### Risk Overview')
     
     table = snapshot.copy()
-    table = table[['Predicted_Risks_new', 'severity_band', 'current_score', 'trend_display', 'risk_share_pct', 'Event_Count', 'trend']]
+    table = table[[
+        'Predicted_Risks_new',
+        'action',
+        'severity_band',
+        'current_score',
+        'previous_score',
+        'trend',
+        'trend_display',
+        'risk_share_pct',
+        'Event_Count'
+    ]]
     table = table.sort_values(['current_score', 'trend'], ascending=[False, False])
     
     st.dataframe(
@@ -310,29 +352,135 @@ if selection == "External Risk Snapshot":
         rrow = snapshot[snapshot['Predicted_Risks_new'] == selected_risk].head()
         if len(rrow):
             rrow = rrow.iloc[0]
+            event_count = int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0
+            trend_word = "increased" if rrow['trend'] > 0 else "decreased" if rrow['trend'] < 0 else "stayed flat"
+            
+            why_action = (
+                f"Recommended action is **{rrow['action']}** because the current risk score is "
+                f"**{rrow['current_score']:.2f}**, the score {trend_word} by "
+                f"**{abs(rrow['trend']):.2f}** versus the prior period, and "
+                f"**{event_count}** event(s) appeared in the selected period."
+            )
+            
+            st.info(why_action)
             st.markdown(
-                f"**{selected_risk}** \nSeverity: {rrow['current_score']:.2f} ({rrow['severity_band']}) \nTrend vs Prior Period: {rrow['trend']} \n Event Count: {int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0} \n Share of Risk Signal: {rrow['risk_share_pct']:.1f}%"
+                f"**{selected_risk}** \nSeverity: {rrow['current_score']:.2f} ({rrow['severity_band']}) \nTrend vs Prior Period: {rrow['trend']} \n Event Count: {int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0} \n Share of Risk Signal: {rrow['risk_share_pct']:.1f}\nAction: {rrow['action']}"
             )
     
     st.divider()
     risk_events = events[(events['Predicted_Risks_new'] == selected_risk) & (events['Window'] >= (datetime.now() - delta).strftime('%Y-%m-%d'))]
+            
+    st.markdown('### Top Events Driving Signal')
+    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    
+    risk_events = risk_events.merge(articles[['Title', 'Content', 'Published_utc', 'Event_Label', 'Acceleration_value', 'Recency', 'Impact_Score', 'Industry_Risk', 'Location']], on='Event_Label', how='left')
+    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    st.markdown("### Source Breadth")
+    
+    source_col = None
+    for candidate in ['Source', 'source', 'canonical_source']:
+        if candidate in risk_events.columns:
+            source_col = candidate
+            break
+    
+    if source_col:
+        source_summary = (
+            risk_events[source_col]
+            .dropna()
+            .astype(str)
+            .value_counts()
+            .head(5)
+            .reset_index()
+        )
+        source_summary.columns = ['Source', 'Event/Article Count']
+    
+        unique_sources = risk_events[source_col].dropna().astype(str).nunique()
+    
+        c1, c2 = st.columns(2)
+        c1.metric("Unique Sources", unique_sources)
+        c2.metric("Top Source", source_summary.iloc[0]['Source'] if not source_summary.empty else "-")
+    
+        st.dataframe(source_summary, use_container_width=True, hide_index=True)
+    else:
+        st.caption("Source information is not available for this selected risk.")
     
     
     if search.strip():
         risk_events = risk_events[risk_events['Title'].str.contains(search, case=False, na=False)]
     
     driver_cols = ['Acceleration_value', 'Recency', 'Source_Accuracy', 'Impact_Score', 'Location', 'Industry_Risk', 'Frequency_Score']
-    
-    if driver_cols:
-        st.markdown("### What is driving this signal")
-        driver_summary = risk_events[driver_cols].mean().reset_index().rename(columns={'index': 'Driver', 0: 'Average_Contribution'})
-        st.dataframe(driver_summary, use_container_width=True)
+
+    # Make sure selected risk events have numeric fields
+    for c in ['Event_Severity', 'Acceleration_value', 'Recency', 'Impact_Score',
+              'Industry_Risk', 'Location', 'Frequency_Score', 'Source_Accuracy']:
+        if c in risk_events.columns:
+            risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
         
-    st.markdown('### Top Events Driving Signal')
-    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    if driver_cols and not risk_events.empty:
+        st.markdown("### What is driving this signal")
+
+    driver_map = {
+        "Acceleration_value": "Momentum / acceleration",
+        "Recency": "Newness / freshness",
+        "Source_Accuracy": "Source reliability",
+        "Impact_Score": "Potential impact",
+        "Location": "Tulane / location relevance",
+        "Industry_Risk": "Higher-ed sector relevance",
+        "Frequency_Score": "Volume / frequency",
+    }
+
+    driver_summary = (
+        risk_events[driver_cols]
+        .apply(pd.to_numeric, errors='coerce')
+        .mean()
+        .reset_index()
+        .rename(columns={'index': 'technical_driver', 0: 'average_score'})
+    )
+
+    driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
+    driver_summary['average_score'] = driver_summary['average_score'].round(2)
+
+    driver_summary['interpretation'] = driver_summary.apply(
+        lambda r: (
+            f"{r['driver']} is a major contributor"
+            if r['average_score'] >= 4 else
+            f"{r['driver']} is a moderate contributor"
+            if r['average_score'] >= 2.5 else
+            f"{r['driver']} is a minor contributor"
+        ),
+        axis=1
+    )
+
+    driver_summary = driver_summary[
+        ['driver', 'average_score', 'interpretation', 'technical_driver']
+    ].sort_values('average_score', ascending=False)
+
+    st.dataframe(driver_summary, use_container_width=True, hide_index=True)
+
+    st.markdown("### Recent Headlines")
+
+    headline_df = risk_events.copy()
     
-    risk_events = risk_events.merge(articles[['Title', 'Content', 'Published_utc', 'Event_Label', 'Acceleration_value', 'Recency', 'Impact_Score', 'Industry_Risk', 'Location']], on='Event_Label', how='left')
-    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+    date_col = 'Published_utc' if 'Published_utc' in headline_df.columns else 'Window'
+    headline_df[date_col] = pd.to_datetime(headline_df[date_col], errors='coerce')
+    
+    recent_headlines = (
+        headline_df
+        .dropna(subset=['Title'])
+        .sort_values(date_col, ascending=False)
+        .drop_duplicates(subset=['Title'])
+        .head(3)
+    )
+    
+    if recent_headlines.empty:
+        st.caption("No recent headlines available for this selected risk.")
+    else:
+        for _, h in recent_headlines.iterrows():
+            st.markdown(f"**{h['Title']}**")
+            if pd.notna(h.get(date_col)):
+                st.caption(f"Published: {h[date_col]}")
+            if pd.notna(h.get('Link')):
+                st.markdown(f"[Open article]({h['Link']})")
     
     if risk_events.empty:
         st.write("No events found for this risk category in the selected period.")
