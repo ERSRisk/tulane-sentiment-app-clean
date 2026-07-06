@@ -237,6 +237,61 @@ if selection == "External Risk Snapshot":
         if score >= 2 or trend > 0.2 or event_count >= 3:
             return "Monitor"
         return "Watch"
+
+    def clean_event_label(label, fallback_title):
+        label = "" if pd.isna(label) else str(label).strip()
+    
+        if label.lower() in ["", "nan", "none"]:
+            if pd.notna(fallback_title):
+                return str(fallback_title)[:140]
+            return "Unlabeled signal"
+    
+        return label
+
+    @st.cache_data(show_spinner=False, ttl=3600)
+    def llm_relevance_filter(selected_risk, rows_json):
+        api_key = os.getenv("API_KEY_PAID")
+        if not api_key:
+            return []
+    
+        client = genai.Client(api_key=api_key)
+    
+        prompt = f"""
+    You are filtering external news signals for a university enterprise risk dashboard.
+    
+    Selected dashboard risk:
+    {selected_risk}
+    
+    Keep an item only if it is clearly relevant to Tulane University in their operations or if it affects the area geographically where Tulane University is (New Orleans, Southeast US).
+    If the article affects or could potentially affect higher education institutions in all the United States or institutions of the same size as Tulane University, keep it.
+    
+    Reject items that are merely general politics, unrelated sports, general healthcare, celebrity/news noise, or only weakly connected.
+    
+    Return ONLY valid JSON:
+    [
+      {{
+        "row_id": "...",
+        "keep": true/false,
+        "reason": "short reason"
+      }}
+    ]
+    
+    Items:
+    {rows_json}
+    """
+    
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+    
+        text = response.text.strip()
+        text = text.replace("```json", "").replace("```", "").strip()
+    
+        try:
+            return json.loads(text)
+        except Exception:
+            return []
     
     time = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
     delta_days = period_map[time]
@@ -445,16 +500,48 @@ if selection == "External Risk Snapshot":
         if c in articles.columns
     ]
     
+    # Normalize keys
+    for d in [risk_events, articles]:
+        if 'Link' in d.columns:
+            d['Link'] = d['Link'].fillna('').astype(str).str.strip()
+        if 'Title' in d.columns:
+            d['Title'] = d['Title'].fillna('').astype(str).str.strip()
+    
+    # Use article-level matching first, not Event_Label
+    if 'Link' in risk_events.columns and 'Link' in articles.columns and risk_events['Link'].str.startswith('http').any():
+        join_keys = ['Link']
+    elif 'Title' in risk_events.columns and 'Title' in articles.columns:
+        join_keys = ['Title']
+    else:
+        join_keys = ['Event_Label']
+    
     article_details = (
         articles[article_detail_cols]
-        .drop_duplicates(subset=['Event_Label', 'Title'])
+        .drop_duplicates(subset=join_keys)
     )
     
     risk_events = risk_events.merge(
         article_details,
-        on='Event_Label',
+        on=join_keys,
         how='left',
         suffixes=('', '_article')
+    )
+    
+    # Fill missing display fields from article copy only if needed
+    for col in ['Title', 'Content', 'Published_utc', 'Link', 'Source', 'source', 'canonical_source']:
+        article_col = f"{col}_article"
+        if article_col in risk_events.columns:
+            if col in risk_events.columns:
+                risk_events[col] = risk_events[col].where(
+                    risk_events[col].notna() & (risk_events[col].astype(str).str.strip() != ''),
+                    risk_events[article_col]
+                )
+            else:
+                risk_events[col] = risk_events[article_col]
+    
+    risk_events = risk_events.drop(
+        columns=[c for c in risk_events.columns if c.endswith('_article')],
+        errors='ignore'
     )
     
     if search.strip() and 'Title' in risk_events.columns:
@@ -467,6 +554,60 @@ if selection == "External Risk Snapshot":
         ]
     
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+
+    # -----------------------------
+    # LLM relevance filter
+    # -----------------------------
+    if not risk_events.empty:
+        risk_events = risk_events.reset_index(drop=True)
+        risk_events["row_id"] = risk_events.index.astype(str)
+    
+        review_sample = risk_events.head(40).copy()
+    
+        review_payload = review_sample[
+            [c for c in [
+                "row_id",
+                "Dashboard_Risk",
+                "Event_Label",
+                "Title",
+                "Content",
+                "Source",
+                "Published_utc",
+                "Event_Severity"
+            ] if c in review_sample.columns]
+        ].fillna("").astype(str).to_dict(orient="records")
+    
+        decisions = llm_relevance_filter(
+            selected_risk,
+            json.dumps(review_payload, ensure_ascii=False)
+        )
+    
+        decisions_df = pd.DataFrame(decisions)
+    
+        if not decisions_df.empty and {"row_id", "keep"}.issubset(decisions_df.columns):
+            decisions_df["row_id"] = decisions_df["row_id"].astype(str)
+            decisions_df["keep"] = decisions_df["keep"].astype(bool)
+    
+            risk_events = risk_events.merge(
+                decisions_df[["row_id", "keep", "reason"]],
+                on="row_id",
+                how="left"
+            )
+    
+            risk_events["keep"] = risk_events["keep"].fillna(True)
+    
+            with st.expander("Filtered out low-relevance signals", expanded=False):
+                rejected = risk_events[risk_events["keep"] == False]
+                if rejected.empty:
+                    st.caption("No signals filtered out.")
+                else:
+                    st.dataframe(
+                        rejected[["Title", "Event_Label", "reason"]].head(20),
+                        use_container_width=True,
+                        hide_index=True
+                    )
+    
+            risk_events = risk_events[risk_events["keep"] == True]
     
     
     # -----------------------------
@@ -547,7 +688,10 @@ if selection == "External Risk Snapshot":
         )
     
         for _, event in grouped_events.head(10).iterrows():
-            event_label = event['Event_Label']
+            event_label = clean_event_label(
+                event.get("Event_Label"),
+                event.get("Sample_Title")
+            )
             sev = float(event['Event_Severity']) if pd.notna(event['Event_Severity']) else 0
             sev_tag = severity_bucket(sev)
     
@@ -571,7 +715,12 @@ if selection == "External Risk Snapshot":
                 else:
                     st.caption("No article link available.")
     
-                related = risk_events[risk_events['Event_Label'] == event_label].copy()
+                raw_event_label = event.get("Event_Label")
+
+                if pd.isna(raw_event_label) or str(raw_event_label).strip().lower() in ["", "nan", "none"]:
+                    related = risk_events[risk_events["Title"] == event.get("Sample_Title")].copy()
+                else:
+                    related = risk_events[risk_events["Event_Label"] == raw_event_label].copy()
     
                 st.markdown("**Related articles**")
     
@@ -620,7 +769,7 @@ if selection == "External Risk Snapshot":
         headline_df
         .dropna(subset=['Title'])
         .sort_values(date_col, ascending=False)
-        .drop_duplicates(subset=['Title'])
+        .drop_duplicates(subset=['Title', 'Link'])
         .head(5)
     )
     
