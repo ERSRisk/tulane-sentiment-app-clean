@@ -293,8 +293,8 @@ if selection == "External Risk Snapshot":
         except Exception:
             return []
     
-    time = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
-    delta_days = period_map[time]
+    time_period = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
+    delta_days = period_map[time_period]
     delta = timedelta(days = delta_days)
     cutoff = pd.to_datetime(datetime.now()-delta)
     
@@ -562,27 +562,69 @@ if selection == "External Risk Snapshot":
         risk_events = risk_events.reset_index(drop=True)
         risk_events["row_id"] = risk_events.index.astype(str)
     
-        review_sample = risk_events.head(40).copy()
+        def chunks(df, size=10):
+            for start in range(0, len(df), size):
+                yield df.iloc[start:start + size].copy()
+        
+        if not risk_events.empty:
+            risk_events = risk_events.reset_index(drop=True)
+            risk_events["row_id"] = risk_events.index.astype(str)
+        
+            all_decisions = []
+        
+            for batch in chunks(risk_events.head(40), size=10):
+                review_payload = batch[
+                    [c for c in [
+                        "row_id",
+                        "Dashboard_Risk",
+                        "Event_Label",
+                        "Title",
+                        "Content",
+                        "Source",
+                        "Published_utc",
+                        "Event_Severity"
+                    ] if c in batch.columns]
+                ].fillna("").astype(str).to_dict(orient="records")
+        
+                decisions = llm_relevance_filter(
+                    selected_risk,
+                    json.dumps(review_payload, ensure_ascii=False)
+                )
+        
+                if decisions:
+                    all_decisions.extend(decisions)
+        
+                time.sleep(0.5)
+        
+            decisions_df = pd.DataFrame(all_decisions)
+        
+            if not decisions_df.empty and {"row_id", "keep"}.issubset(decisions_df.columns):
+                decisions_df["row_id"] = decisions_df["row_id"].astype(str)
+                decisions_df["keep"] = decisions_df["keep"].astype(bool)
+        
+                risk_events = risk_events.merge(
+                    decisions_df[["row_id", "keep", "reason"]],
+                    on="row_id",
+                    how="left"
+                )
+        
+                risk_events["keep"] = risk_events["keep"].fillna(True)
+        
+                with st.expander("Filtered out low-relevance signals", expanded=False):
+                    rejected = risk_events[risk_events["keep"] == False]
+                    if rejected.empty:
+                        st.caption("No signals filtered out.")
+                    else:
+                        st.dataframe(
+                            rejected[["Title", "Event_Label", "reason"]].head(20),
+                            use_container_width=True,
+                            hide_index=True
+                        )
+        
+                risk_events = risk_events[risk_events["keep"] == True]
     
-        review_payload = review_sample[
-            [c for c in [
-                "row_id",
-                "Dashboard_Risk",
-                "Event_Label",
-                "Title",
-                "Content",
-                "Source",
-                "Published_utc",
-                "Event_Severity"
-            ] if c in review_sample.columns]
-        ].fillna("").astype(str).to_dict(orient="records")
-    
-        decisions = llm_relevance_filter(
-            selected_risk,
-            json.dumps(review_payload, ensure_ascii=False)
-        )
-    
-        decisions_df = pd.DataFrame(decisions)
+        
+
     
         if not decisions_df.empty and {"row_id", "keep"}.issubset(decisions_df.columns):
             decisions_df["row_id"] = decisions_df["row_id"].astype(str)
@@ -672,10 +714,23 @@ if selection == "External Risk Snapshot":
     if risk_events.empty:
         st.write("No events found for this risk category in the selected period.")
     else:
+        risk_events['Published_utc'] = pd.to_datetime(
+            risk_events.get('Published_utc'),
+            errors='coerce'
+        )
+        
+        risk_events['Event_Label_Group'] = risk_events.apply(
+            lambda r: clean_event_label(
+                r.get('Event_Label'),
+                r.get('Title')
+            ),
+            axis=1
+        )
         grouped_events = (
             risk_events
-            .groupby('Event_Label', dropna=False)
+            .groupby('Event_Label_Group', dropna=False)
             .agg(
+                Raw_Event_Label=('Event_Label', 'first'),
                 Event_Severity=('Event_Severity', 'max'),
                 Article_Count=('Title', 'nunique'),
                 Latest_Date=('Published_utc', 'max'),
@@ -688,10 +743,7 @@ if selection == "External Risk Snapshot":
         )
     
         for _, event in grouped_events.head(10).iterrows():
-            event_label = clean_event_label(
-                event.get("Event_Label"),
-                event.get("Sample_Title")
-            )
+            event_label = event.get("Event_Label_Group")
             sev = float(event['Event_Severity']) if pd.notna(event['Event_Severity']) else 0
             sev_tag = severity_bucket(sev)
     
@@ -715,7 +767,7 @@ if selection == "External Risk Snapshot":
                 else:
                     st.caption("No article link available.")
     
-                raw_event_label = event.get("Event_Label")
+                raw_event_label = event.get("Raw_Event_Label")
 
                 if pd.isna(raw_event_label) or str(raw_event_label).strip().lower() in ["", "nan", "none"]:
                     related = risk_events[risk_events["Title"] == event.get("Sample_Title")].copy()
