@@ -373,7 +373,36 @@ if selection == "External Risk Snapshot":
     st.markdown('### Top Events Driving Signal')
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
     
-    risk_events = risk_events.merge(articles[['Title', 'Content', 'Published_utc', 'Event_Label', 'Acceleration_value', 'Recency', 'Impact_Score', 'Industry_Risk', 'Location']], on='Event_Label', how='left')
+    article_detail_cols = [
+        'Event_Label',
+        'Title',
+        'Content',
+        'Published_utc',
+        'Link'
+    ]
+    
+    optional_article_cols = [
+        'Source',
+        'source',
+        'canonical_source'
+    ]
+    
+    article_detail_cols = [
+        c for c in article_detail_cols + optional_article_cols
+        if c in articles.columns
+    ]
+    
+    article_details = (
+        articles[article_detail_cols]
+        .drop_duplicates(subset=['Event_Label', 'Title'])
+    )
+    
+    risk_events = risk_events.merge(
+        article_details,
+        on='Event_Label',
+        how='left',
+        suffixes=('', '_article')
+    )
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
     st.markdown("### Source Breadth")
     
@@ -408,34 +437,30 @@ if selection == "External Risk Snapshot":
     if search.strip():
         risk_events = risk_events[risk_events['Title'].str.contains(search, case=False, na=False)]
     
-    driver_cols = ['Acceleration_value', 'Recency', 'Source_Accuracy', 'Impact_Score', 'Location', 'Industry_Risk', 'Frequency_Score']
-
-    # Make sure selected risk events have numeric fields
-    for c in ['Event_Severity', 'Acceleration_value', 'Recency', 'Impact_Score',
-              'Industry_Risk', 'Location', 'Frequency_Score', 'Source_Accuracy']:
-        if c in risk_events.columns:
-            risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
-        
-    if driver_cols and not risk_events.empty:
+    driver_cols = [
+        'Acceleration_value',
+        'Recency',
+        'Source_Accuracy',
+        'Impact_Score',
+        'Location',
+        'Industry_Risk',
+        'Frequency_Score'
+    ]
+    
+    available_driver_cols = [c for c in driver_cols if c in risk_events.columns]
+    
+    if available_driver_cols and not risk_events.empty:
         st.markdown("### What is driving this signal")
-
-    driver_map = {
-        "Acceleration_value": "Momentum / acceleration",
-        "Recency": "Newness / freshness",
-        "Source_Accuracy": "Source reliability",
-        "Impact_Score": "Potential impact",
-        "Location": "Tulane / location relevance",
-        "Industry_Risk": "Higher-ed sector relevance",
-        "Frequency_Score": "Volume / frequency",
-    }
-
-    driver_summary = (
-        risk_events[driver_cols]
-        .apply(pd.to_numeric, errors='coerce')
-        .mean()
-        .reset_index()
-        .rename(columns={'index': 'technical_driver', 0: 'average_score'})
-    )
+    
+        for c in available_driver_cols:
+            risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
+    
+        driver_summary = (
+            risk_events[available_driver_cols]
+            .mean()
+            .reset_index()
+            .rename(columns={'index': 'technical_driver', 0: 'average_score'})
+        )
 
     driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
     driver_summary['average_score'] = driver_summary['average_score'].round(2)
