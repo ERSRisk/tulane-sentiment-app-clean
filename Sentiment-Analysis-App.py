@@ -408,27 +408,37 @@ if selection == "External Risk Snapshot":
             )
     
     st.divider()
-    risk_events = events[(events['Dashboard_Risk'] == selected_risk) & (events['Window'] >= (datetime.now() - delta).strftime('%Y-%m-%d'))]
-            
-    st.markdown('### Top Events Driving Signal')
-    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
+
+    # -----------------------------
+    # Selected risk evidence dataset
+    # -----------------------------
+    risk_events = events[
+        (events['Dashboard_Risk'] == selected_risk) &
+        (events['Window'] >= cutoff)
+    ].copy()
+    
+    risk_events['Event_Severity'] = pd.to_numeric(
+        risk_events['Event_Severity'],
+        errors='coerce'
+    )
+    
+    risk_events = risk_events[
+        risk_events['Event_Severity'].fillna(0) >= min_sev
+    ]
     
     article_detail_cols = [
         'Event_Label',
         'Title',
         'Content',
         'Published_utc',
-        'Link'
-    ]
-    
-    optional_article_cols = [
+        'Link',
         'Source',
         'source',
         'canonical_source'
     ]
     
     article_detail_cols = [
-        c for c in article_detail_cols + optional_article_cols
+        c for c in article_detail_cols
         if c in articles.columns
     ]
     
@@ -443,39 +453,23 @@ if selection == "External Risk Snapshot":
         how='left',
         suffixes=('', '_article')
     )
+    
+    if search.strip() and 'Title' in risk_events.columns:
+        risk_events = risk_events[
+            risk_events['Title'].astype(str).str.contains(
+                search,
+                case=False,
+                na=False
+            )
+        ]
+    
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
-    st.markdown("### Source Breadth")
-    
-    source_col = None
-    for candidate in ['Source', 'source', 'canonical_source']:
-        if candidate in risk_events.columns:
-            source_col = candidate
-            break
-    
-    if source_col:
-        source_summary = (
-            risk_events[source_col]
-            .dropna()
-            .astype(str)
-            .value_counts()
-            .head(5)
-            .reset_index()
-        )
-        source_summary.columns = ['Source', 'Event/Article Count']
-    
-        unique_sources = risk_events[source_col].dropna().astype(str).nunique()
-    
-        c1, c2 = st.columns(2)
-        c1.metric("Unique Sources", unique_sources)
-        c2.metric("Top Source", source_summary.iloc[0]['Source'] if not source_summary.empty else "-")
-    
-        st.dataframe(source_summary, use_container_width=True, hide_index=True)
-    else:
-        st.caption("Source information is not available for this selected risk.")
     
     
-    if search.strip():
-        risk_events = risk_events[risk_events['Title'].str.contains(search, case=False, na=False)]
+    # -----------------------------
+    # Section 1: Key Drivers
+    # -----------------------------
+    st.markdown("### Why this risk is showing up")
     
     driver_cols = [
         'Acceleration_value',
@@ -487,53 +481,133 @@ if selection == "External Risk Snapshot":
         'Frequency_Score'
     ]
     
+    driver_map = {
+        "Acceleration_value": "Momentum",
+        "Recency": "Recency",
+        "Impact_Score": "Impact",
+        "Industry_Risk": "Higher-Ed Relevance",
+        "Location": "Location Relevance",
+        "Frequency_Score": "Event Frequency",
+        "Source_Accuracy": "Source Reliability"
+    }
+    
     available_driver_cols = [c for c in driver_cols if c in risk_events.columns]
     
     if available_driver_cols and not risk_events.empty:
-        st.markdown("### What is driving this signal")
-    
         for c in available_driver_cols:
             risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
-
-        driver_map = {
-            "Acceleration_value": "Momentum",
-            "Recency": "Recency",
-            "Impact_Score": "Impact",
-            "Industry_Risk": "Higher-Ed Relevance",
-            "Location": "Location Relevance",
-            "Frequency_Score": "Event Frequency",
-            "Source_Accuracy": "Source Reliability"
-        }
     
         driver_summary = (
             risk_events[available_driver_cols]
             .mean()
             .reset_index()
-            .rename(columns={'index': 'technical_driver', 0: 'average_score'})
+            .rename(columns={'index': 'technical_driver', 0: 'contribution'})
         )
-
+    
         driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
-        driver_summary['average_score'] = driver_summary['average_score'].round(2)
-
-        driver_summary['interpretation'] = driver_summary.apply(
-            lambda r: (
-                f"{r['driver']} is a major contributor"
-                if r['average_score'] >= 4 else
-                f"{r['driver']} is a moderate contributor"
-                if r['average_score'] >= 2.5 else
-                f"{r['driver']} is a minor contributor"
-            ),
-            axis=1
+        driver_summary['contribution'] = driver_summary['contribution'].round(2)
+    
+        driver_summary['level'] = driver_summary['contribution'].apply(
+            lambda x: "High" if x >= 4 else ("Moderate" if x >= 2.5 else "Low")
         )
     
         driver_summary = driver_summary[
-            ['driver', 'average_score', 'interpretation', 'technical_driver']
-        ].sort_values('average_score', ascending=False)
+            ['driver', 'level', 'contribution', 'technical_driver']
+        ].sort_values('contribution', ascending=False)
     
         st.dataframe(driver_summary, use_container_width=True, hide_index=True)
-
+    else:
+        st.caption("No driver data is available for this selected risk.")
+    
+    
+    # -----------------------------
+    # Section 2: Top Events
+    # -----------------------------
+    st.markdown("### Top Events Driving Signal")
+    
+    if risk_events.empty:
+        st.write("No events found for this risk category in the selected period.")
+    else:
+        grouped_events = (
+            risk_events
+            .groupby('Event_Label', dropna=False)
+            .agg(
+                Event_Severity=('Event_Severity', 'max'),
+                Article_Count=('Title', 'nunique'),
+                Latest_Date=('Published_utc', 'max'),
+                Sample_Title=('Title', 'first'),
+                Sample_Content=('Content', 'first'),
+                Sample_Link=('Link', 'first')
+            )
+            .reset_index()
+            .sort_values('Event_Severity', ascending=False)
+        )
+    
+        for _, event in grouped_events.head(10).iterrows():
+            event_label = event['Event_Label']
+            sev = float(event['Event_Severity']) if pd.notna(event['Event_Severity']) else 0
+            sev_tag = severity_bucket(sev)
+    
+            with st.expander(
+                f"{event_label} — Severity {sev:.2f} ({sev_tag})",
+                expanded=False
+            ):
+                st.caption(
+                    f"{int(event['Article_Count'])} related article(s)"
+                )
+    
+                if pd.notna(event.get('Sample_Title')):
+                    st.markdown(f"**Representative headline:** {event['Sample_Title']}")
+    
+                if pd.notna(event.get('Sample_Content')):
+                    preview = str(event['Sample_Content'])[:700]
+                    st.write(preview + ("..." if len(str(event['Sample_Content'])) > 700 else ""))
+    
+                if pd.notna(event.get('Sample_Link')) and str(event.get('Sample_Link')).startswith("http"):
+                    st.markdown(f"[Read representative article]({event['Sample_Link']})")
+                else:
+                    st.caption("No article link available.")
+    
+                related = risk_events[risk_events['Event_Label'] == event_label].copy()
+    
+                st.markdown("**Related articles**")
+    
+                for _, article_row in related.drop_duplicates(subset=['Title']).head(10).iterrows():
+                    title = article_row.get('Title')
+                    published = article_row.get('Published_utc')
+                    link = article_row.get('Link')
+                    source = article_row.get('Source', article_row.get('source', article_row.get('canonical_source', 'Unknown source')))
+    
+                    if pd.isna(title):
+                        continue
+    
+                    with st.container(border=True):
+                        st.markdown(f"**{title}**")
+    
+                        meta = []
+                        if pd.notna(source):
+                            meta.append(str(source))
+                        if pd.notna(published):
+                            meta.append(f"Published: {published}")
+                        if meta:
+                            st.caption(" | ".join(meta))
+    
+                        content = article_row.get('Content')
+                        if pd.notna(content):
+                            content_preview = str(content)[:450]
+                            st.write(content_preview + ("..." if len(str(content)) > 450 else ""))
+    
+                        if pd.notna(link) and str(link).startswith("http"):
+                            st.markdown(f"[Read original article]({link})")
+                        else:
+                            st.caption("Original article link unavailable.")
+    
+    
+    # -----------------------------
+    # Section 3: Recent Headlines
+    # -----------------------------
     st.markdown("### Recent Headlines")
-
+    
     headline_df = risk_events.copy()
     
     date_col = 'Published_utc' if 'Published_utc' in headline_df.columns else 'Window'
@@ -544,55 +618,64 @@ if selection == "External Risk Snapshot":
         .dropna(subset=['Title'])
         .sort_values(date_col, ascending=False)
         .drop_duplicates(subset=['Title'])
-        .head(3)
+        .head(5)
     )
     
     if recent_headlines.empty:
         st.caption("No recent headlines available for this selected risk.")
     else:
         for _, h in recent_headlines.iterrows():
-            st.markdown(f"**{h['Title']}**")
-            if pd.notna(h.get(date_col)):
-                st.caption(f"Published: {h[date_col]}")
-            if pd.notna(h.get('Link')):
-                st.markdown(f"[Open article]({h['Link']})")
+            with st.expander(str(h['Title'])[:180], expanded=False):
+                if pd.notna(h.get(date_col)):
+                    st.caption(f"Published: {h[date_col]}")
     
-    if risk_events.empty:
-        st.write("No events found for this risk category in the selected period.")
+                source = h.get('Source', h.get('source', h.get('canonical_source', None)))
+                if pd.notna(source):
+                    st.caption(f"Source: {source}")
+    
+                if pd.notna(h.get('Content')):
+                    st.write(str(h['Content'])[:700])
+    
+                if pd.notna(h.get('Link')) and str(h.get('Link')).startswith("http"):
+                    st.markdown(f"[Read original article]({h['Link']})")
+                else:
+                    st.caption("Original article link unavailable.")
+    
+    
+    # -----------------------------
+    # Section 4: Source Breadth
+    # -----------------------------
+    st.markdown("### Evidence Source Breadth")
+    
+    source_col = None
+    for candidate in ['Source', 'source', 'canonical_source']:
+        if candidate in risk_events.columns:
+            source_col = candidate
+            break
+    
+    if source_col and not risk_events.empty:
+        source_summary = (
+            risk_events[source_col]
+            .dropna()
+            .astype(str)
+            .value_counts()
+            .head(10)
+            .reset_index()
+        )
+        source_summary.columns = ['Source', 'Article Count']
+    
+        unique_sources = risk_events[source_col].dropna().astype(str).nunique()
+    
+        c1, c2 = st.columns(2)
+        c1.metric("Unique Sources", unique_sources)
+        c2.metric(
+            "Top Source",
+            source_summary.iloc[0]['Source'] if not source_summary.empty else "-"
+        )
+    
+        st.dataframe(source_summary, use_container_width=True, hide_index=True)
     else:
-        grouped = risk_events.groupby('Event_Label', sort = False)
-    
-        for event_label, group in grouped:
-            row = group.iloc[0]  # event-level info
-    
-            sev = float(row['Event_Severity'])
-            sev_tag = severity_bucket(sev)
-    
-            st.markdown(f"**{event_label}**")
-            st.caption(f"Severity: {sev:.2f} ({sev_tag})")
-            if "Content_trunc" in row.index and pd.notna(row['Content_trunc']):
-                st.write(row['Content_trunc'])
-            chips = []
-            for c in ['Acceleration_value', "Recency", "Impact_Score", "Industry_Risk", "Location"]:
-                if c in row.index and pd.notna(row[c]):
-                    chips.append(f"{c}: {row[c]:.2f}")
-            if chips:
-                st.caption(" | ".join(chips))
-    
-            with st.expander(f"Show {len(group)} Articles"):
-                for _, article_row in group.iterrows():
-                    if pd.notna(article_row.get('Title')):
-                        st.markdown(f"**{article_row['Title']}**")
-                    if pd.notna(article_row.get('Published_utc')):
-                        st.caption(f"Published: {article_row['Published_utc']}")
-                    if pd.notna(article_row.get('Link')):
-                        st.markdown(f"**Link:** {article_row['Link']}")
-                    if pd.notna(article_row.get('Content')):
-                        st.write(article_row['Content'])
-    
-                    st.markdown('---')
-    
-            st.markdown('---')
+        st.caption("Source information is not available for this selected risk.")
         
 
 if selection == "Risk Analysis Dashboard":
