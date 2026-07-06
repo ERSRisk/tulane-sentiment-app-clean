@@ -307,8 +307,28 @@ if selection == "External Risk Snapshot":
     
     current_period = df[df['Window'] >= cutoff.strftime('%Y-%m-%d')]
     previous_period = df[(df['Window'] >= (datetime.now() - 2*delta).strftime('%Y-%m-%d')) & (df['Window'] < (datetime.now() - delta).strftime('%Y-%m-%d'))]
-    current_scores = current_period.groupby('Dashboard_Risk')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'current_score'})
-    previous_scores = previous_period.groupby('Dashboard_Risk')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'previous_score'})
+    events['Event_Severity'] = pd.to_numeric(events['Event_Severity'], errors='coerce').fillna(0)
+
+    current_scores = (
+        current_events
+        .groupby('Dashboard_Risk')['Event_Severity']
+        .mean()
+        .reset_index()
+        .rename(columns={'Event_Severity': 'current_score'})
+    )
+    
+    previous_events = events[
+        (events['Window'] >= previous_cutoff) &
+        (events['Window'] < cutoff)
+    ]
+    
+    previous_scores = (
+        previous_events
+        .groupby('Dashboard_Risk')['Event_Severity']
+        .mean()
+        .reset_index()
+        .rename(columns={'Event_Severity': 'previous_score'})
+    )
     
     snapshot = current_scores.merge(previous_scores, on='Dashboard_Risk', how='left')
 
@@ -440,7 +460,18 @@ if selection == "External Risk Snapshot":
     left, right = st.columns([1,2])
     
     with left:
-        selected_risk = st.selectbox('Select Risk Category', table['Dashboard_Risk'].unique())
+        all_dashboard_risks = sorted(
+            risk_mapping['dashboard_risk']
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .unique()
+        )
+        
+        selected_risk = st.selectbox(
+            'Select Risk Category',
+            all_dashboard_risks
+        )
         min_sev = st.slider('Minimum event severity', 0.0, 5.0, 2.5, 0.1)
         search = st.text_input("Search headlines", "")
     
