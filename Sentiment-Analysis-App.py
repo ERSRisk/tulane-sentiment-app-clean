@@ -413,6 +413,8 @@ if selection == "External Risk Snapshot":
     # -----------------------------
     # Selected risk evidence dataset
     # -----------------------------
+    events['Window'] = pd.to_datetime(events['Window'], errors='coerce', utc=True).dt.tz_convert(None)
+    cutoff = pd.Timestamp(cutoff).tz_localize(None)
     risk_events = events[
         (events['Dashboard_Risk'] == selected_risk) &
         (events['Window'] >= cutoff)
