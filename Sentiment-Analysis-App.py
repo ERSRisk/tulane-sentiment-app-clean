@@ -297,6 +297,7 @@ if selection == "External Risk Snapshot":
     delta_days = period_map['Last Month']
     delta = timedelta(days = delta_days)
     cutoff = pd.to_datetime(datetime.now()-delta)
+    previous_cutoff = cutoff - delta
     
     
     
@@ -318,7 +319,7 @@ if selection == "External Risk Snapshot":
     )
     
     previous_events = events[
-        (events['Window'] >= 60) &
+        (events['Window'] >= previous_cutoff) &
         (events['Window'] < cutoff)
     ]
     
