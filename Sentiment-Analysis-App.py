@@ -318,7 +318,7 @@ if selection == "External Risk Snapshot":
     )
     
     previous_events = events[
-        (events['Window'] >= previous_cutoff) &
+        (events['Window'] >= 60) &
         (events['Window'] < cutoff)
     ]
     
