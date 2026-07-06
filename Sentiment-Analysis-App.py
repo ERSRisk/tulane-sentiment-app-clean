@@ -293,8 +293,8 @@ if selection == "External Risk Snapshot":
         except Exception:
             return []
     
-    time_period = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
-    delta_days = period_map[time_period]
+    #time_period = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
+    delta_days = period_map['Last Month']
     delta = timedelta(days = delta_days)
     cutoff = pd.to_datetime(datetime.now()-delta)
     
@@ -877,40 +877,7 @@ if selection == "External Risk Snapshot":
                     st.caption("Original article link unavailable.")
     
     
-    # -----------------------------
-    # Section 4: Source Breadth
-    # -----------------------------
-    st.markdown("### Evidence Source Breadth")
     
-    source_col = None
-    for candidate in ['Source', 'source', 'canonical_source']:
-        if candidate in risk_events.columns:
-            source_col = candidate
-            break
-    
-    if source_col and not risk_events.empty:
-        source_summary = (
-            risk_events[source_col]
-            .dropna()
-            .astype(str)
-            .value_counts()
-            .head(10)
-            .reset_index()
-        )
-        source_summary.columns = ['Source', 'Article Count']
-    
-        unique_sources = risk_events[source_col].dropna().astype(str).nunique()
-    
-        c1, c2 = st.columns(2)
-        c1.metric("Unique Sources", unique_sources)
-        c2.metric(
-            "Top Source",
-            source_summary.iloc[0]['Source'] if not source_summary.empty else "-"
-        )
-    
-        st.dataframe(source_summary, use_container_width=True, hide_index=True)
-    else:
-        st.caption("Source information is not available for this selected risk.")
         
 
 if selection == "Risk Analysis Dashboard":
