@@ -159,7 +159,31 @@ if selection == "External Risk Snapshot":
         if r.status_code != 200:
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    def apply_risk_mapping(data, mapping):
+        data = data.copy()
     
+        mapping = mapping.copy()
+        mapping['old_risk'] = mapping['old_risk'].astype(str).str.strip()
+        mapping['dashboard_risk'] = mapping['dashboard_risk'].astype(str).str.strip()
+    
+        data['Predicted_Risks_new'] = (
+            data['Predicted_Risks_new']
+            .fillna('No Risk')
+            .astype(str)
+            .str.strip()
+        )
+    
+        data = data.merge(
+            mapping,
+            left_on='Predicted_Risks_new',
+            right_on='old_risk',
+            how='left'
+        )
+    
+        data['Dashboard_Risk'] = data['dashboard_risk'].fillna(data['Predicted_Risks_new'])
+    
+        return data.drop(columns=['old_risk', 'dashboard_risk'], errors='ignore')
+        
     articles = load_csv_gz_from_gcs(
         'latest/topics/BERTopic_Streamlit.csv.gz',
         'pipeline/resources/BERTopic_Streamlit.csv.gz'
@@ -177,7 +201,14 @@ if selection == "External Risk Snapshot":
     df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
     events['Window'] = pd.to_datetime(events['Window'], errors = 'coerce')
-    
+
+    risk_mapping = load_csv_from_gcs(
+        'latest/reference/risk_mapping.csv',
+        'pipeline/resources/risk_mapping.csv'
+    )
+    df = apply_risk_mapping(df, risk_mapping)
+    events = apply_risk_mapping(events, risk_mapping)
+    articles = apply_risk_mapping(articles, risk_mapping)
     now = df['Window'].max()
     
     st.title('External Risk Snapshot')
@@ -216,14 +247,14 @@ if selection == "External Risk Snapshot":
     total_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')].shape[0]
     
     current_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')]
-    events_summary = current_events.groupby(['Window','Predicted_Risks_new'])['Title'].count().reset_index().rename(columns={'Title': 'Event_Count'})
+    events_summary = current_events.groupby(['Window','Dashboard_Risk'])['Title'].count().reset_index().rename(columns={'Title': 'Event_Count'})
     
     current_period = df[df['Window'] >= cutoff.strftime('%Y-%m-%d')]
     previous_period = df[(df['Window'] >= (datetime.now() - 2*delta).strftime('%Y-%m-%d')) & (df['Window'] < (datetime.now() - delta).strftime('%Y-%m-%d'))]
-    current_scores = current_period.groupby('Predicted_Risks_new')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'current_score'})
-    previous_scores = previous_period.groupby('Predicted_Risks_new')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'previous_score'})
+    current_scores = current_period.groupby('Dashboard_Risk')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'current_score'})
+    previous_scores = previous_period.groupby('Dashboard_Risk')['final_risk_score'].mean().reset_index().rename(columns={'final_risk_score': 'previous_score'})
     
-    snapshot = current_scores.merge(previous_scores, on='Predicted_Risks_new', how='left')
+    snapshot = current_scores.merge(previous_scores, on='Dashboard_Risk', how='left')
 
     snapshot['is_new'] = snapshot['previous_score'].isna()
     snapshot['previous_score'] = snapshot['previous_score'].fillna(0)
@@ -239,12 +270,12 @@ if selection == "External Risk Snapshot":
     
     event_counts = (
         events_summary
-        .groupby('Predicted_Risks_new')['Event_Count']
+        .groupby('Dashboard_Risk')['Event_Count']
         .sum()
         .reset_index()
     )
     
-    snapshot = snapshot.merge(event_counts, on='Predicted_Risks_new', how='left')
+    snapshot = snapshot.merge(event_counts, on='Dashboard_Risk', how='left')
     snapshot['Event_Count'] = snapshot['Event_Count'].fillna(0).astype(int)
     
     snapshot['action'] = snapshot.apply(
@@ -259,20 +290,29 @@ if selection == "External Risk Snapshot":
     high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
     emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
     persistent_count = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)].shape[0]
-    persistent_risks = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Predicted_Risks_new']
+    persistent_risks = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Dashboard_Risk']
     persistent_risks_names = persistent_risks if len(persistent_risks) else "-"
     top_trending = snapshot.sort_values('trend', ascending=False).head(5)
     top_high = snapshot.sort_values('current_score', ascending=False).head(8)
     
-    df = df.merge(snapshot[['Predicted_Risks_new', 'trend_display', 'risk_share_pct', 'current_score']], on='Predicted_Risks_new', how='left')
-    df = df.merge(events_summary[['Predicted_Risks_new', 'Window', 'Event_Count']], on=['Predicted_Risks_new', 'Window'], how='left')
+    df = df.merge(
+        snapshot[['Dashboard_Risk', 'trend_display', 'risk_share_pct', 'current_score']],
+        on='Dashboard_Risk',
+        how='left'
+    )
+    
+    df = df.merge(
+        events_summary[['Dashboard_Risk', 'Window', 'Event_Count']],
+        on=['Dashboard_Risk', 'Window'],
+        how='left'
+    )
     
     top_risk = snapshot.sort_values('current_score', ascending=False).head(1)
-    top_risk_name = top_risk['Predicted_Risks_new'].iloc[0] if len(top_risk) else "-"
+    top_risk_name = top_risk['Dashboard_Risk'].iloc[0] if len(top_risk) else "-"
     top_risk_score = top_risk['current_score'].iloc[0] if len(top_risk) else 0
     
     fastest = snapshot.sort_values('trend', ascending=False).head(1)
-    fastest_name = fastest['Predicted_Risks_new'].iloc[0] if len(fastest) else "-"
+    fastest_name = fastest['Dashboard_Risk'].iloc[0] if len(fastest) else "-"
     fastest_delta = fastest['trend'].iloc[0] if len(fastest) else 0
     
     col1, col2, col3, col4 = st.columns(4)
@@ -291,7 +331,7 @@ if selection == "External Risk Snapshot":
             continue
         with trend_cols[i]:
             st.metric(
-                label = row['Predicted_Risks_new'],
+                label = row['Dashboard_Risk'],
                 value = f"{row['current_score']:.2f}",
                 delta = f"{row['trend']:.2f}",
             )
@@ -314,7 +354,7 @@ if selection == "External Risk Snapshot":
         for i, (_, row) in enumerate(new_risks.iterrows()):
             with new_cols[i]:
                 st.metric(
-                    label=row['Predicted_Risks_new'],
+                    label=row['Dashboard_Risk'],
                     value=f"{row['current_score']:.2f}",
                     delta="New",
                 )
@@ -324,7 +364,7 @@ if selection == "External Risk Snapshot":
     
     table = snapshot.copy()
     table = table[[
-        'Predicted_Risks_new',
+        'Dashboard_Risk',
         'action',
         'severity_band',
         'current_score',
@@ -344,12 +384,12 @@ if selection == "External Risk Snapshot":
     left, right = st.columns([1,2])
     
     with left:
-        selected_risk = st.selectbox('Select Risk Category', table['Predicted_Risks_new'].unique())
+        selected_risk = st.selectbox('Select Risk Category', table['Dashboard_Risk'].unique())
         min_sev = st.slider('Minimum event severity', 0.0, 5.0, 2.5, 0.1)
         search = st.text_input("Search headlines", "")
     
     with right:
-        rrow = snapshot[snapshot['Predicted_Risks_new'] == selected_risk].head()
+        rrow = snapshot[snapshot['Dashboard_Risk'] == selected_risk].head()
         if len(rrow):
             rrow = rrow.iloc[0]
             event_count = int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0
@@ -368,7 +408,7 @@ if selection == "External Risk Snapshot":
             )
     
     st.divider()
-    risk_events = events[(events['Predicted_Risks_new'] == selected_risk) & (events['Window'] >= (datetime.now() - delta).strftime('%Y-%m-%d'))]
+    risk_events = events[(events['Dashboard_Risk'] == selected_risk) & (events['Window'] >= (datetime.now() - delta).strftime('%Y-%m-%d'))]
             
     st.markdown('### Top Events Driving Signal')
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
@@ -454,6 +494,16 @@ if selection == "External Risk Snapshot":
     
         for c in available_driver_cols:
             risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
+
+        driver_map = {
+            "Acceleration_value": "Momentum",
+            "Recency": "Recency",
+            "Impact_Score": "Impact",
+            "Industry_Risk": "Higher-Ed Relevance",
+            "Location": "Location Relevance",
+            "Frequency_Score": "Event Frequency",
+            "Source_Accuracy": "Source Reliability"
+        }
     
         driver_summary = (
             risk_events[available_driver_cols]
@@ -462,25 +512,25 @@ if selection == "External Risk Snapshot":
             .rename(columns={'index': 'technical_driver', 0: 'average_score'})
         )
 
-    driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
-    driver_summary['average_score'] = driver_summary['average_score'].round(2)
+        driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
+        driver_summary['average_score'] = driver_summary['average_score'].round(2)
 
-    driver_summary['interpretation'] = driver_summary.apply(
-        lambda r: (
-            f"{r['driver']} is a major contributor"
-            if r['average_score'] >= 4 else
-            f"{r['driver']} is a moderate contributor"
-            if r['average_score'] >= 2.5 else
-            f"{r['driver']} is a minor contributor"
-        ),
-        axis=1
-    )
-
-    driver_summary = driver_summary[
-        ['driver', 'average_score', 'interpretation', 'technical_driver']
-    ].sort_values('average_score', ascending=False)
-
-    st.dataframe(driver_summary, use_container_width=True, hide_index=True)
+        driver_summary['interpretation'] = driver_summary.apply(
+            lambda r: (
+                f"{r['driver']} is a major contributor"
+                if r['average_score'] >= 4 else
+                f"{r['driver']} is a moderate contributor"
+                if r['average_score'] >= 2.5 else
+                f"{r['driver']} is a minor contributor"
+            ),
+            axis=1
+        )
+    
+        driver_summary = driver_summary[
+            ['driver', 'average_score', 'interpretation', 'technical_driver']
+        ].sort_values('average_score', ascending=False)
+    
+        st.dataframe(driver_summary, use_container_width=True, hide_index=True)
 
     st.markdown("### Recent Headlines")
 
