@@ -295,19 +295,24 @@ if selection == "External Risk Snapshot":
     
     #time_period = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
     delta_days = period_map['Last Month']
-    delta = timedelta(days = delta_days)
-    cutoff = pd.to_datetime(datetime.now()-delta)
+    delta = pd.Timedelta(days=delta_days)
+    
+    cutoff = pd.Timestamp.now() - delta
     previous_cutoff = cutoff - delta
+    events['Window'] = pd.to_datetime(events['Window'], errors='coerce')
+    df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
     
+    total_events = events[events['Window'] >= cutoff].shape[0]
+
+    current_events = events[events['Window'] >= cutoff]
     
-    total_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')].shape[0]
+    current_period = df[df['Window'] >= cutoff]
     
-    current_events = events[events['Window'] >= cutoff.strftime('%Y-%m-%d')]
-    events_summary = current_events.groupby(['Window','Dashboard_Risk'])['Title'].count().reset_index().rename(columns={'Title': 'Event_Count'})
-    
-    current_period = df[df['Window'] >= cutoff.strftime('%Y-%m-%d')]
-    previous_period = df[(df['Window'] >= (datetime.now() - 2*delta).strftime('%Y-%m-%d')) & (df['Window'] < (datetime.now() - delta).strftime('%Y-%m-%d'))]
+    previous_period = df[
+        (df['Window'] >= previous_cutoff) &
+        (df['Window'] < cutoff)
+    ]
     events['Event_Severity'] = pd.to_numeric(events['Event_Severity'], errors='coerce').fillna(0)
 
     current_scores = (
