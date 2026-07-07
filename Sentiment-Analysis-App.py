@@ -297,14 +297,14 @@ if selection == "External Risk Snapshot":
     delta_days = period_map['Last Month']
     delta = pd.Timedelta(days=delta_days)
     
-    cutoff = pd.Timestamp.now() - delta
-    previous_cutoff = cutoff - delta
-    events['Window'] = pd.to_datetime(events['Window'], errors='coerce')
-    df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
+    events['Window'] = pd.to_datetime(events['Window'], errors='coerce', utc=True)
+    df['Window'] = pd.to_datetime(df['Window'], errors='coerce', utc=True)
     
+    cutoff = pd.Timestamp.now(tz='UTC') - delta
+    previous_cutoff = cutoff - delta
     
     total_events = events[events['Window'] >= cutoff].shape[0]
-
+    
     current_events = events[events['Window'] >= cutoff]
     
     current_period = df[df['Window'] >= cutoff]
@@ -313,7 +313,11 @@ if selection == "External Risk Snapshot":
         (df['Window'] >= previous_cutoff) &
         (df['Window'] < cutoff)
     ]
-    events['Event_Severity'] = pd.to_numeric(events['Event_Severity'], errors='coerce').fillna(0)
+    
+    events['Event_Severity'] = pd.to_numeric(
+        events['Event_Severity'],
+        errors='coerce'
+    ).fillna(0)
 
     current_scores = (
         current_events
