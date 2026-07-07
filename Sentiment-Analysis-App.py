@@ -306,7 +306,7 @@ if selection == "External Risk Snapshot":
     total_events = events[events['Window'] >= cutoff].shape[0]
     
     current_events = events[events['Window'] >= cutoff]
-        events_summary = (
+    events_summary = (
         current_events
         .groupby(['Window', 'Dashboard_Risk'])['Title']
         .count()
