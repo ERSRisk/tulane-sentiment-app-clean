@@ -306,6 +306,13 @@ if selection == "External Risk Snapshot":
     total_events = events[events['Window'] >= cutoff].shape[0]
     
     current_events = events[events['Window'] >= cutoff]
+        events_summary = (
+        current_events
+        .groupby(['Window', 'Dashboard_Risk'])['Title']
+        .count()
+        .reset_index()
+        .rename(columns={'Title': 'Event_Count'})
+    )
     
     current_period = df[df['Window'] >= cutoff]
     
@@ -355,10 +362,10 @@ if selection == "External Risk Snapshot":
     snapshot['severity_band'] = snapshot['current_score'].apply(severity_bucket)
     
     event_counts = (
-        events_summary
-        .groupby('Dashboard_Risk')['Event_Count']
-        .sum()
-        .reset_index()
+        current_events
+        .groupby('Dashboard_Risk')
+        .size()
+        .reset_index(name='Event_Count')
     )
     
     snapshot = snapshot.merge(event_counts, on='Dashboard_Risk', how='left')
