@@ -475,6 +475,7 @@ if selection == "External Risk Snapshot":
     
     st.divider()
     left, right = st.columns([1,2])
+    max_items = st.slider("Maximum items to show", 10, 200, 50, 10)
     
     with left:
         all_dashboard_risks = sorted(
@@ -698,7 +699,70 @@ if selection == "External Risk Snapshot":
                     )
     
             risk_events = risk_events[risk_events["keep"] == True]
+    st.markdown("### Most Relevant Recent Stories")
     
+    articles_for_risk = articles.copy()
+    
+    if "Published_utc" in articles_for_risk.columns:
+        articles_for_risk["Published_utc"] = pd.to_datetime(
+            articles_for_risk["Published_utc"],
+            errors="coerce",
+            utc=True
+        ).dt.tz_convert(None)
+    elif "Published" in articles_for_risk.columns:
+        articles_for_risk["Published_utc"] = pd.to_datetime(
+            articles_for_risk["Published"],
+            errors="coerce",
+            utc=True
+        ).dt.tz_convert(None)
+    
+    articles_for_risk = articles_for_risk[
+        (articles_for_risk["Dashboard_Risk"] == selected_risk) &
+        (articles_for_risk["Published_utc"] >= cutoff)
+    ].copy()
+    
+    if "University Label" in articles_for_risk.columns:
+        articles_for_risk["University Label"] = pd.to_numeric(
+            articles_for_risk["University Label"],
+            errors="coerce"
+        ).fillna(0).astype(int)
+    
+        articles_for_risk = articles_for_risk[
+            articles_for_risk["University Label"] == 1
+        ]
+    
+    articles_for_risk = (
+        articles_for_risk
+        .dropna(subset=["Title"])
+        .drop_duplicates(subset=["Title", "Link"])
+        .sort_values("Published_utc", ascending=False)
+        .head(max_items)
+    )
+    
+    if articles_for_risk.empty:
+        st.caption("No article-level stories found for this selected risk.")
+    else:
+        for _, row in articles_for_risk.iterrows():
+            with st.container(border=True):
+                st.markdown(f"**{row.get('Title', '')}**")
+    
+                meta = []
+                source = row.get("Source", row.get("source", row.get("canonical_source", "")))
+                if pd.notna(source) and str(source).strip():
+                    meta.append(str(source))
+    
+                if pd.notna(row.get("Published_utc")):
+                    meta.append(f"Published: {row.get('Published_utc')}")
+    
+                if meta:
+                    st.caption(" | ".join(meta))
+    
+                if pd.notna(row.get("Content")):
+                    preview = str(row.get("Content"))[:500]
+                    st.write(preview + ("..." if len(str(row.get("Content"))) > 500 else ""))
+    
+                if pd.notna(row.get("Link")) and str(row.get("Link")).startswith("http"):
+                    st.markdown(f"[Read original article]({row.get('Link')})")
     
     # -----------------------------
     # Section 1: Key Drivers
@@ -790,7 +854,7 @@ if selection == "External Risk Snapshot":
             .sort_values('Event_Severity', ascending=False)
         )
     
-        for _, event in grouped_events.head(10).iterrows():
+        for _, event in grouped_events.iterrows():
             event_label = event.get("Event_Label_Group")
             sev = float(event['Event_Severity']) if pd.notna(event['Event_Severity']) else 0
             sev_tag = severity_bucket(sev)
@@ -824,7 +888,7 @@ if selection == "External Risk Snapshot":
     
                 st.markdown("**Related articles**")
     
-                for _, article_row in related.drop_duplicates(subset=['Title']).head(10).iterrows():
+                for _, article_row in related.drop_duplicates(subset=['Title']).head(max_items).iterrows():
                     title = article_row.get('Title')
                     published = article_row.get('Published_utc')
                     link = article_row.get('Link')
@@ -870,7 +934,7 @@ if selection == "External Risk Snapshot":
         .dropna(subset=['Title'])
         .sort_values(date_col, ascending=False)
         .drop_duplicates(subset=['Title', 'Link'])
-        .head(5)
+        .head(max_items)
     )
     
     if recent_headlines.empty:
