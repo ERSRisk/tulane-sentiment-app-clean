@@ -527,7 +527,10 @@ if selection == "External Risk Snapshot":
         'risk_share_pct',
         'Event_Count'
     ]]
-    table = table.sort_values(['current_score', 'trend'], ascending=[False, False])
+    table = table.sort_values(
+        "Dashboard_Risk",
+        ascending=True
+    )
     
     st.dataframe(
         table, use_container_width = True, hide_index = True
@@ -538,20 +541,61 @@ if selection == "External Risk Snapshot":
     max_items = st.slider("Maximum items to show", 10, 200, 50, 10)
     
     with left:
+    # ---------------------------------
+    # Main risk-register category filter
+    # ---------------------------------
         all_dashboard_risks = sorted(
-            risk_mapping['dashboard_risk']
+            risk_mapping["dashboard_risk"]
             .dropna()
             .astype(str)
             .str.strip()
-            .unique()
+            .loc[lambda s: s.ne("")]
+            .unique(),
+            key=str.lower
         )
-        
+    
         selected_risk = st.selectbox(
-            'Select Risk Category',
+            "Main Risk Register Category",
             all_dashboard_risks
         )
-        min_sev = st.slider('Minimum event severity', 0.0, 5.0, 2.5, 0.1)
-        search = st.text_input("Search headlines", "")
+    
+        # ---------------------------------
+        # AI taxonomy / subcategory filter
+        # ---------------------------------
+        subcategory_options = sorted(
+            risk_mapping.loc[
+                risk_mapping["dashboard_risk"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .eq(selected_risk),
+                "old_risk"
+            ]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .loc[lambda s: s.ne("")]
+            .unique(),
+            key=str.lower
+        )
+    
+        selected_subcategory = st.selectbox(
+            "AI Risk Subcategory",
+            ["All Subcategories"] + subcategory_options
+        )
+    
+        min_sev = st.slider(
+            "Minimum event severity",
+            0.0,
+            5.0,
+            2.5,
+            0.1
+        )
+    
+        search = st.text_input(
+            "Search headlines",
+            ""
+        )
     
     with right:
         rrow = snapshot[snapshot['Dashboard_Risk'] == selected_risk].head()
@@ -580,9 +624,18 @@ if selection == "External Risk Snapshot":
     events['Window'] = pd.to_datetime(events['Window'], errors='coerce', utc=True).dt.tz_convert(None)
     cutoff = pd.Timestamp(cutoff).tz_localize(None)
     risk_events = events[
-        (events['Dashboard_Risk'] == selected_risk) &
-        (events['Window'] >= cutoff)
+        (events["Dashboard_Risk"] == selected_risk)
+        & (events["Window"] >= cutoff)
     ].copy()
+    
+    if selected_subcategory != "All Subcategories":
+        risk_events = risk_events[
+            risk_events["Predicted_Risks_new"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .eq(selected_subcategory)
+        ].copy()
     
     risk_events['Event_Severity'] = pd.to_numeric(
         risk_events['Event_Severity'],
@@ -682,9 +735,18 @@ if selection == "External Risk Snapshot":
         ).dt.tz_convert(None)
     
     articles_for_risk = articles_for_risk[
-        (articles_for_risk["Dashboard_Risk"] == selected_risk) &
-        (articles_for_risk["Published_utc"] >= cutoff)
+        (articles_for_risk["Dashboard_Risk"] == selected_risk)
+        & (articles_for_risk["Published_utc"] >= cutoff)
     ].copy()
+    
+    if selected_subcategory != "All Subcategories":
+        articles_for_risk = articles_for_risk[
+            articles_for_risk["Predicted_Risks_new"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .eq(selected_subcategory)
+        ].copy()
     
     if "University Label" in articles_for_risk.columns:
         articles_for_risk["University Label"] = pd.to_numeric(
