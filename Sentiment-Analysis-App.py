@@ -207,9 +207,32 @@ if selection == "External Risk Snapshot":
         'latest/reference/risk_mapping.csv',
         'pipeline/resources/risk_mapping.csv'
     )
+
+    risk_universe = (
+        risk_mapping[['dashboard_risk']]
+        .dropna()
+        .copy()
+    )
+    
+    risk_universe['dashboard_risk'] = (
+        risk_universe['dashboard_risk']
+        .astype(str)
+        .str.strip()
+    )
+    
+    risk_universe = (
+        risk_universe[
+            risk_universe['dashboard_risk'].ne('')
+        ]
+        .drop_duplicates()
+        .rename(columns={'dashboard_risk': 'Dashboard_Risk'})
+    )
+    
     df = apply_risk_mapping(df, risk_mapping)
     events = apply_risk_mapping(events, risk_mapping)
     articles = apply_risk_mapping(articles, risk_mapping)
+
+    
     now = df['Window'].max()
     
     st.title('External Risk Snapshot')
@@ -347,9 +370,45 @@ if selection == "External Risk Snapshot":
         .rename(columns={'Event_Severity': 'previous_score'})
     )
     
-    snapshot = current_scores.merge(previous_scores, on='Dashboard_Risk', how='left')
+    snapshot = (
+        risk_universe
+        .merge(
+            current_scores,
+            on='Dashboard_Risk',
+            how='left'
+        )
+        .merge(
+            previous_scores,
+            on='Dashboard_Risk',
+            how='left'
+        )
+    )
+    snapshot['current_score'] = pd.to_numeric(
+        snapshot['current_score'],
+        errors='coerce'
+    ).fillna(0.0)
+    
+    snapshot['previous_score'] = pd.to_numeric(
+        snapshot['previous_score'],
+        errors='coerce'
+    ).fillna(0.0)
 
-    snapshot['is_new'] = snapshot['previous_score'].isna()
+    current_risk_names = set(
+        current_scores['Dashboard_Risk']
+        .dropna()
+        .astype(str)
+    )
+    
+    previous_risk_names = set(
+        previous_scores['Dashboard_Risk']
+        .dropna()
+        .astype(str)
+    )
+    
+    snapshot['is_new'] = (
+        snapshot['Dashboard_Risk'].isin(current_risk_names)
+        & ~snapshot['Dashboard_Risk'].isin(previous_risk_names)
+    )
     snapshot['previous_score'] = snapshot['previous_score'].fillna(0)
     
     snapshot['trend'] = snapshot['current_score'] - snapshot['previous_score']
