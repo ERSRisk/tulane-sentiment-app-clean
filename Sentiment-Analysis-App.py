@@ -427,6 +427,7 @@ if selection == "External Risk Snapshot":
                 label = row['Dashboard_Risk'],
                 value = f"{row['current_score']:.2f}",
                 delta = f"{row['trend']:.2f}",
+                delta_color="inverse",
             )
     st.divider()
     
@@ -439,18 +440,18 @@ if selection == "External Risk Snapshot":
     st.divider()
     st.subheader("Newly Emerging Risks (Early Warning)")
     
-    if new_risks.empty:
-        st.write("No new risks detected in this period.")
-    else:
-        new_cols = st.columns(min(5, len(new_risks)))
-    
-        for i, (_, row) in enumerate(new_risks.iterrows()):
-            with new_cols[i]:
-                st.metric(
-                    label=row['Dashboard_Risk'],
-                    value=f"{row['current_score']:.2f}",
-                    delta="New",
-                )
+    #if new_risks.empty:
+    #    st.write("No new risks detected in this period.")
+    #else:
+    #    new_cols = st.columns(min(5, len(new_risks)))
+   # 
+   #     for i, (_, row) in enumerate(new_risks.iterrows()):
+    #        with new_cols[i]:
+    #            st.metric(
+    #                label=row['Dashboard_Risk'],
+    #                value=f"{row['current_score']:.2f}",
+    #                delta="New",
+     #           )
     
     st.markdown('---')
     st.markdown('### Risk Overview')
@@ -603,102 +604,7 @@ if selection == "External Risk Snapshot":
         ]
     
     risk_events = risk_events.sort_values('Event_Severity', ascending=False)
-
-    # -----------------------------
-    # LLM relevance filter
-    # -----------------------------
-    if not risk_events.empty:
-        risk_events = risk_events.reset_index(drop=True)
-        risk_events["row_id"] = risk_events.index.astype(str)
     
-        def chunks(df, size=10):
-            for start in range(0, len(df), size):
-                yield df.iloc[start:start + size].copy()
-        
-        if not risk_events.empty:
-            risk_events = risk_events.reset_index(drop=True)
-            risk_events["row_id"] = risk_events.index.astype(str)
-        
-            all_decisions = []
-        
-            for batch in chunks(risk_events.head(40), size=10):
-                review_payload = batch[
-                    [c for c in [
-                        "row_id",
-                        "Dashboard_Risk",
-                        "Event_Label",
-                        "Title",
-                        "Content",
-                        "Source",
-                        "Published_utc",
-                        "Event_Severity"
-                    ] if c in batch.columns]
-                ].fillna("").astype(str).to_dict(orient="records")
-        
-                decisions = llm_relevance_filter(
-                    selected_risk,
-                    json.dumps(review_payload, ensure_ascii=False)
-                )
-        
-                if decisions:
-                    all_decisions.extend(decisions)
-        
-                time.sleep(0.5)
-        
-            decisions_df = pd.DataFrame(all_decisions)
-        
-            if not decisions_df.empty and {"row_id", "keep"}.issubset(decisions_df.columns):
-                decisions_df["row_id"] = decisions_df["row_id"].astype(str)
-                decisions_df["keep"] = decisions_df["keep"].astype(bool)
-        
-                risk_events = risk_events.merge(
-                    decisions_df[["row_id", "keep", "reason"]],
-                    on="row_id",
-                    how="left"
-                )
-        
-                risk_events["keep"] = risk_events["keep"].fillna(True)
-        
-                with st.expander("Filtered out low-relevance signals", expanded=False):
-                    rejected = risk_events[risk_events["keep"] == False]
-                    if rejected.empty:
-                        st.caption("No signals filtered out.")
-                    else:
-                        st.dataframe(
-                            rejected[["Title", "Event_Label", "reason"]].head(20),
-                            use_container_width=True,
-                            hide_index=True
-                        )
-        
-                risk_events = risk_events[risk_events["keep"] == True]
-    
-        
-
-    
-        if not decisions_df.empty and {"row_id", "keep"}.issubset(decisions_df.columns):
-            decisions_df["row_id"] = decisions_df["row_id"].astype(str)
-            decisions_df["keep"] = decisions_df["keep"].astype(bool)
-    
-            risk_events = risk_events.merge(
-                decisions_df[["row_id", "keep", "reason"]],
-                on="row_id",
-                how="left"
-            )
-    
-            risk_events["keep"] = risk_events["keep"].fillna(True)
-    
-            with st.expander("Filtered out low-relevance signals", expanded=False):
-                rejected = risk_events[risk_events["keep"] == False]
-                if rejected.empty:
-                    st.caption("No signals filtered out.")
-                else:
-                    st.dataframe(
-                        rejected[["Title", "Event_Label", "reason"]].head(20),
-                        use_container_width=True,
-                        hide_index=True
-                    )
-    
-            risk_events = risk_events[risk_events["keep"] == True]
     st.markdown("### Most Relevant Recent Stories")
     
     articles_for_risk = articles.copy()
