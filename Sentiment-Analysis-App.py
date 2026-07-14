@@ -2203,7 +2203,11 @@ if selection == "Article Risk Review":
         usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
                   'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability', 'Assigned_how']
         try:
-            results_df = load_csv_gz_from_gcs('latest/BERTopic_Streamlit.csv.gz', 'pipeline/resources/BERTopic_Streamlit.csv.gz')
+            results_df = load_csv_gz_from_gcs(
+                'latest/topics/BERTopic_Streamlit.csv.gz',
+                'pipeline/resources/BERTopic_Streamlit.csv.gz'
+            st.session_state.articles = results_df.copy()
+            )
             #results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
         except Exception as e:
             st.error(f"Failed to load BERTopic results: {e}")
