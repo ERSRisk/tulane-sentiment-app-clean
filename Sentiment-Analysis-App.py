@@ -2451,7 +2451,7 @@ if selection == "Article Risk Review":
         try:
             results_df = load_csv_gz_from_gcs(
                 'latest/topics/BERTopic_Streamlit.csv.gz',
-                'pipeline/resources/BERTopic_Streamlit.csv.gz'
+                'pipeline/resources/BERTopic_Streamlit.csv.gz')
             st.session_state.articles = results_df.copy()
             )
             #results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
