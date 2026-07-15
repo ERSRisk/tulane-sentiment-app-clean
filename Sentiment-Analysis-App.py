@@ -199,6 +199,108 @@ if selection == "External Risk Snapshot":
         'latest/scores/ranked_events_risks1.csv',
         'pipeline/resources/ranked_events_risks1.csv'
     )
+
+    agent_decisions = load_csv_from_gcs(
+    "latest/agent/agent_decisions.csv",
+    "pipeline/resources/agent_decisions.csv"
+    )
+    
+    emerging_situations = load_csv_from_gcs(
+        "latest/agent/emerging_situations.csv",
+        "pipeline/resources/emerging_situations.csv"
+    )
+
+    def prepare_agent_decisions(data):
+        data = data.copy()
+    
+        if data.empty:
+            return data
+    
+        data["evaluation_timestamp"] = pd.to_datetime(
+            data["evaluation_timestamp"],
+            errors="coerce",
+            utc=True
+        )
+    
+        # Keep the newest decision for each signal.
+        data = (
+            data.sort_values(
+                "evaluation_timestamp",
+                ascending=False
+            )
+            .drop_duplicates(
+                subset=["unit_id"],
+                keep="first"
+            )
+        )
+    
+        # Do not display failed model responses.
+        if "validation_status" in data.columns:
+            data = data[
+                data["validation_status"]
+                .fillna("valid")
+                .eq("valid")
+            ]
+    
+        return data
+    
+    
+    agent_decisions = prepare_agent_decisions(
+        agent_decisions
+    )
+
+    def parse_json_list(value):
+        if isinstance(value, list):
+            return value
+    
+        if pd.isna(value):
+            return []
+    
+        try:
+            parsed = json.loads(str(value))
+            return parsed if isinstance(parsed, list) else []
+        except Exception:
+            return []
+    
+    
+    def executive_priority(row):
+        decision = str(
+            row.get("agent_decision", "")
+        ).lower()
+    
+        actionability = str(
+            row.get("actionability", "")
+        ).lower()
+    
+        relevance = str(
+            row.get("institutional_relevance", "")
+        ).lower()
+    
+        if (
+            decision == "escalate"
+            and actionability == "high"
+            and relevance == "direct"
+        ):
+            return "Critical"
+    
+        if decision == "escalate":
+            return "High"
+    
+        if (
+            decision == "monitor"
+            and relevance == "direct"
+        ):
+            return "Medium"
+    
+        return "Low"
+    
+    
+    agent_decisions["Executive Priority"] = (
+        agent_decisions.apply(
+            executive_priority,
+            axis=1
+        )
+    )
     df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
     
     events['Window'] = pd.to_datetime(events['Window'], errors = 'coerce')
@@ -499,18 +601,162 @@ if selection == "External Risk Snapshot":
     st.divider()
     st.subheader("Newly Emerging Risks (Early Warning)")
     
-    #if new_risks.empty:
-    #    st.write("No new risks detected in this period.")
-    #else:
-    #    new_cols = st.columns(min(5, len(new_risks)))
-   # 
-   #     for i, (_, row) in enumerate(new_risks.iterrows()):
-    #        with new_cols[i]:
-    #            st.metric(
-    #                label=row['Dashboard_Risk'],
-    #                value=f"{row['current_score']:.2f}",
-    #                delta="New",
-     #           )
+    visible_agent_decisions = agent_decisions[
+        agent_decisions["dashboard_visibility"]
+        .isin(["show", "back_burner"])
+    ].copy()
+    
+    priority_order = {
+        "Critical": 1,
+        "High": 2,
+        "Medium": 3,
+        "Low": 4
+    }
+    
+    visible_agent_decisions["_priority_order"] = (
+        visible_agent_decisions["Executive Priority"]
+        .map(priority_order)
+        .fillna(5)
+    )
+    
+    visible_agent_decisions = (
+        visible_agent_decisions
+        .sort_values(
+            [
+                "_priority_order",
+                "evaluation_timestamp"
+            ],
+            ascending=[True, False]
+        )
+    )
+    
+    critical_count = (
+        visible_agent_decisions[
+            visible_agent_decisions[
+                "Executive Priority"
+            ].eq("Critical")
+        ].shape[0]
+    )
+    
+    escalate_count = (
+        visible_agent_decisions[
+            visible_agent_decisions[
+                "agent_decision"
+            ].eq("escalate")
+        ].shape[0]
+    )
+    
+    monitor_count = (
+        visible_agent_decisions[
+            visible_agent_decisions[
+                "agent_decision"
+            ].eq("monitor")
+        ].shape[0]
+    )
+    
+    direct_count = (
+        visible_agent_decisions[
+            visible_agent_decisions[
+                "institutional_relevance"
+            ].eq("direct")
+        ].shape[0]
+    )
+    
+    ai_col1, ai_col2, ai_col3, ai_col4 = st.columns(4)
+    
+    ai_col1.metric(
+        "Critical AI Signals",
+        critical_count
+    )
+    
+    ai_col2.metric(
+        "Recommended Escalations",
+        escalate_count
+    )
+    
+    ai_col3.metric(
+        "Monitor",
+        monitor_count
+    )
+    
+    ai_col4.metric(
+        "Direct Tulane Relevance",
+        direct_count
+    )
+
+    filter_col1, filter_col2, filter_col3 = st.columns(3)
+
+    with filter_col1:
+        agent_priority_filter = st.multiselect(
+            "Executive Priority",
+            ["Critical", "High", "Medium", "Low"],
+            default=["Critical", "High", "Medium"]
+        )
+    
+    with filter_col2:
+        agent_decision_filter = st.multiselect(
+            "Agent Recommendation",
+            ["escalate", "monitor", "already_addressed", "ignore"],
+            default=["escalate", "monitor"]
+        )
+    
+    with filter_col3:
+        agent_relevance_filter = st.multiselect(
+            "Institutional Relevance",
+            ["direct", "indirect", "weak", "none"],
+            default=["direct", "indirect"]
+        )
+
+    filtered_agent_decisions = visible_agent_decisions[
+        visible_agent_decisions[
+            "Executive Priority"
+        ].isin(agent_priority_filter)
+        & visible_agent_decisions[
+            "agent_decision"
+        ].isin(agent_decision_filter)
+        & visible_agent_decisions[
+            "institutional_relevance"
+        ].isin(agent_relevance_filter)
+    ].copy()
+
+    agent_table = filtered_agent_decisions[
+        [
+            "Executive Priority",
+            "agent_decision",
+            "dashboard_visibility",
+            "institutional_relevance",
+            "actionability",
+            "confidence",
+            "what_changed",
+            "recommended_human_action",
+        ]
+    ].copy()
+    
+    agent_table = agent_table.rename(
+        columns={
+            "agent_decision": "Recommendation",
+            "dashboard_visibility": "Visibility",
+            "institutional_relevance": "Tulane Relevance",
+            "actionability": "Actionability",
+            "confidence": "Confidence",
+            "what_changed": "Risk Development",
+            "recommended_human_action": "Recommended Action",
+        }
+    )
+    
+    st.dataframe(
+        agent_table,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Risk Development": st.column_config.TextColumn(
+                width="large"
+            ),
+            "Recommended Action": st.column_config.TextColumn(
+                width="large"
+            ),
+        }
+    )
     
     st.markdown('---')
     st.markdown('### Risk Overview')
