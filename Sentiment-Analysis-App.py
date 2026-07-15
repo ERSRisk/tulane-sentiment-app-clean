@@ -201,12 +201,12 @@ if selection == "External Risk Snapshot":
     )
 
     agent_decisions = load_csv_from_gcs(
-    "latest/agent/agent_decisions.csv",
+    "agent/agent_decisions.csv",
     "pipeline/resources/agent_decisions.csv"
     )
     
     emerging_situations = load_csv_from_gcs(
-        "latest/agent/emerging_situations.csv",
+        "agent/emerging_situations.csv",
         "pipeline/resources/emerging_situations.csv"
     )
 
