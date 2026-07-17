@@ -204,6 +204,17 @@ if selection == "External Risk Snapshot":
     "agent/agent_decisions.csv",
     "pipeline/resources/agent_decisions.csv"
     )
+
+    agent_decisions["latest_seen"] = pd.to_datetime(
+        agent_decisions["latest_seen"],
+        errors="coerce",
+        utc=True
+    )
+    
+    agent_decisions = agent_decisions.sort_values(
+        "latest_seen",
+        ascending=False
+    )
     
     emerging_situations = load_csv_from_gcs(
         "agent/emerging_situations.csv",
