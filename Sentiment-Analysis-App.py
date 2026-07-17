@@ -201,20 +201,21 @@ if selection == "External Risk Snapshot":
     )
 
     agent_decisions = load_csv_from_gcs(
-    "agent/agent_decisions.csv",
-    "pipeline/resources/agent_decisions.csv"
-    )
-
-    agent_decisions["latest_seen"] = pd.to_datetime(
-        agent_decisions["latest_seen"],
-        errors="coerce",
-        utc=True
+        "agent/agent_decisions.csv",
+        "pipeline/resources/agent_decisions.csv"
     )
     
-    agent_decisions = agent_decisions.sort_values(
-        "latest_seen",
-        ascending=False
-    )
+    for col in [
+        "first_seen",
+        "last_seen",
+        "evaluation_timestamp"
+    ]:
+        if col in agent_decisions.columns:
+            agent_decisions[col] = pd.to_datetime(
+                agent_decisions[col],
+                errors="coerce",
+                utc=True
+            )
     
     emerging_situations = load_csv_from_gcs(
         "agent/emerging_situations.csv",
@@ -636,6 +637,18 @@ if selection == "External Risk Snapshot":
         agent_decisions["dashboard_visibility"]
         .isin(["show", "back_burner"])
     ].copy()
+
+    visible_agent_decisions = (
+        visible_agent_decisions
+        .sort_values(
+            [
+                "_priority_order",
+                "last_seen",
+                "evaluation_timestamp"
+            ],
+            ascending=[True, False, False]
+        )
+    )
     
     priority_order = {
         "Critical": 1,
@@ -752,9 +765,9 @@ if selection == "External Risk Snapshot":
 
     agent_table = filtered_agent_decisions[
         [
+            "last_seen",
+            "first_seen",
             "Executive Priority",
-            "agent_decision",
-            "dashboard_visibility",
             "institutional_relevance",
             "actionability",
             "confidence",
