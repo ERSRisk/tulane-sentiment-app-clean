@@ -637,18 +637,6 @@ if selection == "External Risk Snapshot":
         agent_decisions["dashboard_visibility"]
         .isin(["show", "back_burner"])
     ].copy()
-
-    visible_agent_decisions = (
-        visible_agent_decisions
-        .sort_values(
-            [
-                "_priority_order",
-                "last_seen",
-                "evaluation_timestamp"
-            ],
-            ascending=[True, False, False]
-        )
-    )
     
     priority_order = {
         "Critical": 1,
@@ -663,14 +651,28 @@ if selection == "External Risk Snapshot":
         .fillna(5)
     )
     
+    visible_agent_decisions["last_seen"] = pd.to_datetime(
+        visible_agent_decisions["last_seen"],
+        errors="coerce",
+        utc=True
+    )
+    
+    visible_agent_decisions["evaluation_timestamp"] = pd.to_datetime(
+        visible_agent_decisions["evaluation_timestamp"],
+        errors="coerce",
+        utc=True
+    )
+    
     visible_agent_decisions = (
         visible_agent_decisions
         .sort_values(
             [
                 "_priority_order",
+                "last_seen",
                 "evaluation_timestamp"
             ],
-            ascending=[True, False]
+            ascending=[True, False, False],
+            na_position="last"
         )
     )
     
