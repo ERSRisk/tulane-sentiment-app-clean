@@ -234,13 +234,19 @@ if selection == "External Risk Snapshot":
         )
     
         # Keep the newest decision for each signal.
+        dedup_key = (
+            "canonical_event_id"
+            if "canonical_event_id" in data.columns
+            else "unit_id"
+        )
+        
         data = (
             data.sort_values(
                 "evaluation_timestamp",
                 ascending=False
             )
             .drop_duplicates(
-                subset=["unit_id"],
+                subset=[dedup_key],
                 keep="first"
             )
         )
@@ -259,6 +265,20 @@ if selection == "External Risk Snapshot":
     agent_decisions = prepare_agent_decisions(
         agent_decisions
     )
+
+    agent_decisions = agent_decisions[
+        (
+            agent_decisions["institutional_relevance"] == "direct"
+        )
+        & (
+            agent_decisions["dashboard_visibility"] == "show"
+        )
+        & (
+            agent_decisions["requires_human_review"]
+            .fillna(False)
+            .eq(False)
+        )
+    ]
 
     def parse_json_list(value):
         if isinstance(value, list):
