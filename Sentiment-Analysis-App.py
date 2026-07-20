@@ -263,23 +263,75 @@ if selection == "External Risk Snapshot":
         return data
     
     
+    def prepare_agent_decisions(data):
+        data = data.copy()
+    
+        if data.empty:
+            return data
+    
+        data["evaluation_timestamp"] = pd.to_datetime(
+            data["evaluation_timestamp"],
+            errors="coerce",
+            utc=True
+        )
+    
+        # Remove invalid responses first.
+        if "validation_status" in data.columns:
+            data = data[
+                data["validation_status"]
+                .fillna("valid")
+                .eq("valid")
+            ].copy()
+    
+        # Keep only decisions eligible for dashboard display.
+        data = data[
+            (
+                data["institutional_relevance"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("direct")
+            )
+            & (
+                data["dashboard_visibility"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("show")
+            )
+            & (
+                data["requires_human_review"]
+                .fillna(False)
+                .eq(False)
+            )
+        ].copy()
+    
+        dedup_key = (
+            "canonical_event_id"
+            if "canonical_event_id" in data.columns
+            else "unit_id"
+        )
+    
+        # Now retain the newest displayable decision.
+        data = (
+            data.sort_values(
+                "evaluation_timestamp",
+                ascending=False
+            )
+            .drop_duplicates(
+                subset=[dedup_key],
+                keep="first"
+            )
+        )
+    
+        return data
+    
+    
     agent_decisions = prepare_agent_decisions(
         agent_decisions
     )
-
-    agent_decisions = agent_decisions[
-        (
-            agent_decisions["institutional_relevance"] == "direct"
-        )
-        & (
-            agent_decisions["dashboard_visibility"] == "show"
-        )
-        & (
-            agent_decisions["requires_human_review"]
-            .fillna(False)
-            .eq(False)
-        )
-    ]
 
     def parse_json_list(value):
         if isinstance(value, list):
