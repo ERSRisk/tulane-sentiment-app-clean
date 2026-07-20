@@ -766,7 +766,13 @@ if selection == "External Risk Snapshot":
     ].copy()
 
     agent_table = filtered_agent_decisions[
-        [
+        [    
+            "canonical_event_id",
+            "top_risk_match",
+            "situation_title",
+            "last_seen",
+            "Executive Priority",
+            "Risk Development"
             "last_seen",
             "first_seen",
             "Executive Priority",
