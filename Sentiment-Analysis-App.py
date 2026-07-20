@@ -772,7 +772,7 @@ if selection == "External Risk Snapshot":
             "situation_title",
             "last_seen",
             "Executive Priority",
-            "Risk Development"
+            "Risk Development",
             "last_seen",
             "first_seen",
             "Executive Priority",
