@@ -27,6 +27,7 @@ from google.cloud import storage
 def get_gcs_client():
     return storage.Client()
 
+
 def download_blob(blob_path: str, local_path: str, bucket_name = 'tulane-risk-data') -> str:
     client = get_gcs_client()
     bucket = client.bucket(bucket_name)
@@ -61,6 +62,34 @@ def load_json_from_gcs(blob_path: str, local_path:str, bucket_name='tulane-risk-
     ensure_local_file(blob_path, local_path, force = True)
     with open(local_path, 'r', encoding = 'utf-8') as f:
         return json.load(f)
+
+def save_lifecycle_registry_to_gcs(
+    lifecycle_df,
+    blob_name,
+    local_path,
+):
+    local_path = Path(local_path)
+
+    local_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    lifecycle_df.to_csv(
+        local_path,
+        index=False,
+    )
+
+    client = storage.Client()
+
+    bucket = client.bucket(bucket_name)
+
+    blob = bucket.blob(blob_name)
+
+    blob.upload_from_filename(
+        str(local_path),
+        content_type="text/csv",
+    )
 
 def _github_token() -> str:
     # Secret Manager can add a trailing newline; strip it
@@ -131,6 +160,14 @@ if selection == "External Risk Snapshot":
     REPO = 'Tulane-Sentiment-Analysis'
     TAG = 'BERTopic_results'
     ASSET = 'BERTopic_Streamlit.csv.gz'
+    LIFECYCLE_BLOB = (
+        "agent/risk_lifecycle_registry.csv"
+    )
+    
+    LIFECYCLE_LOCAL = (
+        "pipeline/resources/"
+        "risk_lifecycle_registry.csv"
+    )
 
     @st.cache_data(show_spinner=True, ttl=1800)
     def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
@@ -160,6 +197,63 @@ if selection == "External Risk Snapshot":
         if r.status_code != 200:
             raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
         return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+    def update_risk_pin(
+        lifecycle_df,
+        canonical_event_id,
+        should_pin,
+        pinned_by="streamlit_user",
+    ):
+        updated = lifecycle_df.copy()
+    
+        mask = (
+            updated["canonical_event_id"]
+            .astype(str)
+            .eq(str(canonical_event_id))
+        )
+    
+        if not mask.any():
+            raise KeyError(
+                "The selected event was not found "
+                "in the lifecycle registry."
+            )
+    
+        now_utc = pd.Timestamp.now(tz="UTC")
+    
+        updated.loc[
+            mask,
+            "is_pinned",
+        ] = bool(should_pin)
+    
+        updated.loc[
+            mask,
+            "pinned_at",
+        ] = (
+            now_utc
+            if should_pin
+            else pd.NaT
+        )
+    
+        updated.loc[
+            mask,
+            "pinned_by",
+        ] = (
+            pinned_by
+            if should_pin
+            else ""
+        )
+    
+        if should_pin:
+            updated.loc[
+                mask,
+                "lifecycle_status",
+            ] = "active"
+    
+            updated.loc[
+                mask,
+                "expired_at",
+            ] = pd.NaT
+    
+        return updated
     def apply_risk_mapping(data, mapping):
         data = data.copy()
     
@@ -204,6 +298,8 @@ if selection == "External Risk Snapshot":
         "agent/agent_decisions.csv",
         "pipeline/resources/agent_decisions.csv"
     )
+
+    
     
     for col in [
         "first_seen",
@@ -216,51 +312,44 @@ if selection == "External Risk Snapshot":
                 errors="coerce",
                 utc=True
             )
+
+    risk_lifecycle = load_csv_from_gcs(
+        "agent/risk_lifecycle_registry.csv",
+        "pipeline/resources/risk_lifecycle_registry.csv",
+    )
+
+    LIFECYCLE_DATE_COLUMNS = [
+        "first_seen",
+        "last_seen",
+        "last_evidence_at",
+        "first_promoted_at",
+        "last_qualified_at",
+        "pinned_at",
+        "expired_at",
+    ]
+    
+    for column in LIFECYCLE_DATE_COLUMNS:
+        if column in risk_lifecycle.columns:
+            risk_lifecycle[column] = pd.to_datetime(
+                risk_lifecycle[column],
+                errors="coerce",
+                utc=True,
+            )
+    
+    risk_lifecycle["is_pinned"] = (
+        risk_lifecycle["is_pinned"]
+        .fillna(False)
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .isin(["true", "1", "yes"])
+    )
     
     emerging_situations = load_csv_from_gcs(
         "agent/emerging_situations.csv",
         "pipeline/resources/emerging_situations.csv"
     )
 
-    def prepare_agent_decisions(data):
-        data = data.copy()
-    
-        if data.empty:
-            return data
-    
-        data["evaluation_timestamp"] = pd.to_datetime(
-            data["evaluation_timestamp"],
-            errors="coerce",
-            utc=True
-        )
-    
-        # Keep the newest decision for each signal.
-        dedup_key = (
-            "canonical_event_id"
-            if "canonical_event_id" in data.columns
-            else "unit_id"
-        )
-        
-        data = (
-            data.sort_values(
-                "evaluation_timestamp",
-                ascending=False
-            )
-            .drop_duplicates(
-                subset=[dedup_key],
-                keep="first"
-            )
-        )
-    
-        # Do not display failed model responses.
-        if "validation_status" in data.columns:
-            data = data[
-                data["validation_status"]
-                .fillna("valid")
-                .eq("valid")
-            ]
-    
-        return data
     
     
     def prepare_agent_decisions(data):
@@ -333,6 +422,74 @@ if selection == "External Risk Snapshot":
         agent_decisions
     )
 
+    decision_columns = [
+        "canonical_event_id",
+        "agent_decision",
+        "dashboard_visibility",
+        "institutional_relevance",
+        "actionability",
+        "confidence",
+        "what_changed",
+        "why_it_matters",
+        "policy_mitigation_assessment",
+        "recommended_human_action",
+        "relevant_policies",
+        "coverage_gaps",
+        "evaluation_timestamp",
+    ]
+    
+    available_decision_columns = [
+        column
+        for column in decision_columns
+        if column in agent_decisions.columns
+    ]
+    
+    emerging_risk_items = risk_lifecycle.merge(
+        agent_decisions[available_decision_columns],
+        on="canonical_event_id",
+        how="left",
+    )
+    emerging_risk_items = emerging_risk_items[
+        emerging_risk_items["is_pinned"]
+        | emerging_risk_items["lifecycle_status"].isin(
+            [
+                "new",
+                "candidate",
+                "active",
+                "cooling",
+            ]
+        )
+    ].copy()
+
+    LIFECYCLE_ORDER = {
+        "new": 1,
+        "active": 2,
+        "candidate": 3,
+        "cooling": 4,
+        "expired": 5,
+    }
+    
+    emerging_risk_items["_lifecycle_order"] = (
+        emerging_risk_items["lifecycle_status"]
+        .map(LIFECYCLE_ORDER)
+        .fillna(99)
+    )
+    
+    emerging_risk_items = emerging_risk_items.sort_values(
+        [
+            "is_pinned",
+            "_lifecycle_order",
+            "priority_score",
+            "last_evidence_at",
+        ],
+        ascending=[
+            False,
+            True,
+            False,
+            False,
+        ],
+        na_position="last",
+    )
     def parse_json_list(value):
         if isinstance(value, list):
             return value
@@ -683,181 +840,311 @@ if selection == "External Risk Snapshot":
     )
     
     st.divider()
-    st.subheader("Newly Emerging Risks (Early Warning)")
+    st.subheader(
+        "Emerging Risk Developments"
+    )
     
-    visible_agent_decisions = agent_decisions[
-        agent_decisions["dashboard_visibility"]
-        .isin(["show", "back_burner"])
+    st.caption(
+        "Risks remain visible while evidence is current. "
+        "Items cool and eventually leave the main view when "
+        "no new evidence appears. Pinned items remain active."
+    )
+    
+    status_filter = st.multiselect(
+        "Lifecycle Status",
+        [
+            "new",
+            "active",
+            "candidate",
+            "cooling",
+        ],
+        default=[
+            "new",
+            "active",
+            "candidate",
+            "cooling",
+        ],
+    )
+    
+    display_items = emerging_risk_items[
+        emerging_risk_items[
+            "lifecycle_status"
+        ].isin(status_filter)
     ].copy()
     
-    priority_order = {
-        "Critical": 1,
-        "High": 2,
-        "Medium": 3,
-        "Low": 4
+    pinned_count = int(
+        display_items["is_pinned"].sum()
+    )
+    
+    new_count = int(
+        display_items[
+            "lifecycle_status"
+        ].eq("new").sum()
+    )
+    
+    active_count = int(
+        display_items[
+            "lifecycle_status"
+        ].eq("active").sum()
+    )
+    
+    cooling_count = int(
+        display_items[
+            "lifecycle_status"
+        ].eq("cooling").sum()
+    )
+    
+    metric_1, metric_2, metric_3, metric_4 = (
+        st.columns(4)
+    )
+    
+    metric_1.metric(
+        "New Developments",
+        new_count,
+    )
+    
+    metric_2.metric(
+        "Active Developments",
+        active_count,
+    )
+    
+    metric_3.metric(
+        "Cooling",
+        cooling_count,
+    )
+    
+    metric_4.metric(
+        "Pinned",
+        pinned_count,
+    )
+    STATUS_LABELS = {
+        "new": "New",
+        "active": "Active",
+        "candidate": "Candidate",
+        "cooling": "Cooling",
+        "expired": "Expired",
     }
     
-    visible_agent_decisions["_priority_order"] = (
-        visible_agent_decisions["Executive Priority"]
-        .map(priority_order)
-        .fillna(5)
-    )
     
-    visible_agent_decisions["last_seen"] = pd.to_datetime(
-        visible_agent_decisions["last_seen"],
-        errors="coerce",
-        utc=True
-    )
-    
-    visible_agent_decisions["evaluation_timestamp"] = pd.to_datetime(
-        visible_agent_decisions["evaluation_timestamp"],
-        errors="coerce",
-        utc=True
-    )
-    
-    visible_agent_decisions = (
-        visible_agent_decisions
-        .sort_values(
-            [
-                "_priority_order",
-                "last_seen",
-                "evaluation_timestamp"
-            ],
-            ascending=[True, False, False],
-            na_position="last"
-        )
-    )
-    
-    critical_count = (
-        visible_agent_decisions[
-            visible_agent_decisions[
-                "Executive Priority"
-            ].eq("Critical")
-        ].shape[0]
-    )
-    
-    escalate_count = (
-        visible_agent_decisions[
-            visible_agent_decisions[
-                "agent_decision"
-            ].eq("escalate")
-        ].shape[0]
-    )
-    
-    monitor_count = (
-        visible_agent_decisions[
-            visible_agent_decisions[
-                "agent_decision"
-            ].eq("monitor")
-        ].shape[0]
-    )
-    
-    direct_count = (
-        visible_agent_decisions[
-            visible_agent_decisions[
-                "institutional_relevance"
-            ].eq("direct")
-        ].shape[0]
-    )
-    
-    ai_col1, ai_col2, ai_col3, ai_col4 = st.columns(4)
-    
-    ai_col1.metric(
-        "Critical AI Signals",
-        critical_count
-    )
-    
-    ai_col2.metric(
-        "Recommended Escalations",
-        escalate_count
-    )
-    
-    ai_col3.metric(
-        "Monitor",
-        monitor_count
-    )
-    
-    ai_col4.metric(
-        "Direct Tulane Relevance",
-        direct_count
-    )
-
-    filter_col1, filter_col2, filter_col3 = st.columns(3)
-
-    with filter_col1:
-        agent_priority_filter = st.multiselect(
-            "Executive Priority",
-            ["Critical", "High", "Medium", "Low"],
-            default=["Critical", "High", "Medium"]
+    def format_date(value):
+        value = pd.to_datetime(
+            value,
+            errors="coerce",
+            utc=True,
         )
     
-    with filter_col2:
-        agent_decision_filter = st.multiselect(
-            "Agent Recommendation",
-            ["escalate", "monitor", "already_addressed", "ignore"],
-            default=["escalate", "monitor"]
+        if pd.isna(value):
+            return "Not available"
+    
+        return value.strftime("%B %d, %Y")
+    
+    
+    for _, row in display_items.iterrows():
+        canonical_id = str(
+            row["canonical_event_id"]
         )
     
-    with filter_col3:
-        agent_relevance_filter = st.multiselect(
-            "Institutional Relevance",
-            ["direct", "indirect", "weak", "none"],
-            default=["direct", "indirect"]
+        situation_title = str(
+            row.get(
+                "situation_title",
+                "Untitled risk development",
+            )
         )
-
-    filtered_agent_decisions = visible_agent_decisions[
-        visible_agent_decisions[
-            "Executive Priority"
-        ].isin(agent_priority_filter)
-        & visible_agent_decisions[
-            "agent_decision"
-        ].isin(agent_decision_filter)
-        & visible_agent_decisions[
-            "institutional_relevance"
-        ].isin(agent_relevance_filter)
-    ].copy()
-
-    agent_table = filtered_agent_decisions[
-        [    
-            "canonical_event_id",
-            "top_risk_match",
-            "situation_title",
-            "last_seen",
-            "first_seen",
-            "Executive Priority",
-            "institutional_relevance",
-            "actionability",
-            "confidence",
-            "what_changed",
-            "recommended_human_action",
-        ]
-    ].copy()
     
-    agent_table = agent_table.rename(
-        columns={
-            "agent_decision": "Recommendation",
-            "dashboard_visibility": "Visibility",
-            "institutional_relevance": "Tulane Relevance",
-            "actionability": "Actionability",
-            "confidence": "Confidence",
-            "what_changed": "Risk Development",
-            "recommended_human_action": "Recommended Action",
-        }
-    )
+        lifecycle_status = str(
+            row.get(
+                "lifecycle_status",
+                "candidate",
+            )
+        ).lower()
     
-    st.dataframe(
-        agent_table,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Risk Development": st.column_config.TextColumn(
-                width="large"
-            ),
-            "Recommended Action": st.column_config.TextColumn(
-                width="large"
-            ),
-        }
-    )
+        is_pinned = bool(
+            row.get(
+                "is_pinned",
+                False,
+            )
+        )
+    
+        risk_name = str(
+            row.get(
+                "top_risk_match",
+                "Unmapped risk",
+            )
+        )
+    
+        status_label = STATUS_LABELS.get(
+            lifecycle_status,
+            lifecycle_status.title(),
+        )
+    
+        pin_label = (
+            "Pinned"
+            if is_pinned
+            else status_label
+        )
+    
+        with st.container(border=True):
+            title_col, status_col = st.columns(
+                [4, 1]
+            )
+    
+            with title_col:
+                st.markdown(
+                    f"#### {situation_title}"
+                )
+    
+                st.caption(
+                    f"{risk_name} · {pin_label}"
+                )
+    
+            with status_col:
+                if is_pinned:
+                    st.markdown(
+                        "**Pinned indefinitely**"
+                    )
+                else:
+                    st.markdown(
+                        f"**{status_label}**"
+                    )
+    
+            detail_col_1, detail_col_2, detail_col_3 = (
+                st.columns(3)
+            )
+    
+            detail_col_1.metric(
+                "Priority Score",
+                f"{float(row.get('priority_score', 0)):.2f}",
+            )
+    
+            detail_col_2.metric(
+                "First Seen",
+                format_date(
+                    row.get("first_seen")
+                ),
+            )
+    
+            detail_col_3.metric(
+                "Latest Evidence",
+                format_date(
+                    row.get("last_evidence_at")
+                ),
+            )
+    
+            what_changed = row.get(
+                "what_changed"
+            )
+    
+            if pd.notna(what_changed):
+                st.markdown(
+                    "**What changed**"
+                )
+                st.write(what_changed)
+    
+            why_it_matters = row.get(
+                "why_it_matters"
+            )
+    
+            if pd.notna(why_it_matters):
+                st.markdown(
+                    "**Why it matters to Tulane**"
+                )
+                st.write(why_it_matters)
+    
+            recommended_action = row.get(
+                "recommended_human_action"
+            )
+    
+            if pd.notna(recommended_action):
+                st.markdown(
+                    "**Recommended action**"
+                )
+                st.write(recommended_action)
+    
+            pin_col, lifecycle_col = st.columns(
+                [1, 3]
+            )
+    
+            with pin_col:
+                button_text = (
+                    "Unpin"
+                    if is_pinned
+                    else "Keep indefinitely"
+                )
+    
+                if st.button(
+                    button_text,
+                    key=f"pin_{canonical_id}",
+                    use_container_width=True,
+                ):
+                    try:
+                        risk_lifecycle = (
+                            update_risk_pin(
+                                lifecycle_df=(
+                                    risk_lifecycle
+                                ),
+                                canonical_event_id=(
+                                    canonical_id
+                                ),
+                                should_pin=(
+                                    not is_pinned
+                                ),
+                            )
+                        )
+    
+                        save_lifecycle_registry_to_gcs(
+                            lifecycle_df=(
+                                risk_lifecycle
+                            ),
+                            blob_name=(
+                                LIFECYCLE_BLOB
+                            ),
+                            local_path=(
+                                LIFECYCLE_LOCAL
+                            ),
+                        )
+    
+                        st.cache_data.clear()
+    
+                        st.success(
+                            "Risk pinned indefinitely."
+                            if not is_pinned
+                            else "Risk unpinned."
+                        )
+    
+                        st.rerun()
+    
+                    except Exception as error:
+                        st.error(
+                            "The lifecycle registry "
+                            f"could not be updated: {error}"
+                        )
+    
+            with lifecycle_col:
+                if is_pinned:
+                    st.caption(
+                        "This development will remain active "
+                        "until a user removes the pin."
+                    )
+    
+                elif lifecycle_status == "cooling":
+                    st.caption(
+                        "No recent supporting evidence was "
+                        "detected. This item will expire if "
+                        "the condition continues."
+                    )
+    
+                elif lifecycle_status == "candidate":
+                    st.caption(
+                        "This is an early signal that has not "
+                        "yet met the promotion threshold."
+                    )
+    
+                else:
+                    st.caption(
+                        "The weekly lifecycle process will "
+                        "reassess this item when new evidence "
+                        "is available."
+                    )
     
     st.markdown('---')
     st.markdown('### Risk Overview')
