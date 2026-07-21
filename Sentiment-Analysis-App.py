@@ -2,7 +2,7 @@ import numpy as np
 import os
 import io
 import json
-
+import ast
 import time
 import random
 import base64
@@ -278,6 +278,42 @@ if selection == "External Risk Snapshot":
         data['Dashboard_Risk'] = data['dashboard_risk'].fillna(data['Predicted_Risks_new'])
     
         return data.drop(columns=['old_risk', 'dashboard_risk'], errors='ignore')
+
+    def parse_article_sources(value):
+        if isinstance(value, list):
+            return value
+    
+        if pd.isna(value):
+            return []
+    
+        text = str(value).strip()
+    
+        if not text:
+            return []
+    
+        try:
+            parsed = json.loads(text)
+    
+            return (
+                parsed
+                if isinstance(parsed, list)
+                else []
+            )
+    
+        except Exception:
+            pass
+    
+        try:
+            parsed = ast.literal_eval(text)
+    
+            return (
+                parsed
+                if isinstance(parsed, list)
+                else []
+            )
+    
+        except Exception:
+            return []
         
     articles = load_csv_gz_from_gcs(
         'latest/topics/BERTopic_Streamlit.csv.gz',
@@ -343,6 +379,47 @@ if selection == "External Risk Snapshot":
         .str.strip()
         .str.lower()
         .isin(["true", "1", "yes"])
+    )
+
+    consolidated_packets = load_csv_from_gcs(
+        "agent/consolidated_agent_packets.csv",
+        "pipeline/resources/consolidated_agent_packets.csv",
+    )
+
+    packet_source_columns = [
+        "canonical_event_id",
+        "top_articles",
+        "top_titles",
+        "source_packet_count",
+    ]
+    
+    available_packet_columns = [
+        column
+        for column in packet_source_columns
+        if column in consolidated_packets.columns
+    ]
+    
+    emerging_risk_items = (
+        risk_lifecycle
+        .merge(
+            agent_decisions[
+                available_decision_columns
+            ],
+            on="canonical_event_id",
+            how="left",
+        )
+        .merge(
+            consolidated_packets[
+                available_packet_columns
+            ],
+            on="canonical_event_id",
+            how="left",
+        )
+    )
+
+    emerging_risk_items["article_sources"] = (
+        emerging_risk_items["top_articles"]
+        .apply(parse_article_sources)
     )
     
     emerging_situations = load_csv_from_gcs(
@@ -924,6 +1001,106 @@ if selection == "External Risk Snapshot":
         "cooling": "Cooling",
         "expired": "Expired",
     }
+
+    sort_choice = st.selectbox(
+        "Sort emerging risks by",
+        [
+            "Priority: highest first",
+            "Newest evidence first",
+            "Oldest evidence first",
+            "Recently promoted",
+            "Lifecycle status",
+        ],
+    )
+
+    if sort_choice == "Priority: highest first":
+        display_items = display_items.sort_values(
+            [
+                "is_pinned",
+                "priority_score",
+                "last_evidence_at",
+            ],
+            ascending=[
+                False,
+                False,
+                False,
+            ],
+            na_position="last",
+        )
+    
+    elif sort_choice == "Newest evidence first":
+        display_items = display_items.sort_values(
+            [
+                "is_pinned",
+                "last_seen",
+                "priority_score",
+            ],
+            ascending=[
+                False,
+                False,
+                False,
+            ],
+            na_position="last",
+        )
+    
+    elif sort_choice == "Oldest evidence first":
+        display_items = display_items.sort_values(
+            [
+                "is_pinned",
+                "last_seen",
+                "priority_score",
+            ],
+            ascending=[
+                False,
+                True,
+                False,
+            ],
+            na_position="last",
+        )
+    
+    elif sort_choice == "Recently promoted":
+        display_items = display_items.sort_values(
+            [
+                "is_pinned",
+                "first_promoted_at",
+                "priority_score",
+            ],
+            ascending=[
+                False,
+                False,
+                False,
+            ],
+            na_position="last",
+        )
+    
+    elif sort_choice == "Lifecycle status":
+        display_items["_status_order"] = (
+            display_items[
+                "lifecycle_status"
+            ]
+            .map({
+                "new": 1,
+                "active": 2,
+                "candidate": 3,
+                "cooling": 4,
+                "expired": 5,
+            })
+            .fillna(99)
+        )
+    
+        display_items = display_items.sort_values(
+            [
+                "is_pinned",
+                "_status_order",
+                "priority_score",
+            ],
+            ascending=[
+                False,
+                True,
+                False,
+            ],
+            na_position="last",
+        )
     
     
     def format_date(value):
@@ -1059,6 +1236,73 @@ if selection == "External Risk Snapshot":
                     "**Recommended action**"
                 )
                 st.write(recommended_action)
+
+            article_sources = row.get(
+                "article_sources",
+                [],
+            )
+            
+            if article_sources:
+                with st.expander(
+                    f"Read supporting sources "
+                    f"({len(article_sources)})"
+                ):
+                    for article_number, article in enumerate(
+                        article_sources,
+                        start=1,
+                    ):
+                        article_title = str(
+                            article.get(
+                                "title",
+                                f"Source {article_number}",
+                            )
+                        ).strip()
+            
+                        article_link = str(
+                            article.get(
+                                "link",
+                                "",
+                            )
+                        ).strip()
+            
+                        article_date = pd.to_datetime(
+                            article.get("published"),
+                            errors="coerce",
+                            utc=True,
+                        )
+            
+                        article_snippet = str(
+                            article.get(
+                                "snippet",
+                                "",
+                            )
+                        ).strip()
+            
+                        if article_link:
+                            st.markdown(
+                                f"**[{article_title}]"
+                                f"({article_link})**"
+                            )
+                        else:
+                            st.markdown(
+                                f"**{article_title}**"
+                            )
+            
+                        if pd.notna(article_date):
+                            st.caption(
+                                article_date.strftime(
+                                    "%B %d, %Y"
+                                )
+                            )
+            
+                        if article_snippet:
+                            st.write(article_snippet)
+            
+                        if (
+                            article_number
+                            < len(article_sources)
+                        ):
+                            st.divider()
     
             pin_col, lifecycle_col = st.columns(
                 [1, 3]
