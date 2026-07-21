@@ -399,6 +399,98 @@ if selection == "External Risk Snapshot":
         if column in consolidated_packets.columns
     ]
     
+    
+    def prepare_agent_decisions(data):
+        data = data.copy()
+    
+        if data.empty:
+            return data
+    
+        data["evaluation_timestamp"] = pd.to_datetime(
+            data["evaluation_timestamp"],
+            errors="coerce",
+            utc=True,
+        )
+    
+        if "validation_status" in data.columns:
+            data = data[
+                data["validation_status"]
+                .fillna("valid")
+                .eq("valid")
+            ].copy()
+    
+        data = data[
+            (
+                data["institutional_relevance"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("direct")
+            )
+            & (
+                data["dashboard_visibility"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("show")
+            )
+            & (
+                data["requires_human_review"]
+                .fillna(False)
+                .eq(False)
+            )
+        ].copy()
+    
+        dedup_key = (
+            "canonical_event_id"
+            if "canonical_event_id" in data.columns
+            else "unit_id"
+        )
+    
+        data = (
+            data.sort_values(
+                "evaluation_timestamp",
+                ascending=False,
+            )
+            .drop_duplicates(
+                subset=[dedup_key],
+                keep="first",
+            )
+        )
+    
+        return data
+    
+    
+    agent_decisions = prepare_agent_decisions(
+        agent_decisions
+    )
+    
+    
+    decision_columns = [
+        "canonical_event_id",
+        "agent_decision",
+        "dashboard_visibility",
+        "institutional_relevance",
+        "actionability",
+        "confidence",
+        "what_changed",
+        "why_it_matters",
+        "policy_mitigation_assessment",
+        "recommended_human_action",
+        "relevant_policies",
+        "coverage_gaps",
+        "evaluation_timestamp",
+    ]
+    
+    available_decision_columns = [
+        column
+        for column in decision_columns
+        if column in agent_decisions.columns
+    ]
+    
+    
     emerging_risk_items = (
         risk_lifecycle
         .merge(
@@ -416,6 +508,31 @@ if selection == "External Risk Snapshot":
             how="left",
         )
     )
+    
+    
+    if "top_articles" not in emerging_risk_items.columns:
+        emerging_risk_items["top_articles"] = None
+    
+    
+    emerging_risk_items["article_sources"] = (
+        emerging_risk_items["top_articles"]
+        .apply(parse_article_sources)
+    )
+    
+    
+    emerging_risk_items = emerging_risk_items[
+        emerging_risk_items["is_pinned"]
+        | emerging_risk_items[
+            "lifecycle_status"
+        ].isin(
+            [
+                "new",
+                "candidate",
+                "active",
+                "cooling",
+            ]
+        )
+    ].copy()
 
     emerging_risk_items["article_sources"] = (
         emerging_risk_items["top_articles"]
@@ -520,12 +637,7 @@ if selection == "External Risk Snapshot":
         for column in decision_columns
         if column in agent_decisions.columns
     ]
-    
-    emerging_risk_items = risk_lifecycle.merge(
-        agent_decisions[available_decision_columns],
-        on="canonical_event_id",
-        how="left",
-    )
+
     emerging_risk_items = emerging_risk_items[
         emerging_risk_items["is_pinned"]
         | emerging_risk_items["lifecycle_status"].isin(
