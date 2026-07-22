@@ -734,6 +734,80 @@ if selection == "External Risk Snapshot":
 
     # Risk mapping and date preparation.
     articles = apply_risk_mapping(articles, risk_mapping)
+
+    articles["Published_utc"] = pd.to_datetime(
+        articles.get(
+            "Published_utc",
+            articles.get("Published"),
+        ),
+        errors="coerce",
+        utc=True,
+    )
+    
+    articles[
+        "immediate_alert_score"
+    ] = pd.to_numeric(
+        articles.get(
+            "immediate_alert_score",
+            0,
+        ),
+        errors="coerce",
+    ).fillna(0)
+    
+    articles[
+        "is_immediate_alert"
+    ] = (
+        articles.get(
+            "is_immediate_alert",
+            False,
+        )
+        .fillna(False)
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .isin(
+            [
+                "true",
+                "1",
+                "yes",
+            ]
+        )
+    )
+    
+    alert_cutoff = (
+        pd.Timestamp.now(tz="UTC")
+        - pd.Timedelta(days=10)
+    )
+    
+    immediate_alerts = articles[
+        articles["is_immediate_alert"]
+        & (
+            articles["Published_utc"]
+            >= alert_cutoff
+        )
+    ].copy()
+    
+    immediate_alerts = (
+        immediate_alerts
+        .sort_values(
+            [
+                "immediate_alert_score",
+                "Published_utc",
+            ],
+            ascending=[
+                False,
+                False,
+            ],
+        )
+        .drop_duplicates(
+            subset=[
+                "Title",
+                "Link",
+            ],
+            keep="first",
+        )
+        .head(8)
+    )
     events = apply_risk_mapping(events, risk_mapping)
     risk_scores = apply_risk_mapping(risk_scores, risk_mapping)
 
@@ -1785,6 +1859,170 @@ if selection == "External Risk Snapshot":
         )
 
     with developments_tab:
+        st.subheader(
+            "Immediate Alerts"
+        )
+        
+        st.caption(
+            "Recent one-off developments with potentially "
+            "significant implications for Tulane. These alerts "
+            "do not need repeated coverage or an established "
+            "risk pattern."
+        )
+        
+        if immediate_alerts.empty:
+            st.caption(
+                "No immediate alerts were identified "
+                "during the current period."
+            )
+        
+        else:
+            for _, row in immediate_alerts.iterrows():
+                title = str(
+                    row.get(
+                        "Title",
+                        "Untitled alert",
+                    )
+                ).strip()
+        
+                priority = str(
+                    row.get(
+                        "immediate_alert_priority",
+                        "Review",
+                    )
+                ).strip()
+        
+                risk_name = str(
+                    row.get(
+                        "Dashboard_Risk",
+                        row.get(
+                            "Predicted_Risks_new",
+                            "Unmapped risk",
+                        ),
+                    )
+                ).strip()
+        
+                reason = str(
+                    row.get(
+                        "immediate_alert_reason",
+                        "",
+                    )
+                ).strip()
+        
+                source = row.get(
+                    "Source",
+                    row.get(
+                        "source",
+                        row.get(
+                            "canonical_source",
+                            "",
+                        ),
+                    ),
+                )
+        
+                published = pd.to_datetime(
+                    row.get("Published_utc"),
+                    errors="coerce",
+                    utc=True,
+                )
+        
+                link = str(
+                    row.get(
+                        "Link",
+                        "",
+                    )
+                ).strip()
+        
+                content = str(
+                    row.get(
+                        "Content",
+                        "",
+                    )
+                ).strip()
+        
+                disagreement = str(
+                    row.get(
+                        "classification_disagreement",
+                        False,
+                    )
+                ).strip().lower() in [
+                    "true",
+                    "1",
+                    "yes",
+                ]
+        
+                with st.container(
+                    border=True
+                ):
+                    title_col, priority_col = (
+                        st.columns([4, 1])
+                    )
+        
+                    with title_col:
+                        st.markdown(
+                            f"### {title}"
+                        )
+        
+                        metadata = []
+        
+                        if risk_name and risk_name != "nan":
+                            metadata.append(
+                                risk_name
+                            )
+        
+                        if (
+                            pd.notna(source)
+                            and str(source).strip()
+                            and str(source) != "nan"
+                        ):
+                            metadata.append(
+                                str(source).strip()
+                            )
+        
+                        if pd.notna(published):
+                            metadata.append(
+                                published.strftime(
+                                    "%B %d, %Y"
+                                )
+                            )
+        
+                        if metadata:
+                            st.caption(
+                                " · ".join(metadata)
+                            )
+        
+                    with priority_col:
+                        st.markdown(
+                            f"**{priority}**"
+                        )
+        
+                    if reason:
+                        st.warning(reason)
+        
+                    if content:
+                        preview = content[:450]
+        
+                        st.write(
+                            preview
+                            + (
+                                "..."
+                                if len(content) > 450
+                                else ""
+                            )
+                        )
+        
+                    if disagreement:
+                        st.caption(
+                            "This article was surfaced by the "
+                            "immediate-alert process even though "
+                            "the risk classifier labeled it No Risk."
+                        )
+        
+                    if link.startswith("http"):
+                        st.markdown(
+                            f"[Read original article]"
+                            f"({link})"
+                        )
         render_developments(
             development_data=emerging_risk_items,
         )
