@@ -997,7 +997,7 @@ if selection == "External Risk Snapshot":
     # ------------------------------------------------------------------
     # Rendering helpers
     # ------------------------------------------------------------------
-        def prepare_immediate_alerts(
+    def prepare_immediate_alerts(
         article_data,
         days=30,
         limit=12,
