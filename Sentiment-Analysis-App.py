@@ -1282,14 +1282,80 @@ if selection == "External Risk Snapshot":
             ascending=[False, False],
             na_position="last",
         )
-
+        
         if dedup_columns:
             alerts = alerts.drop_duplicates(
                 subset=dedup_columns,
                 keep="first",
             )
 
-        return alerts.head(limit)
+        if (
+            "narrative_id" in alerts.columns
+            and alerts["narrative_id"].notna().any()
+        ):
+            alerts = alerts.drop_duplicates(
+                subset=["narrative_id"],
+                keep="first",
+            )
+        
+        # Choose the most reliable risk field available.
+        if "Dashboard_Risk" in alerts.columns:
+            alerts["_alert_risk"] = (
+                alerts["Dashboard_Risk"]
+                .fillna("Unmapped Risk")
+                .astype(str)
+                .str.strip()
+            )
+        else:
+            alerts["_alert_risk"] = (
+                alerts.get(
+                    "Predicted_Risks_new",
+                    pd.Series("Unmapped Risk", index=alerts.index),
+                )
+                .fillna("Unmapped Risk")
+                .astype(str)
+                .str.strip()
+            )
+        
+        # Keep no more than 2 articles from the same risk category.
+        alerts["_risk_rank"] = (
+            alerts.groupby("_alert_risk")
+            .cumcount()
+        )
+        
+        diverse_alerts = alerts[
+            alerts["_risk_rank"] < 2
+        ].copy()
+        
+        # If the diversity rule produces fewer than the requested limit,
+        # fill remaining slots with the highest-ranked unused articles.
+        if len(diverse_alerts) < limit:
+            remaining = alerts[
+                ~alerts.index.isin(diverse_alerts.index)
+            ]
+        
+            diverse_alerts = pd.concat(
+                [
+                    diverse_alerts,
+                    remaining.head(limit - len(diverse_alerts)),
+                ],
+                ignore_index=False,
+            )
+        
+        diverse_alerts = diverse_alerts.sort_values(
+            [
+                "immediate_alert_score",
+                "Published_utc",
+            ],
+            ascending=[False, False],
+            na_position="last",
+        )
+        
+        return (
+            diverse_alerts
+            .drop(columns=["_alert_risk", "_risk_rank"], errors="ignore")
+            .head(limit)
+        )
 
     immediate_alerts = prepare_immediate_alerts(articles)
 
