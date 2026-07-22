@@ -836,7 +836,7 @@ if selection == "External Risk Snapshot":
     )
 
     # Risk mapping and date preparation.
-        articles = apply_risk_mapping(articles, risk_mapping)
+    articles = apply_risk_mapping(articles, risk_mapping)
     events = apply_risk_mapping(events, risk_mapping)
     risk_scores = apply_risk_mapping(risk_scores, risk_mapping)
 
