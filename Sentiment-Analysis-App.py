@@ -427,6 +427,109 @@ if selection == "External Risk Snapshot":
             errors="ignore",
         )
 
+        # ------------------------------------------------------------------
+    # TEMPORARY DASHBOARD OVERRIDES
+    # Remove after the upstream pipeline has been rerun successfully.
+    # ------------------------------------------------------------------
+
+    TEMPORARY_RISK_REMAP = {
+        "Labor Dispute": "Extreme Weather Events",
+    }
+
+    IMMEDIATE_WEATHER_TERMS = [
+        "hurricane",
+        "tropical storm",
+        "storm surge",
+        "named storm",
+        "hurricane warning",
+        "hurricane watch",
+        "tropical storm warning",
+        "tropical storm watch",
+        "rapid intensification",
+        "landfall",
+    ]
+
+    IMMEDIATE_LOCAL_TERMS = [
+        "tulane",
+        "new orleans",
+        "louisiana",
+        "southeast louisiana",
+        "gulf coast",
+        "orleans parish",
+        "jefferson parish",
+    ]
+
+    # Add other one-off risk labels that should appear immediately.
+    IMMEDIATE_ONE_OFF_RISKS = {
+        "Extreme Weather Events",
+        "Hurricane/Flood/Wildfire",
+        "Violence or Threats",
+        "Unauthorized Access/Data Breach",
+        "Ransomware/Malware",
+        "High-Profile Litigation",
+        "Research Funding Disruption",
+        "Policy or Political Interference",
+        "Title IX/ADA Noncompliance",
+    }
+
+    def apply_temporary_dashboard_overrides(data):
+        """
+        Apply temporary display-layer corrections without modifying
+        the source CSV files in GCS.
+        """
+        data = data.copy()
+
+        risk_columns = [
+            "Predicted_Risks_new",
+            "Dashboard_Risk",
+            "top_risk_match",
+            "assigned_risk",
+            "original_top_risk_match",
+        ]
+
+        for column in risk_columns:
+            if column not in data.columns:
+                continue
+
+            normalized = (
+                data[column]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+            )
+
+            data[column] = normalized.replace(
+                TEMPORARY_RISK_REMAP
+            )
+
+        return data
+
+    def contains_any_term(series, terms):
+        """
+        Return a Boolean mask indicating whether each text value
+        contains any configured term.
+        """
+        text = (
+            series
+            .fillna("")
+            .astype(str)
+            .str.lower()
+        )
+
+        pattern = "|".join(
+            re.escape(term.lower())
+            for term in terms
+        )
+
+        if not pattern:
+            return pd.Series(False, index=series.index)
+
+        return text.str.contains(
+            pattern,
+            regex=True,
+            na=False,
+        )
+
     def update_risk_pin(
         lifecycle_df,
         canonical_event_id,
@@ -733,9 +836,34 @@ if selection == "External Risk Snapshot":
     )
 
     # Risk mapping and date preparation.
-    articles = apply_risk_mapping(articles, risk_mapping)
+        articles = apply_risk_mapping(articles, risk_mapping)
     events = apply_risk_mapping(events, risk_mapping)
     risk_scores = apply_risk_mapping(risk_scores, risk_mapping)
+
+    # Temporary dashboard-only correction.
+    articles = apply_temporary_dashboard_overrides(articles)
+    events = apply_temporary_dashboard_overrides(events)
+    risk_scores = apply_temporary_dashboard_overrides(risk_scores)
+
+    emerging_risk_items = apply_temporary_dashboard_overrides(
+        emerging_risk_items
+    )
+
+    agent_decisions = apply_temporary_dashboard_overrides(
+        agent_decisions
+    )
+
+    risk_lifecycle = apply_temporary_dashboard_overrides(
+        risk_lifecycle
+    )
+
+    consolidated_packets = apply_temporary_dashboard_overrides(
+        consolidated_packets
+    )
+
+    emerging_situations = apply_temporary_dashboard_overrides(
+        emerging_situations
+    )
 
     events["Window"] = pd.to_datetime(
         events.get("Window"),
@@ -869,12 +997,27 @@ if selection == "External Risk Snapshot":
     # ------------------------------------------------------------------
     # Rendering helpers
     # ------------------------------------------------------------------
-    def prepare_immediate_alerts(article_data, days=10, limit=8):
-        """Return urgent article-level alerts independently of story promotion."""
+        def prepare_immediate_alerts(
+        article_data,
+        days=30,
+        limit=12,
+    ):
+        """
+        Return urgent article-level alerts independently of story
+        promotion.
+
+        Temporary fallback logic also surfaces:
+        1. Recent hurricane/tropical-weather articles relevant to
+           Tulane, New Orleans, Louisiana, or the Gulf Coast.
+        2. Recent one-off articles assigned to configured
+           high-priority risk categories.
+        """
         data = article_data.copy()
 
         if data.empty:
             return data
+
+        data = apply_temporary_dashboard_overrides(data)
 
         if "Published_utc" not in data.columns:
             data["Published_utc"] = pd.to_datetime(
@@ -889,22 +1032,169 @@ if selection == "External Risk Snapshot":
                 utc=True,
             )
 
-        # Prefer the fields generated by the article-processing pipeline.
+        # --------------------------------------------------------------
+        # Existing pipeline-generated immediate-alert signals
+        # --------------------------------------------------------------
         if "is_immediate_alert" in data.columns:
-            alert_mask = data["is_immediate_alert"].apply(parse_boolean)
+            pipeline_alert_mask = (
+                data["is_immediate_alert"]
+                .apply(parse_boolean)
+            )
         else:
-            alert_mask = pd.Series(False, index=data.index)
+            pipeline_alert_mask = pd.Series(
+                False,
+                index=data.index,
+            )
 
         if "immediate_alert_score" in data.columns:
             data["immediate_alert_score"] = pd.to_numeric(
                 data["immediate_alert_score"],
                 errors="coerce",
             ).fillna(0.0)
-            alert_mask = alert_mask | data["immediate_alert_score"].ge(4.0)
+
+            pipeline_alert_mask = (
+                pipeline_alert_mask
+                | data["immediate_alert_score"].ge(4.0)
+            )
         else:
             data["immediate_alert_score"] = 0.0
 
-        cutoff_date = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=days)
+        # --------------------------------------------------------------
+        # Build one combined text field for fallback detection
+        # --------------------------------------------------------------
+        title_text = (
+            data["Title"]
+            if "Title" in data.columns
+            else pd.Series("", index=data.index)
+        )
+
+        content_text = (
+            data["Content"]
+            if "Content" in data.columns
+            else pd.Series("", index=data.index)
+        )
+
+        event_text = (
+            data["Event_Label"]
+            if "Event_Label" in data.columns
+            else pd.Series("", index=data.index)
+        )
+
+        combined_text = (
+            title_text.fillna("").astype(str)
+            + " "
+            + content_text.fillna("").astype(str)
+            + " "
+            + event_text.fillna("").astype(str)
+        )
+
+        # --------------------------------------------------------------
+        # Hurricane / tropical-weather fallback
+        # --------------------------------------------------------------
+        weather_term_mask = contains_any_term(
+            combined_text,
+            IMMEDIATE_WEATHER_TERMS,
+        )
+
+        local_relevance_mask = contains_any_term(
+            combined_text,
+            IMMEDIATE_LOCAL_TERMS,
+        )
+
+        weather_risk_mask = pd.Series(
+            False,
+            index=data.index,
+        )
+
+        for column in [
+            "Predicted_Risks_new",
+            "Dashboard_Risk",
+        ]:
+            if column in data.columns:
+                weather_risk_mask = (
+                    weather_risk_mask
+                    | data[column]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .isin({
+                        "Extreme Weather Events",
+                        "Hurricane/Flood/Wildfire",
+                        "Climate Infrastructure Risks",
+                        "Emergency Preparedness Gaps",
+                        "Infrastructure Failure",
+                    })
+                )
+
+        # A hurricane article qualifies when:
+        # - it contains explicit storm language, and
+        # - it is locally relevant OR already has a weather risk.
+        hurricane_fallback_mask = (
+            weather_term_mask
+            & (
+                local_relevance_mask
+                | weather_risk_mask
+            )
+        )
+
+        # --------------------------------------------------------------
+        # Other important one-off risk fallback
+        # --------------------------------------------------------------
+        one_off_risk_mask = pd.Series(
+            False,
+            index=data.index,
+        )
+
+        for column in [
+            "Dashboard_Risk",
+            "Predicted_Risks_new",
+        ]:
+            if column in data.columns:
+                one_off_risk_mask = (
+                    one_off_risk_mask
+                    | data[column]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .isin(IMMEDIATE_ONE_OFF_RISKS)
+                )
+
+        # Require higher-education relevance when available.
+        if "University Label" in data.columns:
+            university_relevance_mask = (
+                pd.to_numeric(
+                    data["University Label"],
+                    errors="coerce",
+                )
+                .fillna(0)
+                .astype(int)
+                .eq(1)
+            )
+        else:
+            university_relevance_mask = pd.Series(
+                True,
+                index=data.index,
+            )
+
+        one_off_fallback_mask = (
+            one_off_risk_mask
+            & university_relevance_mask
+        )
+
+        # --------------------------------------------------------------
+        # Combine pipeline and dashboard fallback alerts
+        # --------------------------------------------------------------
+        alert_mask = (
+            pipeline_alert_mask
+            | hurricane_fallback_mask
+            | one_off_fallback_mask
+        )
+
+        cutoff_date = (
+            pd.Timestamp.now(tz="UTC")
+            - pd.Timedelta(days=days)
+        )
+
         alerts = data[
             alert_mask
             & data["Published_utc"].notna()
@@ -914,6 +1204,70 @@ if selection == "External Risk Snapshot":
         if alerts.empty:
             return alerts
 
+        # --------------------------------------------------------------
+        # Explain why each dashboard-only alert was included
+        # --------------------------------------------------------------
+        if "immediate_alert_reason" not in alerts.columns:
+            alerts["immediate_alert_reason"] = ""
+
+        if "immediate_alert_priority" not in alerts.columns:
+            alerts["immediate_alert_priority"] = "Review"
+
+        hurricane_indices = alerts.index.intersection(
+            data.index[hurricane_fallback_mask]
+        )
+
+        one_off_indices = alerts.index.intersection(
+            data.index[
+                one_off_fallback_mask
+                & ~hurricane_fallback_mask
+            ]
+        )
+
+        alerts.loc[
+            hurricane_indices,
+            "immediate_alert_reason",
+        ] = (
+            "Temporarily surfaced by the dashboard because the article "
+            "describes a hurricane or tropical-weather development with "
+            "potential Tulane, New Orleans, Louisiana, or Gulf Coast relevance."
+        )
+
+        alerts.loc[
+            hurricane_indices,
+            "immediate_alert_priority",
+        ] = "Immediate Review"
+
+        alerts.loc[
+            one_off_indices,
+            "immediate_alert_reason",
+        ] = (
+            "Temporarily surfaced by the dashboard as a high-priority "
+            "one-off institutional risk while the full pipeline is pending."
+        )
+
+        alerts.loc[
+            one_off_indices,
+            "immediate_alert_priority",
+        ] = "Review"
+
+        # Give temporary hurricane alerts a useful sort score.
+        alerts.loc[
+            hurricane_indices,
+            "immediate_alert_score",
+        ] = alerts.loc[
+            hurricane_indices,
+            "immediate_alert_score",
+        ].clip(lower=5.0)
+
+        alerts.loc[
+            one_off_indices,
+            "immediate_alert_score",
+        ] = alerts.loc[
+            one_off_indices,
+            "immediate_alert_score",
+        ].clip(lower=4.0)
+
         dedup_columns = [
             column
             for column in ["Title", "Link"]
@@ -921,7 +1275,10 @@ if selection == "External Risk Snapshot":
         ]
 
         alerts = alerts.sort_values(
-            ["immediate_alert_score", "Published_utc"],
+            [
+                "immediate_alert_score",
+                "Published_utc",
+            ],
             ascending=[False, False],
             na_position="last",
         )
