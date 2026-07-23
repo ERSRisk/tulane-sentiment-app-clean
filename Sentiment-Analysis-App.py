@@ -997,6 +997,141 @@ if selection == "External Risk Snapshot":
     # ------------------------------------------------------------------
     # Rendering helpers
     # ------------------------------------------------------------------
+
+    def build_immediate_alert_eligibility(data, combined_text):
+        """
+        Require evidence of a concrete, current, and potentially material
+        institutional development before an article may appear as an
+        Immediate Alert.
+        """
+        text = combined_text.fillna("").astype(str).str.lower()
+    
+        higher_ed_terms = [
+            "university",
+            "college",
+            "higher education",
+            "campus",
+            "students",
+            "faculty",
+            "research funding",
+            "nih",
+            "nsf",
+            "department of education",
+            "title ix",
+            "title vi",
+            "financial aid",
+            "student visa",
+            "accreditation",
+        ]
+    
+        urgent_mechanism_terms = [
+            "lawsuit",
+            "sued",
+            "investigation",
+            "enforcement action",
+            "civil rights investigation",
+            "funding cut",
+            "funding freeze",
+            "grant terminated",
+            "grant cancellation",
+            "data breach",
+            "cyberattack",
+            "ransomware",
+            "shooting",
+            "bomb threat",
+            "lockdown",
+            "strike",
+            "walkout",
+            "accreditation warning",
+            "sanction",
+            "evacuation order",
+            "state of emergency",
+            "campus closure",
+            "classes canceled",
+            "power outage",
+            "boil water advisory",
+            "road closure",
+            "storm warning",
+            "hurricane warning",
+            "tropical storm warning",
+        ]
+    
+        junk_terms = [
+            "lineup projection",
+            "starting rotation",
+            "mlb draft",
+            "roster projection",
+            "baseball",
+            "football",
+            "basketball",
+            "game recap",
+            "clinical fraud",
+            "medical identity theft",
+            "doctor's office",
+            "solar bees",
+            "anniversary of hurricane",
+            "20 years after hurricane",
+        ]
+    
+        higher_ed_mask = contains_any_term(
+            text,
+            higher_ed_terms,
+        )
+    
+        urgent_mechanism_mask = contains_any_term(
+            text,
+            urgent_mechanism_terms,
+        )
+    
+        junk_mask = contains_any_term(
+            text,
+            junk_terms,
+        )
+    
+        if "University Label" in data.columns:
+            university_mask = (
+                pd.to_numeric(
+                    data["University Label"],
+                    errors="coerce",
+                )
+                .fillna(0)
+                .astype(int)
+                .eq(1)
+            )
+        else:
+            university_mask = higher_ed_mask
+    
+        # Use richer university-label evidence when available.
+        if "briefing_score" in data.columns:
+            briefing_mask = (
+                pd.to_numeric(
+                    data["briefing_score"],
+                    errors="coerce",
+                )
+                .fillna(0)
+                .ge(85)
+            )
+        else:
+            briefing_mask = university_mask
+    
+        if "risk_mechanism" in data.columns:
+            mechanism_field_mask = (
+                data["risk_mechanism"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .ne("")
+            )
+        else:
+            mechanism_field_mask = urgent_mechanism_mask
+    
+        return (
+            university_mask
+            & briefing_mask
+            & urgent_mechanism_mask
+            & mechanism_field_mask
+            & ~junk_mask
+        )
     def prepare_immediate_alerts(
         article_data,
         days=30,
@@ -1358,6 +1493,23 @@ if selection == "External Risk Snapshot":
         )
 
     immediate_alerts = prepare_immediate_alerts(articles)
+    debug_columns = [
+        "Title",
+        "University Label",
+        "briefing_score",
+        "relevance_scope",
+        "risk_mechanism",
+        "Predicted_Risks_new",
+        "Dashboard_Risk",
+        "is_immediate_alert",
+        "immediate_alert_score",
+        "pred_source",
+    ]
+    
+    st.dataframe(
+        immediate_alerts.reindex(columns=debug_columns),
+        use_container_width=True,
+    )
 
     def render_executive_overview(snapshot_data, development_data, alert_data):
         new_count = int(
