@@ -1739,8 +1739,8 @@ Items:
         sort_choice = st.selectbox(
             "Sort emerging risks by",
             [
-                "Priority: highest first",
                 "Newest evidence first",
+                "Priority: highest first",
                 "Oldest evidence first",
                 "Recently promoted",
                 "Lifecycle status",
