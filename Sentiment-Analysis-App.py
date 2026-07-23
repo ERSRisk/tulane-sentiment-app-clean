@@ -156,47 +156,105 @@ if st.session_state.current_tab != selection:
     st.session_state.current_tab = selection
 
 if selection == "External Risk Snapshot":
-    OWNER = 'ERSRisk'
-    REPO = 'Tulane-Sentiment-Analysis'
-    TAG = 'BERTopic_results'
-    ASSET = 'BERTopic_Streamlit.csv.gz'
-    LIFECYCLE_BLOB = (
-        "agent/risk_lifecycle_registry.csv"
-    )
-    
+    OWNER = "ERSRisk"
+    REPO = "Tulane-Sentiment-Analysis"
+    TAG = "BERTopic_results"
+    ASSET = "BERTopic_Streamlit.csv.gz"
+
+    LIFECYCLE_BLOB = "agent/risk_lifecycle_registry.csv"
     LIFECYCLE_LOCAL = (
         "pipeline/resources/"
         "risk_lifecycle_registry.csv"
     )
 
-    @st.cache_data(show_spinner=True, ttl=1800)
-    def get_csv_from_release(owner, repo, tag, asset, usecols=None) -> pd.DataFrame:
+    # =========================================================
+    # Helper functions
+    # =========================================================
+
+    @st.cache_data(
+        show_spinner=True,
+        ttl=1800,
+    )
+    def get_csv_from_release(
+        owner,
+        repo,
+        tag,
+        asset,
+        usecols=None,
+    ) -> pd.DataFrame:
         token = _github_token()
+
         if not token:
-            raise RuntimeError("GITHUB_TOKEN missing (not injected or empty).")
+            raise RuntimeError(
+                "GITHUB_TOKEN missing "
+                "(not injected or empty)."
+            )
 
         headers = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"token {token}",
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"token {token}",
         }
+
         rel = requests.get(
-        f"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}",
-        headers=headers, timeout=60
+            (
+                "https://api.github.com/repos/"
+                f"{owner}/{repo}/releases/tags/{tag}"
+            ),
+            headers=headers,
+            timeout=60,
         )
+
         if rel.status_code != 200:
-        # show the real reason (401, 404, permissions)
-            raise RuntimeError(f"Release lookup {rel.status_code}: {rel.text[:300]}")
+            raise RuntimeError(
+                "Release lookup "
+                f"{rel.status_code}: "
+                f"{rel.text[:300]}"
+            )
 
         rel_json = rel.json()
-        asset_obj = next((a for a in rel_json.get('assets', []) if a.get('name') == asset), None)
-        if not asset_obj:
-            raise RuntimeError(f"Asset '{asset}' not found in release '{tag}'.")
 
-        url = asset_obj['browser_download_url']
-        r = requests.get(url, headers={"Authorization": f"token {token}", "Accept": "application/octet-stream"}, timeout=120)
-        if r.status_code != 200:
-            raise RuntimeError(f"Asset download {r.status_code}: {r.text[:300]}")
-        return pd.read_csv(io.BytesIO(r.content), compression="gzip", low_memory=False, dtype=str, usecols=usecols)
+        asset_obj = next(
+            (
+                release_asset
+                for release_asset
+                in rel_json.get("assets", [])
+                if release_asset.get("name") == asset
+            ),
+            None,
+        )
+
+        if not asset_obj:
+            raise RuntimeError(
+                f"Asset '{asset}' not found "
+                f"in release '{tag}'."
+            )
+
+        url = asset_obj["browser_download_url"]
+
+        response = requests.get(
+            url,
+            headers={
+                "Authorization": f"token {token}",
+                "Accept": "application/octet-stream",
+            },
+            timeout=120,
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError(
+                "Asset download "
+                f"{response.status_code}: "
+                f"{response.text[:300]}"
+            )
+
+        return pd.read_csv(
+            io.BytesIO(response.content),
+            compression="gzip",
+            low_memory=False,
+            dtype=str,
+            usecols=usecols,
+        )
+
     def update_risk_pin(
         lifecycle_df,
         canonical_event_id,
@@ -204,26 +262,26 @@ if selection == "External Risk Snapshot":
         pinned_by="streamlit_user",
     ):
         updated = lifecycle_df.copy()
-    
+
         mask = (
             updated["canonical_event_id"]
             .astype(str)
             .eq(str(canonical_event_id))
         )
-    
+
         if not mask.any():
             raise KeyError(
                 "The selected event was not found "
                 "in the lifecycle registry."
             )
-    
+
         now_utc = pd.Timestamp.now(tz="UTC")
-    
+
         updated.loc[
             mask,
             "is_pinned",
         ] = bool(should_pin)
-    
+
         updated.loc[
             mask,
             "pinned_at",
@@ -232,7 +290,7 @@ if selection == "External Risk Snapshot":
             if should_pin
             else pd.NaT
         )
-    
+
         updated.loc[
             mask,
             "pinned_by",
@@ -241,118 +299,534 @@ if selection == "External Risk Snapshot":
             if should_pin
             else ""
         )
-    
+
         if should_pin:
             updated.loc[
                 mask,
                 "lifecycle_status",
             ] = "active"
-    
+
             updated.loc[
                 mask,
                 "expired_at",
             ] = pd.NaT
-    
+
         return updated
-    def apply_risk_mapping(data, mapping):
+
+    def apply_risk_mapping(
+        data,
+        mapping,
+    ):
         data = data.copy()
-    
         mapping = mapping.copy()
-        mapping['old_risk'] = mapping['old_risk'].astype(str).str.strip()
-        mapping['dashboard_risk'] = mapping['dashboard_risk'].astype(str).str.strip()
-    
-        data['Predicted_Risks_new'] = (
-            data['Predicted_Risks_new']
-            .fillna('No Risk')
+
+        mapping["old_risk"] = (
+            mapping["old_risk"]
             .astype(str)
             .str.strip()
         )
-    
+
+        mapping["dashboard_risk"] = (
+            mapping["dashboard_risk"]
+            .astype(str)
+            .str.strip()
+        )
+
+        data["Predicted_Risks_new"] = (
+            data["Predicted_Risks_new"]
+            .fillna("No Risk")
+            .astype(str)
+            .str.strip()
+        )
+
         data = data.merge(
             mapping,
-            left_on='Predicted_Risks_new',
-            right_on='old_risk',
-            how='left'
+            left_on="Predicted_Risks_new",
+            right_on="old_risk",
+            how="left",
         )
-    
-        data['Dashboard_Risk'] = data['dashboard_risk'].fillna(data['Predicted_Risks_new'])
-    
-        return data.drop(columns=['old_risk', 'dashboard_risk'], errors='ignore')
+
+        data["Dashboard_Risk"] = (
+            data["dashboard_risk"]
+            .fillna(
+                data["Predicted_Risks_new"]
+            )
+        )
+
+        return data.drop(
+            columns=[
+                "old_risk",
+                "dashboard_risk",
+            ],
+            errors="ignore",
+        )
 
     def parse_article_sources(value):
         if isinstance(value, list):
             return value
-    
+
         if pd.isna(value):
             return []
-    
+
         text = str(value).strip()
-    
+
         if not text:
             return []
-    
+
         try:
             parsed = json.loads(text)
-    
+
             return (
                 parsed
                 if isinstance(parsed, list)
                 else []
             )
-    
+
         except Exception:
             pass
-    
+
         try:
             parsed = ast.literal_eval(text)
-    
+
             return (
                 parsed
                 if isinstance(parsed, list)
                 else []
             )
-    
+
         except Exception:
             return []
-        
+
+    def parse_json_list(value):
+        if isinstance(value, list):
+            return value
+
+        if pd.isna(value):
+            return []
+
+        try:
+            parsed = json.loads(
+                str(value)
+            )
+
+            return (
+                parsed
+                if isinstance(parsed, list)
+                else []
+            )
+
+        except Exception:
+            return []
+
+    def prepare_agent_decisions(data):
+        data = data.copy()
+
+        if data.empty:
+            return data
+
+        if "evaluation_timestamp" in data.columns:
+            data["evaluation_timestamp"] = (
+                pd.to_datetime(
+                    data["evaluation_timestamp"],
+                    errors="coerce",
+                    utc=True,
+                )
+            )
+
+        if "validation_status" in data.columns:
+            data = data[
+                data["validation_status"]
+                .fillna("valid")
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .eq("valid")
+            ].copy()
+
+        direct_mask = (
+            data["institutional_relevance"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .eq("direct")
+        )
+
+        visible_mask = (
+            data["dashboard_visibility"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .eq("show")
+        )
+
+        review_values = (
+            data["requires_human_review"]
+            .fillna(False)
+            .astype(str)
+            .str.strip()
+            .str.lower()
+        )
+
+        no_review_mask = ~review_values.isin(
+            [
+                "true",
+                "1",
+                "yes",
+            ]
+        )
+
+        data = data[
+            direct_mask
+            & visible_mask
+            & no_review_mask
+        ].copy()
+
+        dedup_key = (
+            "canonical_event_id"
+            if "canonical_event_id"
+            in data.columns
+            else "unit_id"
+        )
+
+        if "evaluation_timestamp" in data.columns:
+            data = data.sort_values(
+                "evaluation_timestamp",
+                ascending=False,
+            )
+
+        data = data.drop_duplicates(
+            subset=[dedup_key],
+            keep="first",
+        )
+
+        return data
+
+    def executive_priority(row):
+        decision = str(
+            row.get(
+                "agent_decision",
+                "",
+            )
+        ).lower()
+
+        actionability = str(
+            row.get(
+                "actionability",
+                "",
+            )
+        ).lower()
+
+        relevance = str(
+            row.get(
+                "institutional_relevance",
+                "",
+            )
+        ).lower()
+
+        if (
+            decision == "escalate"
+            and actionability == "high"
+            and relevance == "direct"
+        ):
+            return "Critical"
+
+        if decision == "escalate":
+            return "High"
+
+        if (
+            decision == "monitor"
+            and relevance == "direct"
+        ):
+            return "Medium"
+
+        return "Low"
+
+    def severity_bucket(x: float) -> str:
+        if pd.isna(x):
+            return "-"
+
+        if x >= 4.0:
+            return "Critical"
+
+        if x >= 3.0:
+            return "Elevated"
+
+        if x >= 2.0:
+            return "Monitor"
+
+        return "Low"
+
+    def action_label(
+        score,
+        trend,
+        event_count,
+    ):
+        event_count = (
+            0
+            if pd.isna(event_count)
+            else event_count
+        )
+
+        if (
+            score >= 4
+            or (
+                score >= 3
+                and trend > 0.3
+            )
+        ):
+            return "Escalate"
+
+        if (
+            score >= 2
+            or trend > 0.2
+            or event_count >= 3
+        ):
+            return "Monitor"
+
+        return "Watch"
+
+    def clean_event_label(
+        label,
+        fallback_title,
+    ):
+        label = (
+            ""
+            if pd.isna(label)
+            else str(label).strip()
+        )
+
+        if label.lower() in [
+            "",
+            "nan",
+            "none",
+        ]:
+            if pd.notna(fallback_title):
+                return str(
+                    fallback_title
+                )[:140]
+
+            return "Unlabeled signal"
+
+        return label
+
+    def format_date(value):
+        value = pd.to_datetime(
+            value,
+            errors="coerce",
+            utc=True,
+        )
+
+        if pd.isna(value):
+            return "Not available"
+
+        return value.strftime(
+            "%B %d, %Y"
+        )
+
+    @st.cache_data(
+        show_spinner=False,
+        ttl=3600,
+    )
+    def llm_relevance_filter(
+        selected_risk,
+        rows_json,
+    ):
+        api_key = os.getenv(
+            "API_KEY_PAID"
+        )
+
+        if not api_key:
+            return []
+
+        client = genai.Client(
+            api_key=api_key
+        )
+
+        prompt = f"""
+You are filtering external news signals for a university
+enterprise risk dashboard.
+
+Selected dashboard risk:
+{selected_risk}
+
+Keep an item only if it is clearly relevant to Tulane
+University in its operations or if it geographically affects
+New Orleans or the Southeast United States.
+
+Keep an item if it affects or could potentially affect higher
+education institutions across the United States or institutions
+similar in size to Tulane University.
+
+Reject items that are merely general politics, unrelated sports,
+general healthcare, celebrity news, or weakly connected noise.
+
+Return ONLY valid JSON:
+
+[
+  {{
+    "row_id": "...",
+    "keep": true,
+    "reason": "short reason"
+  }}
+]
+
+Items:
+{rows_json}
+"""
+
+        response = (
+            client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+        )
+
+        text = (
+            response.text
+            .strip()
+            .replace(
+                "```json",
+                "",
+            )
+            .replace(
+                "```",
+                "",
+            )
+            .strip()
+        )
+
+        try:
+            return json.loads(text)
+
+        except Exception:
+            return []
+
+    # =========================================================
+    # Load data
+    # =========================================================
+
     articles = load_csv_gz_from_gcs(
-        'latest/topics/BERTopic_Streamlit.csv.gz',
-        'pipeline/resources/BERTopic_Streamlit.csv.gz'
+        (
+            "latest/topics/"
+            "BERTopic_Streamlit.csv.gz"
+        ),
+        (
+            "pipeline/resources/"
+            "BERTopic_Streamlit.csv.gz"
+        ),
     )
-    
+
     df = load_csv_from_gcs(
-        'latest/scores/final_risk_scores1.csv',
-        'pipeline/resources/final_risk_scores1.csv'
+        (
+            "latest/scores/"
+            "final_risk_scores1.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "final_risk_scores1.csv"
+        ),
     )
-    
+
     events = load_csv_from_gcs(
-        'latest/scores/ranked_events_risks1.csv',
-        'pipeline/resources/ranked_events_risks1.csv'
+        (
+            "latest/scores/"
+            "ranked_events_risks1.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "ranked_events_risks1.csv"
+        ),
     )
 
     agent_decisions = load_csv_from_gcs(
         "agent/agent_decisions.csv",
-        "pipeline/resources/agent_decisions.csv"
+        (
+            "pipeline/resources/"
+            "agent_decisions.csv"
+        ),
     )
 
-    
-    
+    risk_lifecycle = load_csv_from_gcs(
+        (
+            "agent/"
+            "risk_lifecycle_registry.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "risk_lifecycle_registry.csv"
+        ),
+    )
+
+    consolidated_packets = load_csv_from_gcs(
+        (
+            "agent/"
+            "consolidated_agent_packets.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "consolidated_agent_packets.csv"
+        ),
+    )
+
+    emerging_situations = load_csv_from_gcs(
+        (
+            "agent/"
+            "emerging_situations.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "emerging_situations.csv"
+        ),
+    )
+
+    risk_mapping = load_csv_from_gcs(
+        (
+            "latest/reference/"
+            "risk_mapping.csv"
+        ),
+        (
+            "pipeline/resources/"
+            "risk_mapping.csv"
+        ),
+    )
+
+    # =========================================================
+    # Prepare agent decisions
+    # =========================================================
+
     for col in [
         "first_seen",
         "last_seen",
-        "evaluation_timestamp"
+        "evaluation_timestamp",
     ]:
         if col in agent_decisions.columns:
-            agent_decisions[col] = pd.to_datetime(
-                agent_decisions[col],
-                errors="coerce",
-                utc=True
+            agent_decisions[col] = (
+                pd.to_datetime(
+                    agent_decisions[col],
+                    errors="coerce",
+                    utc=True,
+                )
             )
 
-    risk_lifecycle = load_csv_from_gcs(
-        "agent/risk_lifecycle_registry.csv",
-        "pipeline/resources/risk_lifecycle_registry.csv",
+    agent_decisions = (
+        prepare_agent_decisions(
+            agent_decisions
+        )
     )
+
+    if not agent_decisions.empty:
+        agent_decisions[
+            "Executive Priority"
+        ] = agent_decisions.apply(
+            executive_priority,
+            axis=1,
+        )
+
+    # =========================================================
+    # Prepare lifecycle registry
+    # =========================================================
 
     LIFECYCLE_DATE_COLUMNS = [
         "first_seen",
@@ -363,28 +837,35 @@ if selection == "External Risk Snapshot":
         "pinned_at",
         "expired_at",
     ]
-    
+
     for column in LIFECYCLE_DATE_COLUMNS:
         if column in risk_lifecycle.columns:
-            risk_lifecycle[column] = pd.to_datetime(
-                risk_lifecycle[column],
-                errors="coerce",
-                utc=True,
+            risk_lifecycle[column] = (
+                pd.to_datetime(
+                    risk_lifecycle[column],
+                    errors="coerce",
+                    utc=True,
+                )
             )
-    
+
     risk_lifecycle["is_pinned"] = (
         risk_lifecycle["is_pinned"]
         .fillna(False)
         .astype(str)
         .str.strip()
         .str.lower()
-        .isin(["true", "1", "yes"])
+        .isin(
+            [
+                "true",
+                "1",
+                "yes",
+            ]
+        )
     )
 
-    consolidated_packets = load_csv_from_gcs(
-        "agent/consolidated_agent_packets.csv",
-        "pipeline/resources/consolidated_agent_packets.csv",
-    )
+    # =========================================================
+    # Build emerging risk dataset
+    # =========================================================
 
     packet_source_columns = [
         "canonical_event_id",
@@ -392,82 +873,14 @@ if selection == "External Risk Snapshot":
         "top_titles",
         "source_packet_count",
     ]
-    
+
     available_packet_columns = [
         column
         for column in packet_source_columns
-        if column in consolidated_packets.columns
+        if column
+        in consolidated_packets.columns
     ]
-    
-    
-    def prepare_agent_decisions(data):
-        data = data.copy()
-    
-        if data.empty:
-            return data
-    
-        data["evaluation_timestamp"] = pd.to_datetime(
-            data["evaluation_timestamp"],
-            errors="coerce",
-            utc=True,
-        )
-    
-        if "validation_status" in data.columns:
-            data = data[
-                data["validation_status"]
-                .fillna("valid")
-                .eq("valid")
-            ].copy()
-    
-        data = data[
-            (
-                data["institutional_relevance"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .str.lower()
-                .eq("direct")
-            )
-            & (
-                data["dashboard_visibility"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .str.lower()
-                .eq("show")
-            )
-            & (
-                data["requires_human_review"]
-                .fillna(False)
-                .eq(False)
-            )
-        ].copy()
-    
-        dedup_key = (
-            "canonical_event_id"
-            if "canonical_event_id" in data.columns
-            else "unit_id"
-        )
-    
-        data = (
-            data.sort_values(
-                "evaluation_timestamp",
-                ascending=False,
-            )
-            .drop_duplicates(
-                subset=[dedup_key],
-                keep="first",
-            )
-        )
-    
-        return data
-    
-    
-    agent_decisions = prepare_agent_decisions(
-        agent_decisions
-    )
-    
-    
+
     decision_columns = [
         "canonical_event_id",
         "agent_decision",
@@ -483,14 +896,14 @@ if selection == "External Risk Snapshot":
         "coverage_gaps",
         "evaluation_timestamp",
     ]
-    
+
     available_decision_columns = [
         column
         for column in decision_columns
-        if column in agent_decisions.columns
+        if column
+        in agent_decisions.columns
     ]
-    
-    
+
     emerging_risk_items = (
         risk_lifecycle
         .merge(
@@ -508,147 +921,44 @@ if selection == "External Risk Snapshot":
             how="left",
         )
     )
-    
-    
-    if "top_articles" not in emerging_risk_items.columns:
-        emerging_risk_items["top_articles"] = None
-    
-    
-    emerging_risk_items["article_sources"] = (
-        emerging_risk_items["top_articles"]
-        .apply(parse_article_sources)
+
+    if (
+        "top_articles"
+        not in emerging_risk_items.columns
+    ):
+        emerging_risk_items[
+            "top_articles"
+        ] = None
+
+    emerging_risk_items[
+        "article_sources"
+    ] = (
+        emerging_risk_items[
+            "top_articles"
+        ]
+        .apply(
+            parse_article_sources
+        )
     )
-    
-    
-    emerging_risk_items = emerging_risk_items[
-        emerging_risk_items["is_pinned"]
-        | emerging_risk_items[
-            "lifecycle_status"
-        ].isin(
-            [
-                "new",
-                "candidate",
-                "active",
-                "cooling",
+
+    emerging_risk_items = (
+        emerging_risk_items[
+            emerging_risk_items[
+                "is_pinned"
             ]
-        )
-    ].copy()
-
-    emerging_risk_items["article_sources"] = (
-        emerging_risk_items["top_articles"]
-        .apply(parse_article_sources)
+            | emerging_risk_items[
+                "lifecycle_status"
+            ].isin(
+                [
+                    "new",
+                    "candidate",
+                    "active",
+                    "cooling",
+                ]
+            )
+        ]
+        .copy()
     )
-    
-    emerging_situations = load_csv_from_gcs(
-        "agent/emerging_situations.csv",
-        "pipeline/resources/emerging_situations.csv"
-    )
-
-    
-    
-    def prepare_agent_decisions(data):
-        data = data.copy()
-    
-        if data.empty:
-            return data
-    
-        data["evaluation_timestamp"] = pd.to_datetime(
-            data["evaluation_timestamp"],
-            errors="coerce",
-            utc=True
-        )
-    
-        # Remove invalid responses first.
-        if "validation_status" in data.columns:
-            data = data[
-                data["validation_status"]
-                .fillna("valid")
-                .eq("valid")
-            ].copy()
-    
-        # Keep only decisions eligible for dashboard display.
-        data = data[
-            (
-                data["institutional_relevance"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .str.lower()
-                .eq("direct")
-            )
-            & (
-                data["dashboard_visibility"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .str.lower()
-                .eq("show")
-            )
-            & (
-                data["requires_human_review"]
-                .fillna(False)
-                .eq(False)
-            )
-        ].copy()
-    
-        dedup_key = (
-            "canonical_event_id"
-            if "canonical_event_id" in data.columns
-            else "unit_id"
-        )
-    
-        # Now retain the newest displayable decision.
-        data = (
-            data.sort_values(
-                "evaluation_timestamp",
-                ascending=False
-            )
-            .drop_duplicates(
-                subset=[dedup_key],
-                keep="first"
-            )
-        )
-    
-        return data
-    
-    
-    agent_decisions = prepare_agent_decisions(
-        agent_decisions
-    )
-
-    decision_columns = [
-        "canonical_event_id",
-        "agent_decision",
-        "dashboard_visibility",
-        "institutional_relevance",
-        "actionability",
-        "confidence",
-        "what_changed",
-        "why_it_matters",
-        "policy_mitigation_assessment",
-        "recommended_human_action",
-        "relevant_policies",
-        "coverage_gaps",
-        "evaluation_timestamp",
-    ]
-    
-    available_decision_columns = [
-        column
-        for column in decision_columns
-        if column in agent_decisions.columns
-    ]
-
-    emerging_risk_items = emerging_risk_items[
-        emerging_risk_items["is_pinned"]
-        | emerging_risk_items["lifecycle_status"].isin(
-            [
-                "new",
-                "candidate",
-                "active",
-                "cooling",
-            ]
-        )
-    ].copy()
 
     LIFECYCLE_ORDER = {
         "new": 1,
@@ -657,1322 +967,2949 @@ if selection == "External Risk Snapshot":
         "cooling": 4,
         "expired": 5,
     }
-    
-    emerging_risk_items["_lifecycle_order"] = (
-        emerging_risk_items["lifecycle_status"]
-        .map(LIFECYCLE_ORDER)
-        .fillna(99)
-    )
-    
-    emerging_risk_items = emerging_risk_items.sort_values(
-        [
-            "is_pinned",
-            "_lifecycle_order",
-            "priority_score",
-            "last_evidence_at",
-        ],
-        ascending=[
-            False,
-            True,
-            False,
-            False,
-        ],
-        na_position="last",
-    )
-    def parse_json_list(value):
-        if isinstance(value, list):
-            return value
-    
-        if pd.isna(value):
-            return []
-    
-        try:
-            parsed = json.loads(str(value))
-            return parsed if isinstance(parsed, list) else []
-        except Exception:
-            return []
-    
-    
-    def executive_priority(row):
-        decision = str(
-            row.get("agent_decision", "")
-        ).lower()
-    
-        actionability = str(
-            row.get("actionability", "")
-        ).lower()
-    
-        relevance = str(
-            row.get("institutional_relevance", "")
-        ).lower()
-    
-        if (
-            decision == "escalate"
-            and actionability == "high"
-            and relevance == "direct"
-        ):
-            return "Critical"
-    
-        if decision == "escalate":
-            return "High"
-    
-        if (
-            decision == "monitor"
-            and relevance == "direct"
-        ):
-            return "Medium"
-    
-        return "Low"
-    
-    
-    agent_decisions["Executive Priority"] = (
-        agent_decisions.apply(
-            executive_priority,
-            axis=1
-        )
-    )
-    df['Window'] = pd.to_datetime(df['Window'], errors='coerce')
-    
-    events['Window'] = pd.to_datetime(events['Window'], errors = 'coerce')
 
-    risk_mapping = load_csv_from_gcs(
-        'latest/reference/risk_mapping.csv',
-        'pipeline/resources/risk_mapping.csv'
-    )
-
-    risk_universe = (
-        risk_mapping[['dashboard_risk']]
-        .dropna()
-        .copy()
-    )
-    
-    risk_universe['dashboard_risk'] = (
-        risk_universe['dashboard_risk']
-        .astype(str)
-        .str.strip()
-    )
-    
-    risk_universe = (
-        risk_universe[
-            risk_universe['dashboard_risk'].ne('')
-        ]
-        .drop_duplicates()
-        .rename(columns={'dashboard_risk': 'Dashboard_Risk'})
-    )
-    
-    df = apply_risk_mapping(df, risk_mapping)
-    events = apply_risk_mapping(events, risk_mapping)
-    articles = apply_risk_mapping(articles, risk_mapping)
-
-    
-    now = df['Window'].max()
-    
-    st.title('External Risk Snapshot')
-    
-    period_map = {
-        "Last Month": 30,
-        "Last 3 Months": 90,
-        "Last 6 Months": 180,
-        "Last Year": 365
-    }
-    
-    def severity_bucket(x: float) -> str:
-        if pd.isna(x):
-            return "-"
-        if x >= 4.0: return "Critical"
-        if x >= 3.0: return "Elevated"
-        if x >= 2.0: return "Monitor"
-        return "Low"
-
-    def action_label(score, trend, event_count):
-        event_count = 0 if pd.isna(event_count) else event_count
-    
-        if score >= 4 or (score >= 3 and trend > 0.3):
-            return "Escalate"
-        if score >= 2 or trend > 0.2 or event_count >= 3:
-            return "Monitor"
-        return "Watch"
-
-    def clean_event_label(label, fallback_title):
-        label = "" if pd.isna(label) else str(label).strip()
-    
-        if label.lower() in ["", "nan", "none"]:
-            if pd.notna(fallback_title):
-                return str(fallback_title)[:140]
-            return "Unlabeled signal"
-    
-        return label
-
-    @st.cache_data(show_spinner=False, ttl=3600)
-    def llm_relevance_filter(selected_risk, rows_json):
-        api_key = os.getenv("API_KEY_PAID")
-        if not api_key:
-            return []
-    
-        client = genai.Client(api_key=api_key)
-    
-        prompt = f"""
-    You are filtering external news signals for a university enterprise risk dashboard.
-    
-    Selected dashboard risk:
-    {selected_risk}
-    
-    Keep an item only if it is clearly relevant to Tulane University in their operations or if it affects the area geographically where Tulane University is (New Orleans, Southeast US).
-    If the article affects or could potentially affect higher education institutions in all the United States or institutions of the same size as Tulane University, keep it.
-    
-    Reject items that are merely general politics, unrelated sports, general healthcare, celebrity/news noise, or only weakly connected.
-    
-    Return ONLY valid JSON:
-    [
-      {{
-        "row_id": "...",
-        "keep": true/false,
-        "reason": "short reason"
-      }}
-    ]
-    
-    Items:
-    {rows_json}
-    """
-    
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-    
-        text = response.text.strip()
-        text = text.replace("```json", "").replace("```", "").strip()
-    
-        try:
-            return json.loads(text)
-        except Exception:
-            return []
-    
-    #time_period = st.sidebar.selectbox('Time period', ['Last Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'])
-    delta_days = period_map['Last Month']
-    delta = pd.Timedelta(days=delta_days)
-    
-    events['Window'] = pd.to_datetime(events['Window'], errors='coerce', utc=True)
-    df['Window'] = pd.to_datetime(df['Window'], errors='coerce', utc=True)
-    
-    cutoff = pd.Timestamp.now(tz='UTC') - delta
-    previous_cutoff = cutoff - delta
-    
-    total_events = events[events['Window'] >= cutoff].shape[0]
-    
-    current_events = events[events['Window'] >= cutoff]
-    events_summary = (
-        current_events
-        .groupby(['Window', 'Dashboard_Risk'])['Title']
-        .count()
-        .reset_index()
-        .rename(columns={'Title': 'Event_Count'})
-    )
-    
-    current_period = df[df['Window'] >= cutoff]
-    
-    previous_period = df[
-        (df['Window'] >= previous_cutoff) &
-        (df['Window'] < cutoff)
-    ]
-    
-    events['Event_Severity'] = pd.to_numeric(
-        events['Event_Severity'],
-        errors='coerce'
-    ).fillna(0)
-
-    current_scores = (
-        current_events
-        .groupby('Dashboard_Risk')['Event_Severity']
-        .mean()
-        .reset_index()
-        .rename(columns={'Event_Severity': 'current_score'})
-    )
-    
-    previous_events = events[
-        (events['Window'] >= previous_cutoff) &
-        (events['Window'] < cutoff)
-    ]
-    
-    previous_scores = (
-        previous_events
-        .groupby('Dashboard_Risk')['Event_Severity']
-        .mean()
-        .reset_index()
-        .rename(columns={'Event_Severity': 'previous_score'})
-    )
-    
-    snapshot = (
-        risk_universe
-        .merge(
-            current_scores,
-            on='Dashboard_Risk',
-            how='left'
-        )
-        .merge(
-            previous_scores,
-            on='Dashboard_Risk',
-            how='left'
-        )
-    )
-    snapshot['current_score'] = pd.to_numeric(
-        snapshot['current_score'],
-        errors='coerce'
-    ).fillna(0.0)
-    
-    snapshot['previous_score'] = pd.to_numeric(
-        snapshot['previous_score'],
-        errors='coerce'
-    ).fillna(0.0)
-
-    current_risk_names = set(
-        current_scores['Dashboard_Risk']
-        .dropna()
-        .astype(str)
-    )
-    
-    previous_risk_names = set(
-        previous_scores['Dashboard_Risk']
-        .dropna()
-        .astype(str)
-    )
-    
-    snapshot['is_new'] = (
-        snapshot['Dashboard_Risk'].isin(current_risk_names)
-        & ~snapshot['Dashboard_Risk'].isin(previous_risk_names)
-    )
-    snapshot['previous_score'] = snapshot['previous_score'].fillna(0)
-    
-    snapshot['trend'] = snapshot['current_score'] - snapshot['previous_score']
-    snapshot.loc[snapshot['is_new'], 'trend'] = snapshot.loc[snapshot['is_new'], 'current_score']
-    
-    snapshot['trend_display'] = snapshot['trend'].apply(
-        lambda x: '🔺' if x > 0.2 else ('🔻' if x < -0.2 else ' ')
-    )
-    
-    snapshot['severity_band'] = snapshot['current_score'].apply(severity_bucket)
-    
-    event_counts = (
-        current_events
-        .groupby('Dashboard_Risk')
-        .size()
-        .reset_index(name='Event_Count')
-    )
-    
-    snapshot = snapshot.merge(event_counts, on='Dashboard_Risk', how='left')
-    snapshot['Event_Count'] = snapshot['Event_Count'].fillna(0).astype(int)
-    
-    snapshot['action'] = snapshot.apply(
-        lambda r: action_label(r['current_score'], r['trend'], r['Event_Count']),
-        axis=1
-    )
-    
-    snapshot['risk_share_pct'] = (
-        snapshot['current_score'] / snapshot['current_score'].sum()
-    ) * 100
-    total_score = snapshot['current_score'].sum()
-    high_risk_count = snapshot[snapshot['current_score'] > 3.0].shape[0]
-    emerging_count = snapshot[(snapshot['trend'] > 0.2) & (snapshot['current_score'] < 3)].shape[0]
-    persistent_count = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)].shape[0]
-    persistent_risks = snapshot[(snapshot['trend'].abs() <= 1.0) & (snapshot['current_score'] > 3.0)]['Dashboard_Risk']
-    persistent_risks_names = persistent_risks if len(persistent_risks) else "-"
-    top_trending = snapshot.sort_values('trend', ascending=False).head(5)
-    top_high = snapshot.sort_values('current_score', ascending=False).head(8)
-    
-    df = df.merge(
-        snapshot[['Dashboard_Risk', 'trend_display', 'risk_share_pct', 'current_score']],
-        on='Dashboard_Risk',
-        how='left'
-    )
-    
-    df = df.merge(
-        events_summary[['Dashboard_Risk', 'Window', 'Event_Count']],
-        on=['Dashboard_Risk', 'Window'],
-        how='left'
-    )
-    
-    top_risk = snapshot.sort_values('current_score', ascending=False).head(1)
-    top_risk_name = top_risk['Dashboard_Risk'].iloc[0] if len(top_risk) else "-"
-    top_risk_score = top_risk['current_score'].iloc[0] if len(top_risk) else 0
-    
-    fastest = snapshot.sort_values('trend', ascending=False).head(1)
-    fastest_name = fastest['Dashboard_Risk'].iloc[0] if len(fastest) else "-"
-    fastest_delta = fastest['trend'].iloc[0] if len(fastest) else 0
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    col1.metric("Total Events for Period", total_events)
-    col2.metric("Highest Risk", f"{top_risk_score:.2f}", help = top_risk_name)
-    col3.metric("Fastest Growth", f"{fastest_delta:.2f}", help = fastest_name)
-    col4.metric("Persistent High Risks", persistent_count)
-    
-    st.divider()
-    
-    st.subheader("Trending Risks")
-    trend_cols = st.columns(5)
-    for i, (_, row) in enumerate(top_trending.iterrows()):
-        if row['trend'] == 0:
-            continue
-        with trend_cols[i]:
-            st.metric(
-                label = row['Dashboard_Risk'],
-                value = f"{row['current_score']:.2f}",
-                delta = f"{row['trend']:.2f}",
-                delta_color="inverse",
-            )
-    st.divider()
-    
-    new_risks = (
-        snapshot[snapshot['is_new']]
-        .sort_values('current_score', ascending=False)
-        .head(5)
-    )
-    
-    st.divider()
-    st.subheader(
-        "Emerging Risk Developments"
-    )
-    
-    st.caption(
-        "Risks remain visible while evidence is current. "
-        "Items cool and eventually leave the main view when "
-        "no new evidence appears. Pinned items remain active."
-    )
-    
-    status_filter = st.multiselect(
-        "Lifecycle Status",
-        [
-            "new",
-            "active",
-            "candidate",
-            "cooling",
-        ],
-        default=[
-            "new",
-            "active",
-            "candidate",
-            "cooling",
-        ],
-    )
-    
-    display_items = emerging_risk_items[
+    emerging_risk_items[
+        "_lifecycle_order"
+    ] = (
         emerging_risk_items[
             "lifecycle_status"
-        ].isin(status_filter)
-    ].copy()
-    
-    pinned_count = int(
-        display_items["is_pinned"].sum()
-    )
-    
-    new_count = int(
-        display_items[
-            "lifecycle_status"
-        ].eq("new").sum()
-    )
-    
-    active_count = int(
-        display_items[
-            "lifecycle_status"
-        ].eq("active").sum()
-    )
-    
-    cooling_count = int(
-        display_items[
-            "lifecycle_status"
-        ].eq("cooling").sum()
-    )
-    
-    metric_1, metric_2, metric_3, metric_4 = (
-        st.columns(4)
-    )
-    
-    metric_1.metric(
-        "New Developments",
-        new_count,
-    )
-    
-    metric_2.metric(
-        "Active Developments",
-        active_count,
-    )
-    
-    metric_3.metric(
-        "Cooling",
-        cooling_count,
-    )
-    
-    metric_4.metric(
-        "Pinned",
-        pinned_count,
-    )
-    STATUS_LABELS = {
-        "new": "New",
-        "active": "Active",
-        "candidate": "Candidate",
-        "cooling": "Cooling",
-        "expired": "Expired",
-    }
-
-    sort_choice = st.selectbox(
-        "Sort emerging risks by",
-        [
-            "Priority: highest first",
-            "Newest evidence first",
-            "Oldest evidence first",
-            "Recently promoted",
-            "Lifecycle status",
-        ],
+        ]
+        .map(
+            LIFECYCLE_ORDER
+        )
+        .fillna(99)
     )
 
-    if sort_choice == "Priority: highest first":
-        display_items = display_items.sort_values(
+    emerging_risk_items = (
+        emerging_risk_items
+        .sort_values(
             [
                 "is_pinned",
+                "_lifecycle_order",
                 "priority_score",
                 "last_evidence_at",
             ],
             ascending=[
                 False,
-                False,
-                False,
-            ],
-            na_position="last",
-        )
-    
-    elif sort_choice == "Newest evidence first":
-        display_items = display_items.sort_values(
-            [
-                "is_pinned",
-                "last_seen",
-                "priority_score",
-            ],
-            ascending=[
-                False,
-                False,
-                False,
-            ],
-            na_position="last",
-        )
-    
-    elif sort_choice == "Oldest evidence first":
-        display_items = display_items.sort_values(
-            [
-                "is_pinned",
-                "last_seen",
-                "priority_score",
-            ],
-            ascending=[
-                False,
                 True,
                 False,
+                False,
             ],
             na_position="last",
         )
-    
-    elif sort_choice == "Recently promoted":
-        display_items = display_items.sort_values(
+    )
+
+    # =========================================================
+    # Prepare risk mapping
+    # =========================================================
+
+    risk_universe = (
+        risk_mapping[
+            ["dashboard_risk"]
+        ]
+        .dropna()
+        .copy()
+    )
+
+    risk_universe[
+        "dashboard_risk"
+    ] = (
+        risk_universe[
+            "dashboard_risk"
+        ]
+        .astype(str)
+        .str.strip()
+    )
+
+    risk_universe = (
+        risk_universe[
+            risk_universe[
+                "dashboard_risk"
+            ].ne("")
+        ]
+        .drop_duplicates()
+        .rename(
+            columns={
+                "dashboard_risk":
+                "Dashboard_Risk"
+            }
+        )
+    )
+
+    df = apply_risk_mapping(
+        df,
+        risk_mapping,
+    )
+
+    events = apply_risk_mapping(
+        events,
+        risk_mapping,
+    )
+
+    articles = apply_risk_mapping(
+        articles,
+        risk_mapping,
+    )
+
+    # =========================================================
+    # Calculate snapshot data
+    # =========================================================
+
+    period_map = {
+        "Last Month": 30,
+        "Last 3 Months": 90,
+        "Last 6 Months": 180,
+        "Last Year": 365,
+    }
+
+    selected_period = "Last Month"
+
+    delta_days = period_map[
+        selected_period
+    ]
+
+    delta = pd.Timedelta(
+        days=delta_days
+    )
+
+    events["Window"] = pd.to_datetime(
+        events["Window"],
+        errors="coerce",
+        utc=True,
+    )
+
+    df["Window"] = pd.to_datetime(
+        df["Window"],
+        errors="coerce",
+        utc=True,
+    )
+
+    cutoff = (
+        pd.Timestamp.now(tz="UTC")
+        - delta
+    )
+
+    previous_cutoff = (
+        cutoff
+        - delta
+    )
+
+    current_events = events[
+        events["Window"] >= cutoff
+    ].copy()
+
+    previous_events = events[
+        (
+            events["Window"]
+            >= previous_cutoff
+        )
+        & (
+            events["Window"]
+            < cutoff
+        )
+    ].copy()
+
+    total_events = (
+        current_events.shape[0]
+    )
+
+    events_summary = (
+        current_events
+        .groupby(
             [
-                "is_pinned",
-                "first_promoted_at",
-                "priority_score",
-            ],
-            ascending=[
-                False,
-                False,
-                False,
-            ],
-            na_position="last",
+                "Window",
+                "Dashboard_Risk",
+            ]
+        )["Title"]
+        .count()
+        .reset_index()
+        .rename(
+            columns={
+                "Title":
+                "Event_Count"
+            }
         )
-    
-    elif sort_choice == "Lifecycle status":
-        display_items["_status_order"] = (
+    )
+
+    events[
+        "Event_Severity"
+    ] = pd.to_numeric(
+        events[
+            "Event_Severity"
+        ],
+        errors="coerce",
+    ).fillna(0)
+
+    current_events[
+        "Event_Severity"
+    ] = pd.to_numeric(
+        current_events[
+            "Event_Severity"
+        ],
+        errors="coerce",
+    ).fillna(0)
+
+    previous_events[
+        "Event_Severity"
+    ] = pd.to_numeric(
+        previous_events[
+            "Event_Severity"
+        ],
+        errors="coerce",
+    ).fillna(0)
+
+    current_scores = (
+        current_events
+        .groupby(
+            "Dashboard_Risk"
+        )[
+            "Event_Severity"
+        ]
+        .mean()
+        .reset_index()
+        .rename(
+            columns={
+                "Event_Severity":
+                "current_score"
+            }
+        )
+    )
+
+    previous_scores = (
+        previous_events
+        .groupby(
+            "Dashboard_Risk"
+        )[
+            "Event_Severity"
+        ]
+        .mean()
+        .reset_index()
+        .rename(
+            columns={
+                "Event_Severity":
+                "previous_score"
+            }
+        )
+    )
+
+    snapshot = (
+        risk_universe
+        .merge(
+            current_scores,
+            on="Dashboard_Risk",
+            how="left",
+        )
+        .merge(
+            previous_scores,
+            on="Dashboard_Risk",
+            how="left",
+        )
+    )
+
+    snapshot[
+        "current_score"
+    ] = pd.to_numeric(
+        snapshot[
+            "current_score"
+        ],
+        errors="coerce",
+    ).fillna(0.0)
+
+    snapshot[
+        "previous_score"
+    ] = pd.to_numeric(
+        snapshot[
+            "previous_score"
+        ],
+        errors="coerce",
+    ).fillna(0.0)
+
+    current_risk_names = set(
+        current_scores[
+            "Dashboard_Risk"
+        ]
+        .dropna()
+        .astype(str)
+    )
+
+    previous_risk_names = set(
+        previous_scores[
+            "Dashboard_Risk"
+        ]
+        .dropna()
+        .astype(str)
+    )
+
+    snapshot["is_new"] = (
+        snapshot[
+            "Dashboard_Risk"
+        ].isin(
+            current_risk_names
+        )
+        & ~snapshot[
+            "Dashboard_Risk"
+        ].isin(
+            previous_risk_names
+        )
+    )
+
+    snapshot["trend"] = (
+        snapshot["current_score"]
+        - snapshot["previous_score"]
+    )
+
+    snapshot.loc[
+        snapshot["is_new"],
+        "trend",
+    ] = snapshot.loc[
+        snapshot["is_new"],
+        "current_score",
+    ]
+
+    snapshot[
+        "trend_display"
+    ] = snapshot[
+        "trend"
+    ].apply(
+        lambda value: (
+            "🔺"
+            if value > 0.2
+            else (
+                "🔻"
+                if value < -0.2
+                else " "
+            )
+        )
+    )
+
+    snapshot[
+        "severity_band"
+    ] = snapshot[
+        "current_score"
+    ].apply(
+        severity_bucket
+    )
+
+    event_counts = (
+        current_events
+        .groupby(
+            "Dashboard_Risk"
+        )
+        .size()
+        .reset_index(
+            name="Event_Count"
+        )
+    )
+
+    snapshot = snapshot.merge(
+        event_counts,
+        on="Dashboard_Risk",
+        how="left",
+    )
+
+    snapshot[
+        "Event_Count"
+    ] = (
+        snapshot[
+            "Event_Count"
+        ]
+        .fillna(0)
+        .astype(int)
+    )
+
+    snapshot["action"] = (
+        snapshot.apply(
+            lambda row: action_label(
+                row[
+                    "current_score"
+                ],
+                row["trend"],
+                row[
+                    "Event_Count"
+                ],
+            ),
+            axis=1,
+        )
+    )
+
+    total_score = (
+        snapshot[
+            "current_score"
+        ].sum()
+    )
+
+    if total_score > 0:
+        snapshot[
+            "risk_share_pct"
+        ] = (
+            snapshot[
+                "current_score"
+            ]
+            / total_score
+        ) * 100
+
+    else:
+        snapshot[
+            "risk_share_pct"
+        ] = 0.0
+
+    high_risk_count = snapshot[
+        snapshot[
+            "current_score"
+        ] > 3.0
+    ].shape[0]
+
+    emerging_count = snapshot[
+        (
+            snapshot["trend"] > 0.2
+        )
+        & (
+            snapshot[
+                "current_score"
+            ] < 3
+        )
+    ].shape[0]
+
+    persistent_count = snapshot[
+        (
+            snapshot[
+                "trend"
+            ].abs() <= 1.0
+        )
+        & (
+            snapshot[
+                "current_score"
+            ] > 3.0
+        )
+    ].shape[0]
+
+    persistent_risks = snapshot[
+        (
+            snapshot[
+                "trend"
+            ].abs() <= 1.0
+        )
+        & (
+            snapshot[
+                "current_score"
+            ] > 3.0
+        )
+    ][
+        "Dashboard_Risk"
+    ]
+
+    persistent_risks_names = (
+        persistent_risks.tolist()
+        if len(persistent_risks)
+        else "-"
+    )
+
+    top_trending = (
+        snapshot
+        .sort_values(
+            "trend",
+            ascending=False,
+        )
+        .head(5)
+    )
+
+    top_high = (
+        snapshot
+        .sort_values(
+            "current_score",
+            ascending=False,
+        )
+        .head(8)
+    )
+
+    new_risks = (
+        snapshot[
+            snapshot["is_new"]
+        ]
+        .sort_values(
+            "current_score",
+            ascending=False,
+        )
+        .head(5)
+    )
+
+    df = df.merge(
+        snapshot[
+            [
+                "Dashboard_Risk",
+                "trend_display",
+                "risk_share_pct",
+                "current_score",
+            ]
+        ],
+        on="Dashboard_Risk",
+        how="left",
+    )
+
+    df = df.merge(
+        events_summary[
+            [
+                "Dashboard_Risk",
+                "Window",
+                "Event_Count",
+            ]
+        ],
+        on=[
+            "Dashboard_Risk",
+            "Window",
+        ],
+        how="left",
+    )
+
+    top_risk = (
+        snapshot
+        .sort_values(
+            "current_score",
+            ascending=False,
+        )
+        .head(1)
+    )
+
+    top_risk_name = (
+        top_risk[
+            "Dashboard_Risk"
+        ].iloc[0]
+        if len(top_risk)
+        else "-"
+    )
+
+    top_risk_score = (
+        top_risk[
+            "current_score"
+        ].iloc[0]
+        if len(top_risk)
+        else 0
+    )
+
+    fastest = (
+        snapshot
+        .sort_values(
+            "trend",
+            ascending=False,
+        )
+        .head(1)
+    )
+
+    fastest_name = (
+        fastest[
+            "Dashboard_Risk"
+        ].iloc[0]
+        if len(fastest)
+        else "-"
+    )
+
+    fastest_delta = (
+        fastest[
+            "trend"
+        ].iloc[0]
+        if len(fastest)
+        else 0
+    )
+
+    # =========================================================
+    # Page tabs
+    # =========================================================
+
+    st.title(
+        "External Risk Intelligence"
+    )
+
+    snapshot_tab, risk_details_tab = st.tabs(
+        [
+            "External Risk Snapshot",
+            "Risk Overview & Stories",
+        ]
+    )
+
+    # =========================================================
+    # TAB 1: Snapshot and emerging developments
+    # =========================================================
+
+    with snapshot_tab:
+        st.subheader(
+            "External Risk Snapshot"
+        )
+
+        st.caption(
+            "Executive view of external risk activity "
+            f"for the {selected_period.lower()}."
+        )
+
+        col1, col2, col3, col4 = (
+            st.columns(4)
+        )
+
+        col1.metric(
+            "Total Events for Period",
+            total_events,
+        )
+
+        col2.metric(
+            "Highest Risk",
+            f"{top_risk_score:.2f}",
+            help=top_risk_name,
+        )
+
+        col3.metric(
+            "Fastest Growth",
+            f"{fastest_delta:.2f}",
+            help=fastest_name,
+        )
+
+        col4.metric(
+            "Persistent High Risks",
+            persistent_count,
+        )
+
+        st.divider()
+
+        st.subheader(
+            "Trending Risks"
+        )
+
+        nonzero_trending = (
+            top_trending[
+                top_trending[
+                    "trend"
+                ].ne(0)
+            ]
+            .copy()
+        )
+
+        if nonzero_trending.empty:
+            st.caption(
+                "No material risk trend changes "
+                "were detected for this period."
+            )
+
+        else:
+            trend_cols = st.columns(
+                len(nonzero_trending)
+            )
+
+            for column, (_, row) in zip(
+                trend_cols,
+                nonzero_trending.iterrows(),
+            ):
+                with column:
+                    st.metric(
+                        label=row[
+                            "Dashboard_Risk"
+                        ],
+                        value=(
+                            f"{row['current_score']:.2f}"
+                        ),
+                        delta=(
+                            f"{row['trend']:.2f}"
+                        ),
+                        delta_color="inverse",
+                    )
+
+        st.divider()
+
+        st.subheader(
+            "Emerging Risk Developments"
+        )
+
+        st.caption(
+            "Risks remain visible while evidence is current. "
+            "Items cool and eventually leave the main view "
+            "when no new evidence appears. "
+            "Pinned items remain active."
+        )
+
+        status_filter = st.multiselect(
+            "Lifecycle Status",
+            [
+                "new",
+                "active",
+                "candidate",
+                "cooling",
+            ],
+            default=[
+                "new",
+                "active",
+                "candidate",
+                "cooling",
+            ],
+            key=(
+                "external_risk_"
+                "lifecycle_status"
+            ),
+        )
+
+        display_items = (
+            emerging_risk_items[
+                emerging_risk_items[
+                    "lifecycle_status"
+                ].isin(
+                    status_filter
+                )
+            ]
+            .copy()
+        )
+
+        pinned_count = int(
+            display_items[
+                "is_pinned"
+            ].sum()
+        )
+
+        new_count = int(
             display_items[
                 "lifecycle_status"
             ]
-            .map({
-                "new": 1,
-                "active": 2,
-                "candidate": 3,
-                "cooling": 4,
-                "expired": 5,
-            })
-            .fillna(99)
+            .eq("new")
+            .sum()
         )
-    
-        display_items = display_items.sort_values(
+
+        active_count = int(
+            display_items[
+                "lifecycle_status"
+            ]
+            .eq("active")
+            .sum()
+        )
+
+        cooling_count = int(
+            display_items[
+                "lifecycle_status"
+            ]
+            .eq("cooling")
+            .sum()
+        )
+
+        metric_1, metric_2, metric_3, metric_4 = (
+            st.columns(4)
+        )
+
+        metric_1.metric(
+            "New Developments",
+            new_count,
+        )
+
+        metric_2.metric(
+            "Active Developments",
+            active_count,
+        )
+
+        metric_3.metric(
+            "Cooling",
+            cooling_count,
+        )
+
+        metric_4.metric(
+            "Pinned",
+            pinned_count,
+        )
+
+        STATUS_LABELS = {
+            "new": "New",
+            "active": "Active",
+            "candidate": "Candidate",
+            "cooling": "Cooling",
+            "expired": "Expired",
+        }
+
+        sort_choice = st.selectbox(
+            "Sort emerging risks by",
             [
-                "is_pinned",
-                "_status_order",
-                "priority_score",
+                "Priority: highest first",
+                "Newest evidence first",
+                "Oldest evidence first",
+                "Recently promoted",
+                "Lifecycle status",
             ],
-            ascending=[
-                False,
-                True,
-                False,
-            ],
-            na_position="last",
+            key=(
+                "external_risk_"
+                "emerging_sort"
+            ),
         )
-    
-    
-    def format_date(value):
-        value = pd.to_datetime(
-            value,
-            errors="coerce",
-            utc=True,
-        )
-    
-        if pd.isna(value):
-            return "Not available"
-    
-        return value.strftime("%B %d, %Y")
-    
-    
-    for _, row in display_items.iterrows():
-        canonical_id = str(
-            row["canonical_event_id"]
-        )
-    
-        situation_title = str(
-            row.get(
+
+        if (
+            sort_choice
+            == "Priority: highest first"
+        ):
+            display_items = (
+                display_items
+                .sort_values(
+                    [
+                        "is_pinned",
+                        "priority_score",
+                        "last_evidence_at",
+                    ],
+                    ascending=[
+                        False,
+                        False,
+                        False,
+                    ],
+                    na_position="last",
+                )
+            )
+
+        elif (
+            sort_choice
+            == "Newest evidence first"
+        ):
+            display_items = (
+                display_items
+                .sort_values(
+                    [
+                        "is_pinned",
+                        "last_seen",
+                        "priority_score",
+                    ],
+                    ascending=[
+                        False,
+                        False,
+                        False,
+                    ],
+                    na_position="last",
+                )
+            )
+
+        elif (
+            sort_choice
+            == "Oldest evidence first"
+        ):
+            display_items = (
+                display_items
+                .sort_values(
+                    [
+                        "is_pinned",
+                        "last_seen",
+                        "priority_score",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        False,
+                    ],
+                    na_position="last",
+                )
+            )
+
+        elif (
+            sort_choice
+            == "Recently promoted"
+        ):
+            display_items = (
+                display_items
+                .sort_values(
+                    [
+                        "is_pinned",
+                        "first_promoted_at",
+                        "priority_score",
+                    ],
+                    ascending=[
+                        False,
+                        False,
+                        False,
+                    ],
+                    na_position="last",
+                )
+            )
+
+        elif (
+            sort_choice
+            == "Lifecycle status"
+        ):
+            display_items[
+                "_status_order"
+            ] = (
+                display_items[
+                    "lifecycle_status"
+                ]
+                .map(
+                    {
+                        "new": 1,
+                        "active": 2,
+                        "candidate": 3,
+                        "cooling": 4,
+                        "expired": 5,
+                    }
+                )
+                .fillna(99)
+            )
+
+            display_items = (
+                display_items
+                .sort_values(
+                    [
+                        "is_pinned",
+                        "_status_order",
+                        "priority_score",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        False,
+                    ],
+                    na_position="last",
+                )
+            )
+
+        if display_items.empty:
+            st.info(
+                "No emerging risk developments "
+                "match the selected lifecycle statuses."
+            )
+
+        for _, row in display_items.iterrows():
+            canonical_id = str(
+                row[
+                    "canonical_event_id"
+                ]
+            )
+
+            raw_title = row.get(
                 "situation_title",
                 "Untitled risk development",
             )
-        )
-    
-        lifecycle_status = str(
-            row.get(
-                "lifecycle_status",
-                "candidate",
+
+            situation_title = (
+                str(raw_title).strip()
+                if pd.notna(raw_title)
+                else "Untitled risk development"
             )
-        ).lower()
-    
-        is_pinned = bool(
-            row.get(
-                "is_pinned",
-                False,
+
+            if situation_title.lower() in [
+                "",
+                "nan",
+                "none",
+            ]:
+                situation_title = (
+                    "Untitled risk development"
+                )
+
+            lifecycle_status = str(
+                row.get(
+                    "lifecycle_status",
+                    "candidate",
+                )
+            ).lower()
+
+            is_pinned = bool(
+                row.get(
+                    "is_pinned",
+                    False,
+                )
             )
-        )
-    
-        risk_name = str(
-            row.get(
+
+            raw_risk_name = row.get(
                 "top_risk_match",
                 "Unmapped risk",
             )
-        )
-    
-        status_label = STATUS_LABELS.get(
-            lifecycle_status,
-            lifecycle_status.title(),
-        )
-    
-        pin_label = (
-            "Pinned"
-            if is_pinned
-            else status_label
-        )
-    
-        with st.container(border=True):
-            title_col, status_col = st.columns(
-                [4, 1]
-            )
-    
-            with title_col:
-                st.markdown(
-                    f"#### {situation_title}"
-                )
-    
-                st.caption(
-                    f"{risk_name} · {pin_label}"
-                )
-    
-            with status_col:
-                if is_pinned:
-                    st.markdown(
-                        "**Pinned indefinitely**"
-                    )
-                else:
-                    st.markdown(
-                        f"**{status_label}**"
-                    )
-    
-            detail_col_1, detail_col_2, detail_col_3 = (
-                st.columns(3)
-            )
-    
-            detail_col_1.metric(
-                "Priority Score",
-                f"{float(row.get('priority_score', 0)):.2f}",
-            )
-    
-            detail_col_2.metric(
-                "First Seen",
-                format_date(
-                    row.get("first_seen")
-                ),
-            )
-    
-            detail_col_3.metric(
-                "Latest Evidence",
-                format_date(
-                    row.get("last_evidence_at")
-                ),
-            )
-    
-            what_changed = row.get(
-                "what_changed"
-            )
-    
-            if pd.notna(what_changed):
-                st.markdown(
-                    "**What changed**"
-                )
-                st.write(what_changed)
-    
-            why_it_matters = row.get(
-                "why_it_matters"
-            )
-    
-            if pd.notna(why_it_matters):
-                st.markdown(
-                    "**Why it matters to Tulane**"
-                )
-                st.write(why_it_matters)
-    
-            recommended_action = row.get(
-                "recommended_human_action"
-            )
-    
-            if pd.notna(recommended_action):
-                st.markdown(
-                    "**Recommended action**"
-                )
-                st.write(recommended_action)
 
-            article_sources = row.get(
-                "article_sources",
-                [],
+            risk_name = (
+                str(raw_risk_name).strip()
+                if pd.notna(raw_risk_name)
+                else "Unmapped risk"
             )
-            
-            if article_sources:
-                with st.expander(
-                    f"Read supporting sources "
-                    f"({len(article_sources)})"
-                ):
-                    for article_number, article in enumerate(
-                        article_sources,
-                        start=1,
-                    ):
-                        article_title = str(
-                            article.get(
-                                "title",
-                                f"Source {article_number}",
-                            )
-                        ).strip()
-            
-                        article_link = str(
-                            article.get(
-                                "link",
-                                "",
-                            )
-                        ).strip()
-            
-                        article_date = pd.to_datetime(
-                            article.get("published"),
-                            errors="coerce",
-                            utc=True,
+
+            if risk_name.lower() in [
+                "",
+                "nan",
+                "none",
+            ]:
+                risk_name = "Unmapped risk"
+
+            status_label = (
+                STATUS_LABELS.get(
+                    lifecycle_status,
+                    lifecycle_status.title(),
+                )
+            )
+
+            pin_label = (
+                "Pinned"
+                if is_pinned
+                else status_label
+            )
+
+            with st.container(
+                border=True
+            ):
+                title_col, status_col = (
+                    st.columns(
+                        [4, 1]
+                    )
+                )
+
+                with title_col:
+                    st.markdown(
+                        f"#### {situation_title}"
+                    )
+
+                    st.caption(
+                        f"{risk_name} · {pin_label}"
+                    )
+
+                with status_col:
+                    if is_pinned:
+                        st.markdown(
+                            "**Pinned indefinitely**"
                         )
-            
-                        article_snippet = str(
-                            article.get(
-                                "snippet",
-                                "",
-                            )
-                        ).strip()
-            
-                        if article_link:
-                            st.markdown(
-                                f"**[{article_title}]"
-                                f"({article_link})**"
-                            )
-                        else:
-                            st.markdown(
-                                f"**{article_title}**"
-                            )
-            
-                        if pd.notna(article_date):
-                            st.caption(
-                                article_date.strftime(
-                                    "%B %d, %Y"
+
+                    else:
+                        st.markdown(
+                            f"**{status_label}**"
+                        )
+
+                (
+                    detail_col_1,
+                    detail_col_2,
+                    detail_col_3,
+                ) = st.columns(3)
+
+                priority_score = pd.to_numeric(
+                    row.get(
+                        "priority_score",
+                        0,
+                    ),
+                    errors="coerce",
+                )
+
+                if pd.isna(priority_score):
+                    priority_score = 0
+
+                detail_col_1.metric(
+                    "Priority Score",
+                    f"{priority_score:.2f}",
+                )
+
+                detail_col_2.metric(
+                    "First Seen",
+                    format_date(
+                        row.get(
+                            "first_seen"
+                        )
+                    ),
+                )
+
+                detail_col_3.metric(
+                    "Latest Evidence",
+                    format_date(
+                        row.get(
+                            "last_evidence_at"
+                        )
+                    ),
+                )
+
+                what_changed = row.get(
+                    "what_changed"
+                )
+
+                if (
+                    pd.notna(what_changed)
+                    and str(
+                        what_changed
+                    ).strip()
+                ):
+                    st.markdown(
+                        "**What changed**"
+                    )
+
+                    st.write(
+                        what_changed
+                    )
+
+                why_it_matters = row.get(
+                    "why_it_matters"
+                )
+
+                if (
+                    pd.notna(
+                        why_it_matters
+                    )
+                    and str(
+                        why_it_matters
+                    ).strip()
+                ):
+                    st.markdown(
+                        "**Why it matters to Tulane**"
+                    )
+
+                    st.write(
+                        why_it_matters
+                    )
+
+                recommended_action = row.get(
+                    "recommended_human_action"
+                )
+
+                if (
+                    pd.notna(
+                        recommended_action
+                    )
+                    and str(
+                        recommended_action
+                    ).strip()
+                ):
+                    st.markdown(
+                        "**Recommended action**"
+                    )
+
+                    st.write(
+                        recommended_action
+                    )
+
+                article_sources = row.get(
+                    "article_sources",
+                    [],
+                )
+
+                if not isinstance(
+                    article_sources,
+                    list,
+                ):
+                    article_sources = (
+                        parse_article_sources(
+                            article_sources
+                        )
+                    )
+
+                if article_sources:
+                    with st.expander(
+                        (
+                            "Read supporting sources "
+                            f"({len(article_sources)})"
+                        )
+                    ):
+                        for (
+                            article_number,
+                            article,
+                        ) in enumerate(
+                            article_sources,
+                            start=1,
+                        ):
+                            if not isinstance(
+                                article,
+                                dict,
+                            ):
+                                continue
+
+                            article_title = str(
+                                article.get(
+                                    "title",
+                                    (
+                                        "Source "
+                                        f"{article_number}"
+                                    ),
+                                )
+                            ).strip()
+
+                            article_link = str(
+                                article.get(
+                                    "link",
+                                    "",
+                                )
+                            ).strip()
+
+                            article_date = (
+                                pd.to_datetime(
+                                    article.get(
+                                        "published"
+                                    ),
+                                    errors="coerce",
+                                    utc=True,
                                 )
                             )
-            
-                        if article_snippet:
-                            st.write(article_snippet)
-            
-                        if (
-                            article_number
-                            < len(article_sources)
-                        ):
-                            st.divider()
-    
-            pin_col, lifecycle_col = st.columns(
-                [1, 3]
-            )
-    
-            with pin_col:
-                button_text = (
-                    "Unpin"
-                    if is_pinned
-                    else "Keep indefinitely"
+
+                            article_snippet = str(
+                                article.get(
+                                    "snippet",
+                                    "",
+                                )
+                            ).strip()
+
+                            if (
+                                article_link
+                                .startswith("http")
+                            ):
+                                st.markdown(
+                                    (
+                                        f"**[{article_title}]"
+                                        f"({article_link})**"
+                                    )
+                                )
+
+                            else:
+                                st.markdown(
+                                    f"**{article_title}**"
+                                )
+
+                            if pd.notna(
+                                article_date
+                            ):
+                                st.caption(
+                                    article_date
+                                    .strftime(
+                                        "%B %d, %Y"
+                                    )
+                                )
+
+                            if article_snippet:
+                                st.write(
+                                    article_snippet
+                                )
+
+                            if (
+                                article_number
+                                < len(
+                                    article_sources
+                                )
+                            ):
+                                st.divider()
+
+                pin_col, lifecycle_col = (
+                    st.columns(
+                        [1, 3]
+                    )
                 )
-    
-                if st.button(
-                    button_text,
-                    key=f"pin_{canonical_id}",
-                    use_container_width=True,
-                ):
-                    try:
-                        risk_lifecycle = (
-                            update_risk_pin(
+
+                with pin_col:
+                    button_text = (
+                        "Unpin"
+                        if is_pinned
+                        else "Keep indefinitely"
+                    )
+
+                    if st.button(
+                        button_text,
+                        key=(
+                            "risk_pin_"
+                            f"{canonical_id}"
+                        ),
+                        use_container_width=True,
+                    ):
+                        try:
+                            risk_lifecycle = (
+                                update_risk_pin(
+                                    lifecycle_df=(
+                                        risk_lifecycle
+                                    ),
+                                    canonical_event_id=(
+                                        canonical_id
+                                    ),
+                                    should_pin=(
+                                        not is_pinned
+                                    ),
+                                )
+                            )
+
+                            save_lifecycle_registry_to_gcs(
                                 lifecycle_df=(
                                     risk_lifecycle
                                 ),
-                                canonical_event_id=(
-                                    canonical_id
+                                blob_name=(
+                                    LIFECYCLE_BLOB
                                 ),
-                                should_pin=(
-                                    not is_pinned
+                                local_path=(
+                                    LIFECYCLE_LOCAL
+                                ),
+                            )
+
+                            st.cache_data.clear()
+
+                            st.success(
+                                (
+                                    "Risk pinned "
+                                    "indefinitely."
+                                )
+                                if not is_pinned
+                                else "Risk unpinned."
+                            )
+
+                            st.rerun()
+
+                        except Exception as error:
+                            st.error(
+                                "The lifecycle registry "
+                                "could not be updated: "
+                                f"{error}"
+                            )
+
+                with lifecycle_col:
+                    if is_pinned:
+                        st.caption(
+                            "This development will "
+                            "remain active until a user "
+                            "removes the pin."
+                        )
+
+                    elif (
+                        lifecycle_status
+                        == "cooling"
+                    ):
+                        st.caption(
+                            "No recent supporting evidence "
+                            "was detected. This item will "
+                            "expire if the condition continues."
+                        )
+
+                    elif (
+                        lifecycle_status
+                        == "candidate"
+                    ):
+                        st.caption(
+                            "This is an early signal that "
+                            "has not yet met the promotion "
+                            "threshold."
+                        )
+
+                    else:
+                        st.caption(
+                            "The weekly lifecycle process "
+                            "will reassess this item when "
+                            "new evidence is available."
+                        )
+
+    # =========================================================
+    # TAB 2: Risk overview and stories
+    # =========================================================
+
+    with risk_details_tab:
+        st.subheader(
+            "Risk Overview"
+        )
+
+        table = snapshot.copy()
+
+        table = table[
+            [
+                "Dashboard_Risk",
+                "action",
+                "severity_band",
+                "current_score",
+                "previous_score",
+                "trend",
+                "trend_display",
+                "risk_share_pct",
+                "Event_Count",
+            ]
+        ]
+
+        table = table.sort_values(
+            "Dashboard_Risk",
+            ascending=True,
+        )
+
+        table = table.rename(
+            columns={
+                "Dashboard_Risk":
+                "Risk",
+                "action":
+                "Action",
+                "severity_band":
+                "Severity Band",
+                "current_score":
+                "Current Score",
+                "previous_score":
+                "Previous Score",
+                "trend":
+                "Change",
+                "trend_display":
+                "Trend",
+                "risk_share_pct":
+                "Risk Share %",
+                "Event_Count":
+                "Event Count",
+            }
+        )
+
+        st.dataframe(
+            table,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Current Score":
+                st.column_config.NumberColumn(
+                    format="%.2f"
+                ),
+                "Previous Score":
+                st.column_config.NumberColumn(
+                    format="%.2f"
+                ),
+                "Change":
+                st.column_config.NumberColumn(
+                    format="%.2f"
+                ),
+                "Risk Share %":
+                st.column_config.NumberColumn(
+                    format="%.1f%%"
+                ),
+            },
+        )
+
+        st.divider()
+
+        max_items = st.slider(
+            "Maximum items to show",
+            min_value=10,
+            max_value=200,
+            value=50,
+            step=10,
+            key=(
+                "risk_overview_"
+                "maximum_items"
+            ),
+        )
+
+        left, right = st.columns(
+            [1, 2]
+        )
+
+        with left:
+            all_dashboard_risks = sorted(
+                risk_mapping[
+                    "dashboard_risk"
+                ]
+                .dropna()
+                .astype(str)
+                .str.strip()
+                .loc[
+                    lambda values:
+                    values.ne("")
+                ]
+                .unique(),
+                key=str.lower,
+            )
+
+            if not all_dashboard_risks:
+                st.error(
+                    "No dashboard risks were "
+                    "found in the risk mapping."
+                )
+
+                st.stop()
+
+            selected_risk = st.selectbox(
+                "Main Risk Register Category",
+                all_dashboard_risks,
+                key=(
+                    "risk_overview_"
+                    "selected_risk"
+                ),
+            )
+
+            subcategory_options = sorted(
+                risk_mapping.loc[
+                    risk_mapping[
+                        "dashboard_risk"
+                    ]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .eq(
+                        selected_risk
+                    ),
+                    "old_risk",
+                ]
+                .dropna()
+                .astype(str)
+                .str.strip()
+                .loc[
+                    lambda values:
+                    values.ne("")
+                ]
+                .unique(),
+                key=str.lower,
+            )
+
+            selected_subcategory = (
+                st.selectbox(
+                    "AI Risk Subcategory",
+                    [
+                        "All Subcategories"
+                    ]
+                    + subcategory_options,
+                    key=(
+                        "risk_overview_"
+                        "subcategory"
+                    ),
+                )
+            )
+
+            min_sev = st.slider(
+                "Minimum event severity",
+                min_value=0.0,
+                max_value=5.0,
+                value=2.5,
+                step=0.1,
+                key=(
+                    "risk_overview_"
+                    "minimum_severity"
+                ),
+            )
+
+            search = st.text_input(
+                "Search headlines",
+                "",
+                key=(
+                    "risk_overview_"
+                    "headline_search"
+                ),
+            )
+
+        with right:
+            rrow = snapshot[
+                snapshot[
+                    "Dashboard_Risk"
+                ].eq(
+                    selected_risk
+                )
+            ].head(1)
+
+            if not rrow.empty:
+                rrow = rrow.iloc[0]
+
+                event_count = (
+                    int(
+                        rrow[
+                            "Event_Count"
+                        ]
+                    )
+                    if pd.notna(
+                        rrow[
+                            "Event_Count"
+                        ]
+                    )
+                    else 0
+                )
+
+                if rrow["trend"] > 0:
+                    trend_word = (
+                        "increased"
+                    )
+
+                elif rrow["trend"] < 0:
+                    trend_word = (
+                        "decreased"
+                    )
+
+                else:
+                    trend_word = (
+                        "stayed flat"
+                    )
+
+                why_action = (
+                    "Recommended action is "
+                    f"**{rrow['action']}** "
+                    "because the current risk "
+                    "score is "
+                    f"**{rrow['current_score']:.2f}**, "
+                    f"the score {trend_word} by "
+                    f"**{abs(rrow['trend']):.2f}** "
+                    "versus the prior period, and "
+                    f"**{event_count}** event(s) "
+                    "appeared in the selected period."
+                )
+
+                st.info(
+                    why_action
+                )
+
+                metric_a, metric_b = (
+                    st.columns(2)
+                )
+
+                metric_a.metric(
+                    "Current Severity",
+                    (
+                        f"{rrow['current_score']:.2f}"
+                    ),
+                    delta=(
+                        f"{rrow['trend']:.2f}"
+                    ),
+                    delta_color="inverse",
+                )
+
+                metric_b.metric(
+                    "Event Count",
+                    event_count,
+                )
+
+                st.markdown(
+                    (
+                        f"**Risk category:** "
+                        f"{selected_risk}  \n"
+                        f"**Severity band:** "
+                        f"{rrow['severity_band']}  \n"
+                        f"**Share of risk signal:** "
+                        f"{rrow['risk_share_pct']:.1f}%  \n"
+                        f"**Recommended action:** "
+                        f"{rrow['action']}"
+                    )
+                )
+
+        st.divider()
+
+        # =====================================================
+        # Build selected risk evidence dataset
+        # =====================================================
+
+        events_for_details = (
+            events.copy()
+        )
+
+        articles_for_details = (
+            articles.copy()
+        )
+
+        events_for_details[
+            "Window"
+        ] = pd.to_datetime(
+            events_for_details[
+                "Window"
+            ],
+            errors="coerce",
+            utc=True,
+        ).dt.tz_convert(None)
+
+        cutoff_naive = (
+            pd.Timestamp(
+                cutoff
+            )
+            .tz_convert(None)
+        )
+
+        risk_events = (
+            events_for_details[
+                (
+                    events_for_details[
+                        "Dashboard_Risk"
+                    ]
+                    == selected_risk
+                )
+                & (
+                    events_for_details[
+                        "Window"
+                    ]
+                    >= cutoff_naive
+                )
+            ]
+            .copy()
+        )
+
+        if (
+            selected_subcategory
+            != "All Subcategories"
+        ):
+            risk_events = (
+                risk_events[
+                    risk_events[
+                        "Predicted_Risks_new"
+                    ]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .eq(
+                        selected_subcategory
+                    )
+                ]
+                .copy()
+            )
+
+        risk_events[
+            "Event_Severity"
+        ] = pd.to_numeric(
+            risk_events[
+                "Event_Severity"
+            ],
+            errors="coerce",
+        )
+
+        risk_events = (
+            risk_events[
+                risk_events[
+                    "Event_Severity"
+                ]
+                .fillna(0)
+                .ge(
+                    min_sev
+                )
+            ]
+            .copy()
+        )
+
+        article_detail_cols = [
+            "Event_Label",
+            "Title",
+            "Content",
+            "Published_utc",
+            "Link",
+            "Source",
+            "source",
+            "canonical_source",
+        ]
+
+        article_detail_cols = [
+            column
+            for column in article_detail_cols
+            if column
+            in articles_for_details.columns
+        ]
+
+        for detail_data in [
+            risk_events,
+            articles_for_details,
+        ]:
+            if (
+                "Link"
+                in detail_data.columns
+            ):
+                detail_data[
+                    "Link"
+                ] = (
+                    detail_data[
+                        "Link"
+                    ]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                )
+
+            if (
+                "Title"
+                in detail_data.columns
+            ):
+                detail_data[
+                    "Title"
+                ] = (
+                    detail_data[
+                        "Title"
+                    ]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                )
+
+        has_event_links = (
+            "Link"
+            in risk_events.columns
+            and risk_events[
+                "Link"
+            ]
+            .astype(str)
+            .str.startswith(
+                "http"
+            )
+            .any()
+        )
+
+        has_article_links = (
+            "Link"
+            in articles_for_details.columns
+        )
+
+        if (
+            has_event_links
+            and has_article_links
+        ):
+            join_keys = [
+                "Link"
+            ]
+
+        elif (
+            "Title"
+            in risk_events.columns
+            and "Title"
+            in articles_for_details.columns
+        ):
+            join_keys = [
+                "Title"
+            ]
+
+        else:
+            join_keys = [
+                "Event_Label"
+            ]
+
+        available_join_keys = [
+            key
+            for key in join_keys
+            if key in article_detail_cols
+        ]
+
+        if available_join_keys:
+            article_details = (
+                articles_for_details[
+                    article_detail_cols
+                ]
+                .drop_duplicates(
+                    subset=(
+                        available_join_keys
+                    )
+                )
+            )
+
+            risk_events = risk_events.merge(
+                article_details,
+                on=available_join_keys,
+                how="left",
+                suffixes=(
+                    "",
+                    "_article",
+                ),
+            )
+
+        for col in [
+            "Title",
+            "Content",
+            "Published_utc",
+            "Link",
+            "Source",
+            "source",
+            "canonical_source",
+        ]:
+            article_col = (
+                f"{col}_article"
+            )
+
+            if (
+                article_col
+                in risk_events.columns
+            ):
+                if col in risk_events.columns:
+                    existing_value = (
+                        risk_events[col]
+                        .notna()
+                        & risk_events[
+                            col
+                        ]
+                        .astype(str)
+                        .str.strip()
+                        .ne("")
+                    )
+
+                    risk_events[
+                        col
+                    ] = (
+                        risk_events[
+                            col
+                        ]
+                        .where(
+                            existing_value,
+                            risk_events[
+                                article_col
+                            ],
+                        )
+                    )
+
+                else:
+                    risk_events[
+                        col
+                    ] = risk_events[
+                        article_col
+                    ]
+
+        risk_events = (
+            risk_events.drop(
+                columns=[
+                    column
+                    for column
+                    in risk_events.columns
+                    if column.endswith(
+                        "_article"
+                    )
+                ],
+                errors="ignore",
+            )
+        )
+
+        if (
+            search.strip()
+            and "Title"
+            in risk_events.columns
+        ):
+            risk_events = (
+                risk_events[
+                    risk_events[
+                        "Title"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        search,
+                        case=False,
+                        na=False,
+                    )
+                ]
+                .copy()
+            )
+
+        risk_events = (
+            risk_events
+            .sort_values(
+                "Event_Severity",
+                ascending=False,
+            )
+        )
+
+        # =====================================================
+        # Most Relevant Recent Stories
+        # =====================================================
+
+        st.markdown(
+            "### Most Relevant Recent Stories"
+        )
+
+        articles_for_risk = (
+            articles_for_details.copy()
+        )
+
+        if (
+            "Published_utc"
+            in articles_for_risk.columns
+        ):
+            articles_for_risk[
+                "Published_utc"
+            ] = pd.to_datetime(
+                articles_for_risk[
+                    "Published_utc"
+                ],
+                errors="coerce",
+                utc=True,
+            ).dt.tz_convert(None)
+
+        elif (
+            "Published"
+            in articles_for_risk.columns
+        ):
+            articles_for_risk[
+                "Published_utc"
+            ] = pd.to_datetime(
+                articles_for_risk[
+                    "Published"
+                ],
+                errors="coerce",
+                utc=True,
+            ).dt.tz_convert(None)
+
+        else:
+            articles_for_risk[
+                "Published_utc"
+            ] = pd.NaT
+
+        articles_for_risk = (
+            articles_for_risk[
+                (
+                    articles_for_risk[
+                        "Dashboard_Risk"
+                    ]
+                    == selected_risk
+                )
+                & (
+                    articles_for_risk[
+                        "Published_utc"
+                    ]
+                    >= cutoff_naive
+                )
+            ]
+            .copy()
+        )
+
+        if (
+            selected_subcategory
+            != "All Subcategories"
+        ):
+            articles_for_risk = (
+                articles_for_risk[
+                    articles_for_risk[
+                        "Predicted_Risks_new"
+                    ]
+                    .fillna("")
+                    .astype(str)
+                    .str.strip()
+                    .eq(
+                        selected_subcategory
+                    )
+                ]
+                .copy()
+            )
+
+        if (
+            "University Label"
+            in articles_for_risk.columns
+        ):
+            articles_for_risk[
+                "University Label"
+            ] = pd.to_numeric(
+                articles_for_risk[
+                    "University Label"
+                ],
+                errors="coerce",
+            ).fillna(0).astype(int)
+
+            articles_for_risk = (
+                articles_for_risk[
+                    articles_for_risk[
+                        "University Label"
+                    ]
+                    == 1
+                ]
+                .copy()
+            )
+
+        if (
+            search.strip()
+            and "Title"
+            in articles_for_risk.columns
+        ):
+            articles_for_risk = (
+                articles_for_risk[
+                    articles_for_risk[
+                        "Title"
+                    ]
+                    .astype(str)
+                    .str.contains(
+                        search,
+                        case=False,
+                        na=False,
+                    )
+                ]
+                .copy()
+            )
+
+        story_dedup_columns = [
+            column
+            for column in [
+                "Title",
+                "Link",
+            ]
+            if column
+            in articles_for_risk.columns
+        ]
+
+        articles_for_risk = (
+            articles_for_risk
+            .dropna(
+                subset=["Title"]
+            )
+        )
+
+        if story_dedup_columns:
+            articles_for_risk = (
+                articles_for_risk
+                .drop_duplicates(
+                    subset=(
+                        story_dedup_columns
+                    )
+                )
+            )
+
+        articles_for_risk = (
+            articles_for_risk
+            .sort_values(
+                "Published_utc",
+                ascending=False,
+            )
+            .head(
+                max_items
+            )
+        )
+
+        if articles_for_risk.empty:
+            st.caption(
+                "No article-level stories "
+                "were found for the selected risk."
+            )
+
+        else:
+            for _, row in (
+                articles_for_risk.iterrows()
+            ):
+                with st.container(
+                    border=True
+                ):
+                    title = row.get(
+                        "Title",
+                        "Untitled article",
+                    )
+
+                    link = str(
+                        row.get(
+                            "Link",
+                            "",
+                        )
+                    ).strip()
+
+                    if link.startswith(
+                        "http"
+                    ):
+                        st.markdown(
+                            f"**[{title}]({link})**"
+                        )
+
+                    else:
+                        st.markdown(
+                            f"**{title}**"
+                        )
+
+                    meta = []
+
+                    source = row.get(
+                        "Source",
+                        row.get(
+                            "source",
+                            row.get(
+                                "canonical_source",
+                                "",
+                            ),
+                        ),
+                    )
+
+                    if (
+                        pd.notna(source)
+                        and str(
+                            source
+                        ).strip()
+                    ):
+                        meta.append(
+                            str(source)
+                        )
+
+                    published = row.get(
+                        "Published_utc"
+                    )
+
+                    if pd.notna(
+                        published
+                    ):
+                        published_text = (
+                            pd.to_datetime(
+                                published,
+                                errors="coerce",
+                            )
+                        )
+
+                        if pd.notna(
+                            published_text
+                        ):
+                            meta.append(
+                                (
+                                    "Published: "
+                                    f"{published_text:%B %d, %Y}"
+                                )
+                            )
+
+                    if meta:
+                        st.caption(
+                            " | ".join(meta)
+                        )
+
+                    content = row.get(
+                        "Content"
+                    )
+
+                    if (
+                        pd.notna(content)
+                        and str(
+                            content
+                        ).strip()
+                    ):
+                        content_text = str(
+                            content
+                        )
+
+                        preview = (
+                            content_text[:500]
+                        )
+
+                        st.write(
+                            preview
+                            + (
+                                "..."
+                                if len(
+                                    content_text
+                                ) > 500
+                                else ""
+                            )
+                        )
+
+        st.divider()
+
+        # =====================================================
+        # Key drivers
+        # =====================================================
+
+        st.markdown(
+            "### Why This Risk Is Showing Up"
+        )
+
+        driver_cols = [
+            "Acceleration_value",
+            "Recency",
+            "Source_Accuracy",
+            "Impact_Score",
+            "Location",
+            "Industry_Risk",
+            "Frequency_Score",
+        ]
+
+        driver_map = {
+            "Acceleration_value":
+            "Momentum",
+            "Recency":
+            "Recency",
+            "Impact_Score":
+            "Impact",
+            "Industry_Risk":
+            "Higher-Ed Relevance",
+            "Location":
+            "Location Relevance",
+            "Frequency_Score":
+            "Event Frequency",
+            "Source_Accuracy":
+            "Source Reliability",
+        }
+
+        available_driver_cols = [
+            column
+            for column in driver_cols
+            if column
+            in risk_events.columns
+        ]
+
+        if (
+            available_driver_cols
+            and not risk_events.empty
+        ):
+            for column in (
+                available_driver_cols
+            ):
+                risk_events[
+                    column
+                ] = pd.to_numeric(
+                    risk_events[
+                        column
+                    ],
+                    errors="coerce",
+                )
+
+            driver_summary = (
+                risk_events[
+                    available_driver_cols
+                ]
+                .mean()
+                .reset_index()
+                .rename(
+                    columns={
+                        "index":
+                        "technical_driver",
+                        0:
+                        "contribution",
+                    }
+                )
+            )
+
+            driver_summary[
+                "driver"
+            ] = (
+                driver_summary[
+                    "technical_driver"
+                ]
+                .map(
+                    driver_map
+                )
+            )
+
+            driver_summary[
+                "contribution"
+            ] = (
+                driver_summary[
+                    "contribution"
+                ]
+                .round(2)
+            )
+
+            driver_summary[
+                "level"
+            ] = driver_summary[
+                "contribution"
+            ].apply(
+                lambda value: (
+                    "High"
+                    if value >= 4
+                    else (
+                        "Moderate"
+                        if value >= 2.5
+                        else "Low"
+                    )
+                )
+            )
+
+            driver_summary = (
+                driver_summary[
+                    [
+                        "driver",
+                        "level",
+                        "contribution",
+                        "technical_driver",
+                    ]
+                ]
+                .sort_values(
+                    "contribution",
+                    ascending=False,
+                )
+            )
+
+            driver_summary = (
+                driver_summary.rename(
+                    columns={
+                        "driver":
+                        "Driver",
+                        "level":
+                        "Level",
+                        "contribution":
+                        "Average Score",
+                        "technical_driver":
+                        "Technical Field",
+                    }
+                )
+            )
+
+            st.dataframe(
+                driver_summary,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Average Score":
+                    st.column_config.NumberColumn(
+                        format="%.2f"
+                    )
+                },
+            )
+
+        else:
+            st.caption(
+                "No driver data is available "
+                "for the selected risk."
+            )
+
+        st.divider()
+
+        # =====================================================
+        # Top events driving signal
+        # =====================================================
+
+        st.markdown(
+            "### Top Events Driving Signal"
+        )
+
+        if risk_events.empty:
+            st.caption(
+                "No events were found for this "
+                "risk category using the selected filters."
+            )
+
+        else:
+            if (
+                "Published_utc"
+                in risk_events.columns
+            ):
+                risk_events[
+                    "Published_utc"
+                ] = pd.to_datetime(
+                    risk_events[
+                        "Published_utc"
+                    ],
+                    errors="coerce",
+                )
+
+            else:
+                risk_events[
+                    "Published_utc"
+                ] = pd.NaT
+
+            risk_events[
+                "Event_Label_Group"
+            ] = risk_events.apply(
+                lambda row: clean_event_label(
+                    row.get(
+                        "Event_Label"
+                    ),
+                    row.get(
+                        "Title"
+                    ),
+                ),
+                axis=1,
+            )
+
+            grouped_events = (
+                risk_events
+                .groupby(
+                    "Event_Label_Group",
+                    dropna=False,
+                )
+                .agg(
+                    Raw_Event_Label=(
+                        "Event_Label",
+                        "first",
+                    ),
+                    Event_Severity=(
+                        "Event_Severity",
+                        "max",
+                    ),
+                    Article_Count=(
+                        "Title",
+                        "nunique",
+                    ),
+                    Latest_Date=(
+                        "Published_utc",
+                        "max",
+                    ),
+                    Sample_Title=(
+                        "Title",
+                        "first",
+                    ),
+                    Sample_Content=(
+                        "Content",
+                        "first",
+                    ),
+                    Sample_Link=(
+                        "Link",
+                        "first",
+                    ),
+                )
+                .reset_index()
+                .sort_values(
+                    "Event_Severity",
+                    ascending=False,
+                )
+            )
+
+            for _, event in (
+                grouped_events.iterrows()
+            ):
+                event_label = event.get(
+                    "Event_Label_Group"
+                )
+
+                sev = (
+                    float(
+                        event[
+                            "Event_Severity"
+                        ]
+                    )
+                    if pd.notna(
+                        event[
+                            "Event_Severity"
+                        ]
+                    )
+                    else 0
+                )
+
+                sev_tag = (
+                    severity_bucket(
+                        sev
+                    )
+                )
+
+                with st.expander(
+                    (
+                        f"{event_label} — "
+                        f"Severity {sev:.2f} "
+                        f"({sev_tag})"
+                    ),
+                    expanded=False,
+                ):
+                    article_count = int(
+                        event[
+                            "Article_Count"
+                        ]
+                    )
+
+                    st.caption(
+                        (
+                            f"{article_count} "
+                            "related article(s)"
+                        )
+                    )
+
+                    sample_title = (
+                        event.get(
+                            "Sample_Title"
+                        )
+                    )
+
+                    if (
+                        pd.notna(
+                            sample_title
+                        )
+                        and str(
+                            sample_title
+                        ).strip()
+                    ):
+                        st.markdown(
+                            (
+                                "**Representative headline:** "
+                                f"{sample_title}"
+                            )
+                        )
+
+                    sample_content = (
+                        event.get(
+                            "Sample_Content"
+                        )
+                    )
+
+                    if (
+                        pd.notna(
+                            sample_content
+                        )
+                        and str(
+                            sample_content
+                        ).strip()
+                    ):
+                        content_text = str(
+                            sample_content
+                        )
+
+                        preview = (
+                            content_text[:700]
+                        )
+
+                        st.write(
+                            preview
+                            + (
+                                "..."
+                                if len(
+                                    content_text
+                                ) > 700
+                                else ""
+                            )
+                        )
+
+                    sample_link = str(
+                        event.get(
+                            "Sample_Link",
+                            "",
+                        )
+                    ).strip()
+
+                    if sample_link.startswith(
+                        "http"
+                    ):
+                        st.markdown(
+                            (
+                                "[Read representative "
+                                f"article]({sample_link})"
+                            )
+                        )
+
+                    else:
+                        st.caption(
+                            "No representative "
+                            "article link is available."
+                        )
+
+                    raw_event_label = (
+                        event.get(
+                            "Raw_Event_Label"
+                        )
+                    )
+
+                    missing_raw_label = (
+                        pd.isna(
+                            raw_event_label
+                        )
+                        or str(
+                            raw_event_label
+                        )
+                        .strip()
+                        .lower()
+                        in [
+                            "",
+                            "nan",
+                            "none",
+                        ]
+                    )
+
+                    if missing_raw_label:
+                        related = (
+                            risk_events[
+                                risk_events[
+                                    "Title"
+                                ]
+                                == sample_title
+                            ]
+                            .copy()
+                        )
+
+                    else:
+                        related = (
+                            risk_events[
+                                risk_events[
+                                    "Event_Label"
+                                ]
+                                == raw_event_label
+                            ]
+                            .copy()
+                        )
+
+                    st.markdown(
+                        "**Related articles**"
+                    )
+
+                    related_dedup_columns = [
+                        column
+                        for column in [
+                            "Title",
+                            "Link",
+                        ]
+                        if column
+                        in related.columns
+                    ]
+
+                    if related_dedup_columns:
+                        related = (
+                            related
+                            .drop_duplicates(
+                                subset=(
+                                    related_dedup_columns
+                                )
+                            )
+                        )
+
+                    for _, article_row in (
+                        related
+                        .head(
+                            max_items
+                        )
+                        .iterrows()
+                    ):
+                        title = (
+                            article_row.get(
+                                "Title"
+                            )
+                        )
+
+                        if (
+                            pd.isna(title)
+                            or not str(
+                                title
+                            ).strip()
+                        ):
+                            continue
+
+                        published = (
+                            article_row.get(
+                                "Published_utc"
+                            )
+                        )
+
+                        link = str(
+                            article_row.get(
+                                "Link",
+                                "",
+                            )
+                        ).strip()
+
+                        source = (
+                            article_row.get(
+                                "Source",
+                                article_row.get(
+                                    "source",
+                                    article_row.get(
+                                        "canonical_source",
+                                        (
+                                            "Unknown "
+                                            "source"
+                                        ),
+                                    ),
                                 ),
                             )
                         )
-    
-                        save_lifecycle_registry_to_gcs(
-                            lifecycle_df=(
-                                risk_lifecycle
-                            ),
-                            blob_name=(
-                                LIFECYCLE_BLOB
-                            ),
-                            local_path=(
-                                LIFECYCLE_LOCAL
-                            ),
-                        )
-    
-                        st.cache_data.clear()
-    
-                        st.success(
-                            "Risk pinned indefinitely."
-                            if not is_pinned
-                            else "Risk unpinned."
-                        )
-    
-                        st.rerun()
-    
-                    except Exception as error:
-                        st.error(
-                            "The lifecycle registry "
-                            f"could not be updated: {error}"
-                        )
-    
-            with lifecycle_col:
-                if is_pinned:
-                    st.caption(
-                        "This development will remain active "
-                        "until a user removes the pin."
-                    )
-    
-                elif lifecycle_status == "cooling":
-                    st.caption(
-                        "No recent supporting evidence was "
-                        "detected. This item will expire if "
-                        "the condition continues."
-                    )
-    
-                elif lifecycle_status == "candidate":
-                    st.caption(
-                        "This is an early signal that has not "
-                        "yet met the promotion threshold."
-                    )
-    
-                else:
-                    st.caption(
-                        "The weekly lifecycle process will "
-                        "reassess this item when new evidence "
-                        "is available."
-                    )
-    
-    st.markdown('---')
-    st.markdown('### Risk Overview')
-    
-    table = snapshot.copy()
-    table = table[[
-        'Dashboard_Risk',
-        'action',
-        'severity_band',
-        'current_score',
-        'previous_score',
-        'trend',
-        'trend_display',
-        'risk_share_pct',
-        'Event_Count'
-    ]]
-    table = table.sort_values(
-        "Dashboard_Risk",
-        ascending=True
-    )
-    
-    st.dataframe(
-        table, use_container_width = True, hide_index = True
-    )
-    
-    st.divider()
-    left, right = st.columns([1,2])
-    max_items = st.slider("Maximum items to show", 10, 200, 50, 10)
-    
-    with left:
-    # ---------------------------------
-    # Main risk-register category filter
-    # ---------------------------------
-        all_dashboard_risks = sorted(
-            risk_mapping["dashboard_risk"]
-            .dropna()
-            .astype(str)
-            .str.strip()
-            .loc[lambda s: s.ne("")]
-            .unique(),
-            key=str.lower
+
+                        with st.container(
+                            border=True
+                        ):
+                            if link.startswith(
+                                "http"
+                            ):
+                                st.markdown(
+                                    f"**[{title}]({link})**"
+                                )
+
+                            else:
+                                st.markdown(
+                                    f"**{title}**"
+                                )
+
+                            meta = []
+
+                            if (
+                                pd.notna(source)
+                                and str(
+                                    source
+                                ).strip()
+                            ):
+                                meta.append(
+                                    str(source)
+                                )
+
+                            if pd.notna(
+                                published
+                            ):
+                                published_value = (
+                                    pd.to_datetime(
+                                        published,
+                                        errors="coerce",
+                                    )
+                                )
+
+                                if pd.notna(
+                                    published_value
+                                ):
+                                    meta.append(
+                                        (
+                                            "Published: "
+                                            f"{published_value:%B %d, %Y}"
+                                        )
+                                    )
+
+                            if meta:
+                                st.caption(
+                                    " | ".join(
+                                        meta
+                                    )
+                                )
+
+                            content = (
+                                article_row.get(
+                                    "Content"
+                                )
+                            )
+
+                            if (
+                                pd.notna(
+                                    content
+                                )
+                                and str(
+                                    content
+                                ).strip()
+                            ):
+                                content_text = (
+                                    str(content)
+                                )
+
+                                content_preview = (
+                                    content_text[
+                                        :450
+                                    ]
+                                )
+
+                                st.write(
+                                    content_preview
+                                    + (
+                                        "..."
+                                        if len(
+                                            content_text
+                                        ) > 450
+                                        else ""
+                                    )
+                                )
+
+                            if not link.startswith(
+                                "http"
+                            ):
+                                st.caption(
+                                    "Original article "
+                                    "link unavailable."
+                                )
+
+        st.divider()
+
+        # =====================================================
+        # Recent headlines
+        # =====================================================
+
+        st.markdown(
+            "### Recent Headlines"
         )
-    
-        selected_risk = st.selectbox(
-            "Main Risk Register Category",
-            all_dashboard_risks
+
+        headline_df = (
+            risk_events.copy()
         )
-    
-        # ---------------------------------
-        # AI taxonomy / subcategory filter
-        # ---------------------------------
-        subcategory_options = sorted(
-            risk_mapping.loc[
-                risk_mapping["dashboard_risk"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .eq(selected_risk),
-                "old_risk"
+
+        date_col = (
+            "Published_utc"
+            if (
+                "Published_utc"
+                in headline_df.columns
+            )
+            else "Window"
+        )
+
+        if date_col in headline_df.columns:
+            headline_df[
+                date_col
+            ] = pd.to_datetime(
+                headline_df[
+                    date_col
+                ],
+                errors="coerce",
+            )
+
+        headline_dedup_columns = [
+            column
+            for column in [
+                "Title",
+                "Link",
             ]
-            .dropna()
-            .astype(str)
-            .str.strip()
-            .loc[lambda s: s.ne("")]
-            .unique(),
-            key=str.lower
-        )
-    
-        selected_subcategory = st.selectbox(
-            "AI Risk Subcategory",
-            ["All Subcategories"] + subcategory_options
-        )
-    
-        min_sev = st.slider(
-            "Minimum event severity",
-            0.0,
-            5.0,
-            2.5,
-            0.1
-        )
-    
-        search = st.text_input(
-            "Search headlines",
-            ""
-        )
-    
-    with right:
-        rrow = snapshot[snapshot['Dashboard_Risk'] == selected_risk].head()
-        if len(rrow):
-            rrow = rrow.iloc[0]
-            event_count = int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0
-            trend_word = "increased" if rrow['trend'] > 0 else "decreased" if rrow['trend'] < 0 else "stayed flat"
-            
-            why_action = (
-                f"Recommended action is **{rrow['action']}** because the current risk score is "
-                f"**{rrow['current_score']:.2f}**, the score {trend_word} by "
-                f"**{abs(rrow['trend']):.2f}** versus the prior period, and "
-                f"**{event_count}** event(s) appeared in the selected period."
-            )
-            
-            st.info(why_action)
-            st.markdown(
-                f"**{selected_risk}** \nSeverity: {rrow['current_score']:.2f} ({rrow['severity_band']}) \nTrend vs Prior Period: {rrow['trend']} \n Event Count: {int(rrow['Event_Count']) if not pd.isna(rrow['Event_Count']) else 0} \n Share of Risk Signal: {rrow['risk_share_pct']:.1f}\nAction: {rrow['action']}"
-            )
-    
-    st.divider()
+            if column
+            in headline_df.columns
+        ]
 
-    # -----------------------------
-    # Selected risk evidence dataset
-    # -----------------------------
-    events['Window'] = pd.to_datetime(events['Window'], errors='coerce', utc=True).dt.tz_convert(None)
-    cutoff = pd.Timestamp(cutoff).tz_localize(None)
-    risk_events = events[
-        (events["Dashboard_Risk"] == selected_risk)
-        & (events["Window"] >= cutoff)
-    ].copy()
-    
-    if selected_subcategory != "All Subcategories":
-        risk_events = risk_events[
-            risk_events["Predicted_Risks_new"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .eq(selected_subcategory)
-        ].copy()
-    
-    risk_events['Event_Severity'] = pd.to_numeric(
-        risk_events['Event_Severity'],
-        errors='coerce'
-    )
-    
-    risk_events = risk_events[
-        risk_events['Event_Severity'].fillna(0) >= min_sev
-    ]
-    
-    article_detail_cols = [
-        'Event_Label',
-        'Title',
-        'Content',
-        'Published_utc',
-        'Link',
-        'Source',
-        'source',
-        'canonical_source'
-    ]
-    
-    article_detail_cols = [
-        c for c in article_detail_cols
-        if c in articles.columns
-    ]
-    
-    # Normalize keys
-    for d in [risk_events, articles]:
-        if 'Link' in d.columns:
-            d['Link'] = d['Link'].fillna('').astype(str).str.strip()
-        if 'Title' in d.columns:
-            d['Title'] = d['Title'].fillna('').astype(str).str.strip()
-    
-    # Use article-level matching first, not Event_Label
-    if 'Link' in risk_events.columns and 'Link' in articles.columns and risk_events['Link'].str.startswith('http').any():
-        join_keys = ['Link']
-    elif 'Title' in risk_events.columns and 'Title' in articles.columns:
-        join_keys = ['Title']
-    else:
-        join_keys = ['Event_Label']
-    
-    article_details = (
-        articles[article_detail_cols]
-        .drop_duplicates(subset=join_keys)
-    )
-    
-    risk_events = risk_events.merge(
-        article_details,
-        on=join_keys,
-        how='left',
-        suffixes=('', '_article')
-    )
-    
-    # Fill missing display fields from article copy only if needed
-    for col in ['Title', 'Content', 'Published_utc', 'Link', 'Source', 'source', 'canonical_source']:
-        article_col = f"{col}_article"
-        if article_col in risk_events.columns:
-            if col in risk_events.columns:
-                risk_events[col] = risk_events[col].where(
-                    risk_events[col].notna() & (risk_events[col].astype(str).str.strip() != ''),
-                    risk_events[article_col]
+        recent_headlines = (
+            headline_df
+            .dropna(
+                subset=["Title"]
+            )
+            .sort_values(
+                date_col,
+                ascending=False,
+            )
+        )
+
+        if headline_dedup_columns:
+            recent_headlines = (
+                recent_headlines
+                .drop_duplicates(
+                    subset=(
+                        headline_dedup_columns
+                    )
                 )
-            else:
-                risk_events[col] = risk_events[article_col]
-    
-    risk_events = risk_events.drop(
-        columns=[c for c in risk_events.columns if c.endswith('_article')],
-        errors='ignore'
-    )
-    
-    if search.strip() and 'Title' in risk_events.columns:
-        risk_events = risk_events[
-            risk_events['Title'].astype(str).str.contains(
-                search,
-                case=False,
-                na=False
             )
-        ]
-    
-    risk_events = risk_events.sort_values('Event_Severity', ascending=False)
-    
-    st.markdown("### Most Relevant Recent Stories")
-    
-    articles_for_risk = articles.copy()
-    
-    if "Published_utc" in articles_for_risk.columns:
-        articles_for_risk["Published_utc"] = pd.to_datetime(
-            articles_for_risk["Published_utc"],
-            errors="coerce",
-            utc=True
-        ).dt.tz_convert(None)
-    elif "Published" in articles_for_risk.columns:
-        articles_for_risk["Published_utc"] = pd.to_datetime(
-            articles_for_risk["Published"],
-            errors="coerce",
-            utc=True
-        ).dt.tz_convert(None)
-    
-    articles_for_risk = articles_for_risk[
-        (articles_for_risk["Dashboard_Risk"] == selected_risk)
-        & (articles_for_risk["Published_utc"] >= cutoff)
-    ].copy()
-    
-    if selected_subcategory != "All Subcategories":
-        articles_for_risk = articles_for_risk[
-            articles_for_risk["Predicted_Risks_new"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .eq(selected_subcategory)
-        ].copy()
-    
-    if "University Label" in articles_for_risk.columns:
-        articles_for_risk["University Label"] = pd.to_numeric(
-            articles_for_risk["University Label"],
-            errors="coerce"
-        ).fillna(0).astype(int)
-    
-        articles_for_risk = articles_for_risk[
-            articles_for_risk["University Label"] == 1
-        ]
-    
-    articles_for_risk = (
-        articles_for_risk
-        .dropna(subset=["Title"])
-        .drop_duplicates(subset=["Title", "Link"])
-        .sort_values("Published_utc", ascending=False)
-        .head(max_items)
-    )
-    
-    if articles_for_risk.empty:
-        st.caption("No article-level stories found for this selected risk.")
-    else:
-        for _, row in articles_for_risk.iterrows():
-            with st.container(border=True):
-                st.markdown(f"**{row.get('Title', '')}**")
-    
-                meta = []
-                source = row.get("Source", row.get("source", row.get("canonical_source", "")))
-                if pd.notna(source) and str(source).strip():
-                    meta.append(str(source))
-    
-                if pd.notna(row.get("Published_utc")):
-                    meta.append(f"Published: {row.get('Published_utc')}")
-    
-                if meta:
-                    st.caption(" | ".join(meta))
-    
-                if pd.notna(row.get("Content")):
-                    preview = str(row.get("Content"))[:500]
-                    st.write(preview + ("..." if len(str(row.get("Content"))) > 500 else ""))
-    
-                if pd.notna(row.get("Link")) and str(row.get("Link")).startswith("http"):
-                    st.markdown(f"[Read original article]({row.get('Link')})")
-    
-    # -----------------------------
-    # Section 1: Key Drivers
-    # -----------------------------
-    st.markdown("### Why this risk is showing up")
-    
-    driver_cols = [
-        'Acceleration_value',
-        'Recency',
-        'Source_Accuracy',
-        'Impact_Score',
-        'Location',
-        'Industry_Risk',
-        'Frequency_Score'
-    ]
-    
-    driver_map = {
-        "Acceleration_value": "Momentum",
-        "Recency": "Recency",
-        "Impact_Score": "Impact",
-        "Industry_Risk": "Higher-Ed Relevance",
-        "Location": "Location Relevance",
-        "Frequency_Score": "Event Frequency",
-        "Source_Accuracy": "Source Reliability"
-    }
-    
-    available_driver_cols = [c for c in driver_cols if c in risk_events.columns]
-    
-    if available_driver_cols and not risk_events.empty:
-        for c in available_driver_cols:
-            risk_events[c] = pd.to_numeric(risk_events[c], errors='coerce')
-    
-        driver_summary = (
-            risk_events[available_driver_cols]
-            .mean()
-            .reset_index()
-            .rename(columns={'index': 'technical_driver', 0: 'contribution'})
-        )
-    
-        driver_summary['driver'] = driver_summary['technical_driver'].map(driver_map)
-        driver_summary['contribution'] = driver_summary['contribution'].round(2)
-    
-        driver_summary['level'] = driver_summary['contribution'].apply(
-            lambda x: "High" if x >= 4 else ("Moderate" if x >= 2.5 else "Low")
-        )
-    
-        driver_summary = driver_summary[
-            ['driver', 'level', 'contribution', 'technical_driver']
-        ].sort_values('contribution', ascending=False)
-    
-        st.dataframe(driver_summary, use_container_width=True, hide_index=True)
-    else:
-        st.caption("No driver data is available for this selected risk.")
-    
-    
-    # -----------------------------
-    # Section 2: Top Events
-    # -----------------------------
-    st.markdown("### Top Events Driving Signal")
-    
-    if risk_events.empty:
-        st.write("No events found for this risk category in the selected period.")
-    else:
-        risk_events['Published_utc'] = pd.to_datetime(
-            risk_events.get('Published_utc'),
-            errors='coerce'
-        )
-        
-        risk_events['Event_Label_Group'] = risk_events.apply(
-            lambda r: clean_event_label(
-                r.get('Event_Label'),
-                r.get('Title')
-            ),
-            axis=1
-        )
-        grouped_events = (
-            risk_events
-            .groupby('Event_Label_Group', dropna=False)
-            .agg(
-                Raw_Event_Label=('Event_Label', 'first'),
-                Event_Severity=('Event_Severity', 'max'),
-                Article_Count=('Title', 'nunique'),
-                Latest_Date=('Published_utc', 'max'),
-                Sample_Title=('Title', 'first'),
-                Sample_Content=('Content', 'first'),
-                Sample_Link=('Link', 'first')
+
+        recent_headlines = (
+            recent_headlines
+            .head(
+                max_items
             )
-            .reset_index()
-            .sort_values('Event_Severity', ascending=False)
         )
-    
-        for _, event in grouped_events.iterrows():
-            event_label = event.get("Event_Label_Group")
-            sev = float(event['Event_Severity']) if pd.notna(event['Event_Severity']) else 0
-            sev_tag = severity_bucket(sev)
-    
-            with st.expander(
-                f"{event_label} — Severity {sev:.2f} ({sev_tag})",
-                expanded=False
+
+        if recent_headlines.empty:
+            st.caption(
+                "No recent headlines are "
+                "available for the selected risk."
+            )
+
+        else:
+            for _, headline in (
+                recent_headlines.iterrows()
             ):
-                st.caption(
-                    f"{int(event['Article_Count'])} related article(s)"
+                headline_title = str(
+                    headline.get(
+                        "Title",
+                        "Untitled headline",
+                    )
                 )
-    
-                if pd.notna(event.get('Sample_Title')):
-                    st.markdown(f"**Representative headline:** {event['Sample_Title']}")
-    
-                if pd.notna(event.get('Sample_Content')):
-                    preview = str(event['Sample_Content'])[:700]
-                    st.write(preview + ("..." if len(str(event['Sample_Content'])) > 700 else ""))
-    
-                if pd.notna(event.get('Sample_Link')) and str(event.get('Sample_Link')).startswith("http"):
-                    st.markdown(f"[Read representative article]({event['Sample_Link']})")
-                else:
-                    st.caption("No article link available.")
-    
-                raw_event_label = event.get("Raw_Event_Label")
 
-                if pd.isna(raw_event_label) or str(raw_event_label).strip().lower() in ["", "nan", "none"]:
-                    related = risk_events[risk_events["Title"] == event.get("Sample_Title")].copy()
-                else:
-                    related = risk_events[risk_events["Event_Label"] == raw_event_label].copy()
-    
-                st.markdown("**Related articles**")
-    
-                for _, article_row in related.drop_duplicates(subset=['Title']).head(max_items).iterrows():
-                    title = article_row.get('Title')
-                    published = article_row.get('Published_utc')
-                    link = article_row.get('Link')
-                    source = article_row.get('Source', article_row.get('source', article_row.get('canonical_source', 'Unknown source')))
-    
-                    if pd.isna(title):
-                        continue
-    
-                    with st.container(border=True):
-                        st.markdown(f"**{title}**")
-    
-                        meta = []
-                        if pd.notna(source):
-                            meta.append(str(source))
-                        if pd.notna(published):
-                            meta.append(f"Published: {published}")
-                        if meta:
-                            st.caption(" | ".join(meta))
-    
-                        content = article_row.get('Content')
-                        if pd.notna(content):
-                            content_preview = str(content)[:450]
-                            st.write(content_preview + ("..." if len(str(content)) > 450 else ""))
-    
-                        if pd.notna(link) and str(link).startswith("http"):
-                            st.markdown(f"[Read original article]({link})")
-                        else:
-                            st.caption("Original article link unavailable.")
-    
-    
-    # -----------------------------
-    # Section 3: Recent Headlines
-    # -----------------------------
-    st.markdown("### Recent Headlines")
-    
-    headline_df = risk_events.copy()
-    
-    date_col = 'Published_utc' if 'Published_utc' in headline_df.columns else 'Window'
-    headline_df[date_col] = pd.to_datetime(headline_df[date_col], errors='coerce')
-    
-    recent_headlines = (
-        headline_df
-        .dropna(subset=['Title'])
-        .sort_values(date_col, ascending=False)
-        .drop_duplicates(subset=['Title', 'Link'])
-        .head(max_items)
-    )
-    
-    if recent_headlines.empty:
-        st.caption("No recent headlines available for this selected risk.")
-    else:
-        for _, h in recent_headlines.iterrows():
-            with st.expander(str(h['Title'])[:180], expanded=False):
-                if pd.notna(h.get(date_col)):
-                    st.caption(f"Published: {h[date_col]}")
-    
-                source = h.get('Source', h.get('source', h.get('canonical_source', None)))
-                if pd.notna(source):
-                    st.caption(f"Source: {source}")
-    
-                if pd.notna(h.get('Content')):
-                    st.write(str(h['Content'])[:700])
-    
-                if pd.notna(h.get('Link')) and str(h.get('Link')).startswith("http"):
-                    st.markdown(f"[Read original article]({h['Link']})")
-                else:
-                    st.caption("Original article link unavailable.")
+                with st.expander(
+                    headline_title[:180],
+                    expanded=False,
+                ):
+                    if pd.notna(
+                        headline.get(
+                            date_col
+                        )
+                    ):
+                        headline_date = (
+                            pd.to_datetime(
+                                headline.get(
+                                    date_col
+                                ),
+                                errors="coerce",
+                            )
+                        )
+
+                        if pd.notna(
+                            headline_date
+                        ):
+                            st.caption(
+                                (
+                                    "Published: "
+                                    f"{headline_date:%B %d, %Y}"
+                                )
+                            )
+
+                    source = headline.get(
+                        "Source",
+                        headline.get(
+                            "source",
+                            headline.get(
+                                "canonical_source",
+                                None,
+                            ),
+                        ),
+                    )
+
+                    if (
+                        pd.notna(source)
+                        and str(
+                            source
+                        ).strip()
+                    ):
+                        st.caption(
+                            f"Source: {source}"
+                        )
+
+                    content = (
+                        headline.get(
+                            "Content"
+                        )
+                    )
+
+                    if (
+                        pd.notna(content)
+                        and str(
+                            content
+                        ).strip()
+                    ):
+                        content_text = str(
+                            content
+                        )
+
+                        st.write(
+                            content_text[:700]
+                            + (
+                                "..."
+                                if len(
+                                    content_text
+                                ) > 700
+                                else ""
+                            )
+                        )
+
+                    link = str(
+                        headline.get(
+                            "Link",
+                            "",
+                        )
+                    ).strip()
+
+                    if link.startswith(
+                        "http"
+                    ):
+                        st.markdown(
+                            (
+                                "[Read original "
+                                f"article]({link})"
+                            )
+                        )
+
+                    else:
+                        st.caption(
+                            "Original article "
+                            "link unavailable."
+                        )
     
     
     
