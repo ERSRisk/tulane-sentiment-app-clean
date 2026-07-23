@@ -142,7 +142,7 @@ def get_secrets(path, default = None):
 st.set_page_config(page_title="Tulane Risk Dashboard")
 st.sidebar.title("Navigation")
 st.sidebar.markdown("Select a tool:")
-selection = st.sidebar.selectbox("Choose a tool:", ["Article Risk Review","External Risk Snapshot", "Unmatched Topic Analysis", "Risk/Event Detector"])
+selection = st.sidebar.selectbox("Choose a tool:", ["External Risk Snapshot", "Article Risk Review", "Unmatched Topic Analysis", "Risk/Event Detector"])
 
 if "current_tab" not in st.session_state:
     st.session_state.current_tab = selection
