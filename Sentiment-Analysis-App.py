@@ -1052,6 +1052,26 @@ Items:
     )
 
     # =========================================================
+    # TEMPORARY PATCH FOR THIS RUN
+    # Treat all Labor Dispute records as Extreme Weather Events
+    # Remove after the meeting/run.
+    # =========================================================
+    
+    TEMP_RISK_FROM = "Labor Dispute"
+    TEMP_RISK_TO = "Extreme Weather Events"
+    
+    for dataset in [df, events, articles]:
+        dataset["Dashboard_Risk"] = (
+            dataset["Dashboard_Risk"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .replace({
+                TEMP_RISK_FROM: TEMP_RISK_TO
+            })
+        )
+
+    # =========================================================
     # Calculate snapshot data
     # =========================================================
 
