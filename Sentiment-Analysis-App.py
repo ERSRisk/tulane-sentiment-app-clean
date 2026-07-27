@@ -175,6 +175,43 @@ if selection == "External Risk Snapshot":
         show_spinner=True,
         ttl=1800,
     )
+
+    def exclude_no_risk(data):
+        data = data.copy()
+    
+        if "Predicted_Risks_new" in data.columns:
+            risk_values = (
+                data["Predicted_Risks_new"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.casefold()
+            )
+    
+            data = data[
+                risk_values.ne("no risk")
+                & risk_values.ne("")
+                & risk_values.ne("nan")
+                & risk_values.ne("none")
+            ].copy()
+    
+        if "Dashboard_Risk" in data.columns:
+            dashboard_values = (
+                data["Dashboard_Risk"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.casefold()
+            )
+    
+            data = data[
+                dashboard_values.ne("no risk")
+                & dashboard_values.ne("")
+                & dashboard_values.ne("nan")
+                & dashboard_values.ne("none")
+            ].copy()
+    
+        return data
     def get_csv_from_release(
         owner,
         repo,
@@ -792,6 +829,30 @@ Items:
         ),
     )
 
+    risk_mapping["old_risk"] = (
+        risk_mapping["old_risk"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    
+    risk_mapping["dashboard_risk"] = (
+        risk_mapping["dashboard_risk"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    
+    risk_mapping = risk_mapping[
+        risk_mapping["old_risk"]
+        .str.casefold()
+        .ne("no risk")
+        &
+        risk_mapping["dashboard_risk"]
+        .str.casefold()
+        .ne("no risk")
+    ].copy()
+
     # =========================================================
     # Prepare agent decisions
     # =========================================================
@@ -922,6 +983,18 @@ Items:
         )
     )
 
+    if "top_risk_match" in emerging_risk_items.columns:
+        emerging_risk_items = emerging_risk_items[
+            emerging_risk_items[
+                "top_risk_match"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.casefold()
+            .ne("no risk")
+        ].copy()
+
     if (
         "top_articles"
         not in emerging_risk_items.columns
@@ -1051,25 +1124,11 @@ Items:
         risk_mapping,
     )
 
-    # =========================================================
-    # TEMPORARY PATCH FOR THIS RUN
-    # Treat all Labor Dispute records as Extreme Weather Events
-    # Remove after the meeting/run.
-    # =========================================================
-    
-    TEMP_RISK_FROM = "Labor Dispute"
-    TEMP_RISK_TO = "Extreme Weather Events"
-    
-    for dataset in [df, events, articles]:
-        dataset["Dashboard_Risk"] = (
-            dataset["Dashboard_Risk"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .replace({
-                TEMP_RISK_FROM: TEMP_RISK_TO
-            })
-        )
+    df = exclude_no_risk(df)
+    events = exclude_no_risk(events)
+    articles = exclude_no_risk(articles)
+
+
 
     # =========================================================
     # Calculate snapshot data
