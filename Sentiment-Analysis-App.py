@@ -12,7 +12,9 @@ from datetime import datetime, timedelta, date
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from pathlib import Path
 from typing import Iterable, Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from zoneinfo import ZoneInfo
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 import re
 import requests
 import pandas as pd
@@ -757,7 +759,7 @@ Items:
 
     df = load_csv_from_gcs(
         (
-            "latest/scores/"
+            "latest/dashboard/"
             "final_risk_scores1.csv"
         ),
         (
@@ -768,7 +770,7 @@ Items:
 
     events = load_csv_from_gcs(
         (
-            "latest/scores/"
+            "latest/dashboard/"
             "ranked_events_risks1.csv"
         ),
         (
@@ -5183,6 +5185,880 @@ if selection == "Article Risk Review":
         r= requests.get(api_url, headers = headers)
         r.raise_for_status()
         return pd.read_csv(io.BytesIO(r.content), compression = 'gzip', low_memory = False)
+    # Manual review overrides are durable state. GCS is the source of truth;
+    # GitHub remains an audit mirror only.
+    ARTICLE_CHANGES_BLOB = (
+        "latest/manual_overrides/BERTopic_changes.csv"
+    )
+    STORY_CHANGES_BLOB = (
+        "latest/manual_overrides/Story_changes.csv"
+    )
+    change_log_path = Path(
+        "Model_training/BERTopic_changes.csv"
+    )
+    story_change_log = Path(
+        "Model_training/Story_changes.csv"
+    )
+
+    ARTICLE_OVERRIDE_MAP = {
+        "Predicted_Risks_Upd": "Predicted_Risks_new",
+        "Recency_Upd": "Recency",
+        "Acceleration_value_Upd": "Acceleration_value",
+        "Source_Accuracy_Upd": "Source_Accuracy",
+        "Impact_Score_Upd": "Impact_Score",
+        "Location_Upd": "Location",
+        "Industry_Risk_Upd": "Industry_Risk",
+        "Frequency_Score_Upd": "Frequency_Score",
+    }
+
+    STORY_OVERRIDE_MAP = {
+        "Predicted_Risks_Upd": "risk_label",
+        "Recency_Upd": "avg_recency",
+        "Acceleration_value_Upd": "avg_acceleration",
+        "Source_Accuracy_Upd": "avg_source_accuracy",
+        "Impact_Score_Upd": "avg_impact_score",
+        "Location_Upd": "avg_location",
+        "Industry_Risk_Upd": "avg_industry_risk",
+        "Frequency_Score_Upd": "avg_frequency",
+    }
+
+    OVERRIDE_META_COLUMNS = [
+        "Reviewed",
+        "Reviewed_at",
+        "Changed_at",
+        "Change reason",
+    ]
+
+    def save_override_log(
+        data: pd.DataFrame,
+        local_path: Path,
+        blob_path: str,
+    ) -> None:
+        local_path = Path(local_path)
+        local_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        temp_path = local_path.with_suffix(
+            local_path.suffix + ".tmp"
+        )
+
+        data.to_csv(
+            temp_path,
+            index=False,
+        )
+
+        client = get_gcs_client()
+        bucket = client.bucket(
+            "tulane-risk-data"
+        )
+        blob = bucket.blob(
+            blob_path
+        )
+        blob.upload_from_filename(
+            str(temp_path),
+            content_type="text/csv",
+        )
+
+        os.replace(
+            temp_path,
+            local_path,
+        )
+
+    def load_override_log(
+        blob_path: str,
+        local_path: Path,
+    ) -> pd.DataFrame:
+        local_path = Path(local_path)
+        local_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        if blob_exists(
+            blob_path,
+            bucket_name="tulane-risk-data",
+        ):
+            download_blob(
+                blob_path,
+                str(local_path),
+            )
+
+            if (
+                local_path.exists()
+                and local_path.stat().st_size > 0
+            ):
+                return pd.read_csv(
+                    local_path,
+                    low_memory=False,
+                )
+
+        # One-time migration path: if GCS has not been seeded yet,
+        # use the repository copy and immediately persist it.
+        if (
+            local_path.exists()
+            and local_path.stat().st_size > 0
+        ):
+            migrated = pd.read_csv(
+                local_path,
+                low_memory=False,
+            )
+
+            save_override_log(
+                migrated,
+                local_path,
+                blob_path,
+            )
+
+            return migrated
+
+        return pd.DataFrame()
+
+    def append_override_row(
+        row: dict,
+        blob_path: str,
+        local_path: Path,
+    ) -> pd.DataFrame:
+        """Append safely without silently overwriting a concurrent edit."""
+        from google.api_core.exceptions import PreconditionFailed
+
+        local_path = Path(local_path)
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+
+        client = get_gcs_client()
+        bucket = client.bucket("tulane-risk-data")
+
+        for attempt in range(5):
+            blob = bucket.blob(blob_path)
+
+            if blob.exists(client=client):
+                blob.reload(client=client)
+                generation = int(blob.generation)
+                payload = blob.download_as_bytes(
+                    if_generation_match=generation
+                )
+
+                if payload:
+                    try:
+                        current = pd.read_csv(
+                            io.BytesIO(payload),
+                            low_memory=False,
+                        )
+                    except pd.errors.EmptyDataError:
+                        current = pd.DataFrame()
+                else:
+                    current = pd.DataFrame()
+            else:
+                generation = 0
+
+                # First deployment: seed from the existing repository copy.
+                if local_path.exists() and local_path.stat().st_size > 0:
+                    current = pd.read_csv(local_path, low_memory=False)
+                else:
+                    current = pd.DataFrame()
+
+            updated = pd.concat(
+                [current, pd.DataFrame([row])],
+                ignore_index=True,
+                sort=False,
+            )
+
+            csv_text = updated.to_csv(index=False)
+
+            try:
+                blob.upload_from_string(
+                    csv_text,
+                    content_type="text/csv",
+                    if_generation_match=generation,
+                )
+            except PreconditionFailed:
+                # Another administrator saved between our read and write.
+                # Reload that newer object and retry the append.
+                time.sleep(0.25 * (attempt + 1))
+                continue
+
+            temp_path = local_path.with_suffix(local_path.suffix + ".tmp")
+            temp_path.write_text(csv_text, encoding="utf-8")
+            os.replace(temp_path, local_path)
+            return updated
+
+        raise RuntimeError(
+            "The override log changed repeatedly while saving. "
+            "Please submit the edit again."
+        )
+
+    def clean_single_risk(value):
+        if isinstance(value, list):
+            return (
+                str(value[0]).strip()
+                if value
+                else "No Risk"
+            )
+
+        if pd.isna(value):
+            return "No Risk"
+
+        text = str(value).strip()
+
+        if (
+            text.startswith("[")
+            and text.endswith("]")
+        ):
+            for parser_func in (
+                json.loads,
+                ast.literal_eval,
+            ):
+                try:
+                    parsed = parser_func(text)
+
+                    if isinstance(parsed, list):
+                        return (
+                            str(parsed[0]).strip()
+                            if parsed
+                            else "No Risk"
+                        )
+
+                except Exception:
+                    continue
+
+        return text or "No Risk"
+
+    def normalize_story_id(value):
+        if pd.isna(value):
+            return ""
+
+        text = str(value).strip()
+
+        if re.fullmatch(
+            r"-?\d+\.0",
+            text,
+        ):
+            text = text[:-2]
+
+        return text
+
+    def _normalize_override_url(value):
+        if pd.isna(value):
+            return ""
+
+        text = str(value).strip()
+
+        if not text:
+            return ""
+
+        if not text.casefold().startswith(
+            ("http://", "https://")
+        ):
+            return text.casefold().rstrip("/")
+
+        try:
+            parsed = urlsplit(text)
+            query = []
+
+            for key, query_value in parse_qsl(
+                parsed.query,
+                keep_blank_values=True,
+            ):
+                key_lower = key.casefold()
+
+                if (
+                    key_lower.startswith("utm_")
+                    or key_lower
+                    in {
+                        "fbclid",
+                        "gclid",
+                        "mc_cid",
+                        "mc_eid",
+                    }
+                ):
+                    continue
+
+                query.append((key, query_value))
+
+            normalized_path = re.sub(
+                r"/+$",
+                "",
+                parsed.path or "",
+            )
+
+            return urlunsplit(
+                (
+                    parsed.scheme.casefold(),
+                    parsed.netloc.casefold(),
+                    normalized_path,
+                    urlencode(sorted(query)),
+                    "",
+                )
+            )
+
+        except ValueError:
+            return text.casefold().rstrip("/")
+
+    TRACKING_QUERY_KEYS = {
+        "fbclid",
+        "gclid",
+        "mc_cid",
+        "mc_eid",
+    }
+
+    def normalize_override_url(value):
+        if value is None or pd.isna(value):
+            return ""
+
+        text = str(value).strip()
+        if not text:
+            return ""
+
+        if not text.casefold().startswith(("http://", "https://")):
+            return text.casefold().rstrip("/")
+
+        try:
+            parsed = urlsplit(text)
+            cleaned_query = []
+
+            for key, query_value in parse_qsl(
+                parsed.query,
+                keep_blank_values=True,
+            ):
+                key_lower = key.casefold()
+                if (
+                    key_lower.startswith("utm_")
+                    or key_lower in TRACKING_QUERY_KEYS
+                ):
+                    continue
+                cleaned_query.append((key, query_value))
+
+            normalized_path = re.sub(
+                r"/+$",
+                "",
+                parsed.path or "",
+            )
+
+            return urlunsplit(
+                (
+                    parsed.scheme.casefold(),
+                    parsed.netloc.casefold(),
+                    normalized_path,
+                    urlencode(sorted(cleaned_query)),
+                    "",
+                )
+            )
+
+        except ValueError:
+            return text.casefold().rstrip("/")
+
+    def article_override_key(data):
+        links = data.get(
+            "Link",
+            pd.Series("", index=data.index),
+        ).apply(normalize_override_url)
+
+        titles = (
+            data.get(
+                "Title",
+                pd.Series("", index=data.index),
+            )
+            .fillna("")
+            .astype(str)
+            .str.replace(r"\s+", " ", regex=True)
+            .str.strip()
+            .str.casefold()
+        )
+
+        if "Published_utc" in data.columns:
+            published_source = data["Published_utc"]
+        else:
+            published_source = data.get(
+                "Published",
+                pd.Series("", index=data.index),
+            )
+
+        published = pd.to_datetime(
+            published_source,
+            errors="coerce",
+            utc=True,
+        ).astype(str)
+        published = published.where(
+            ~published.eq("NaT"),
+            "",
+        )
+
+        fallback = (
+            "title::"
+            + titles
+            + "|published::"
+            + published
+        )
+
+        return links.where(
+            links.ne(""),
+            fallback,
+        )
+
+    def _blank_override_value(value):
+        if value is None:
+            return True
+
+        try:
+            if pd.isna(value):
+                return True
+        except (TypeError, ValueError):
+            pass
+
+        return str(value).strip().casefold() in {
+            "",
+            "nan",
+            "none",
+            "<na>",
+        }
+
+    def _collapse_override_history(
+        changes: pd.DataFrame,
+        key_column: str,
+        value_columns: list[str],
+    ) -> pd.DataFrame:
+        """Keep the newest nonblank value for each editable field."""
+        if (
+            changes is None
+            or changes.empty
+            or key_column not in changes.columns
+        ):
+            return pd.DataFrame(
+                columns=[key_column, *value_columns]
+            )
+
+        work = changes.copy()
+        work["_override_row_order"] = range(len(work))
+        work["_override_changed_at"] = pd.to_datetime(
+            work.get("Changed_at"),
+            errors="coerce",
+            utc=True,
+        )
+        work = work[
+            work[key_column]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .ne("")
+        ].copy()
+
+        if work.empty:
+            return pd.DataFrame(
+                columns=[key_column, *value_columns]
+            )
+
+        work = work.sort_values(
+            ["_override_changed_at", "_override_row_order"],
+            ascending=[True, True],
+            na_position="first",
+        )
+
+        records = []
+        available = [
+            column
+            for column in value_columns
+            if column in work.columns
+        ]
+
+        for key, group in work.groupby(
+            key_column,
+            sort=False,
+            dropna=False,
+        ):
+            record = {key_column: key}
+
+            for column in available:
+                valid = ~group[column].apply(
+                    _blank_override_value
+                )
+
+                if valid.any():
+                    record[column] = (
+                        group.loc[valid, column].iloc[-1]
+                    )
+
+            records.append(record)
+
+        return pd.DataFrame(records)
+
+    def apply_latest_overrides(
+        base_data: pd.DataFrame,
+        changes: pd.DataFrame,
+        item_type: str,
+    ) -> pd.DataFrame:
+        result = base_data.copy()
+
+        if item_type == "article":
+            result["_override_key"] = (
+                article_override_key(result)
+            )
+            field_map = ARTICLE_OVERRIDE_MAP
+
+        elif item_type == "story":
+            story_ids = (
+                result.get(
+                    "story_id",
+                    pd.Series(
+                        "",
+                        index=result.index,
+                    ),
+                )
+                .apply(normalize_story_id)
+            )
+
+            result["_override_key"] = (
+                story_ids.apply(
+                    lambda value: (
+                        f"story::{value}"
+                        if value
+                        else ""
+                    )
+                )
+            )
+            field_map = STORY_OVERRIDE_MAP
+
+        else:
+            raise ValueError(
+                f"Unsupported override item type: {item_type}"
+            )
+
+        for update_column in field_map:
+            if update_column not in result.columns:
+                result[update_column] = pd.NA
+
+        for column in OVERRIDE_META_COLUMNS:
+            if column not in result.columns:
+                if column == "Reviewed":
+                    result[column] = 0
+                elif column in {
+                    "Reviewed_at",
+                    "Changed_at",
+                }:
+                    result[column] = pd.NaT
+                else:
+                    result[column] = ""
+
+        if changes is None or changes.empty:
+            return result.drop(
+                columns=["_override_key"],
+                errors="ignore",
+            )
+
+        history = changes.copy()
+
+        if item_type == "article":
+            history["_override_key"] = (
+                article_override_key(history)
+            )
+        else:
+            story_ids = (
+                history.get(
+                    "story_id",
+                    pd.Series(
+                        "",
+                        index=history.index,
+                    ),
+                )
+                .apply(normalize_story_id)
+            )
+            history["_override_key"] = (
+                story_ids.apply(
+                    lambda value: (
+                        f"story::{value}"
+                        if value
+                        else ""
+                    )
+                )
+            )
+
+        latest = _collapse_override_history(
+            history,
+            "_override_key",
+            list(field_map.keys())
+            + OVERRIDE_META_COLUMNS,
+        )
+
+        if latest.empty:
+            return result.drop(
+                columns=["_override_key"],
+                errors="ignore",
+            )
+
+        result = result.merge(
+            latest,
+            on="_override_key",
+            how="left",
+            suffixes=("", "__manual"),
+        )
+
+        manual_factor_mask = pd.Series(
+            False,
+            index=result.index,
+        )
+
+        for update_column, base_column in (
+            field_map.items()
+        ):
+            manual_column = (
+                f"{update_column}__manual"
+            )
+
+            if manual_column not in result.columns:
+                continue
+
+            manual_values = result[manual_column]
+
+            if update_column == "Predicted_Risks_Upd":
+                manual_values = manual_values.apply(
+                    lambda value: (
+                        clean_single_risk(value)
+                        if not _blank_override_value(value)
+                        else pd.NA
+                    )
+                )
+            else:
+                manual_values = pd.to_numeric(
+                    manual_values,
+                    errors="coerce",
+                )
+                manual_factor_mask = (
+                    manual_factor_mask
+                    | manual_values.notna()
+                )
+
+            result[update_column] = (
+                manual_values.combine_first(
+                    result[update_column]
+                )
+            )
+
+            if base_column not in result.columns:
+                result[base_column] = pd.NA
+
+            result[base_column] = (
+                manual_values.combine_first(
+                    result[base_column]
+                )
+            )
+
+        for column in OVERRIDE_META_COLUMNS:
+            manual_column = f"{column}__manual"
+
+            if manual_column in result.columns:
+                result[column] = (
+                    result[manual_column]
+                    .combine_first(result[column])
+                )
+
+        result["Reviewed"] = (
+            pd.to_numeric(
+                result["Reviewed"],
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
+        result.loc[
+            result["Reviewed"].eq(0),
+            "Reviewed_at",
+        ] = pd.NaT
+
+        if item_type == "article":
+            weights = {
+                "Recency": 0.15,
+                "Source_Accuracy": 0.10,
+                "Impact_Score": 0.35,
+                "Acceleration_value": 0.25,
+                "Location": 0.05,
+                "Industry_Risk": 0.05,
+                "Frequency_Score": 0.05,
+            }
+
+            # Leave untouched pipeline scores exactly as they were.
+            # Recalculate only records with a saved manual factor.
+            if manual_factor_mask.any():
+                score = pd.Series(
+                    0.0,
+                    index=result.index[manual_factor_mask],
+                )
+
+                for column, weight in weights.items():
+                    values = pd.to_numeric(
+                        result.loc[manual_factor_mask, column],
+                        errors="coerce",
+                    ).fillna(0.0)
+                    score = score + (values * weight)
+
+                result.loc[
+                    manual_factor_mask,
+                    "Risk_Score",
+                ] = score / sum(weights.values())
+
+        else:
+            if "risk_label" in result.columns:
+                result["Predicted_Risks_new"] = (
+                    result["risk_label"]
+                )
+
+            story_weights = {
+                "avg_recency": 0.15,
+                "avg_source_accuracy": 0.10,
+                "avg_impact_score": 0.35,
+                "avg_acceleration": 0.25,
+                "avg_location": 0.05,
+                "avg_industry_risk": 0.05,
+                "avg_frequency": 0.05,
+            }
+
+            if manual_factor_mask.any():
+                score = pd.Series(
+                    0.0,
+                    index=result.index[manual_factor_mask],
+                )
+
+                for column, weight in story_weights.items():
+                    values = pd.to_numeric(
+                        result.loc[manual_factor_mask, column],
+                        errors="coerce",
+                    ).fillna(0.0)
+                    score = score + (values * weight)
+
+                result.loc[
+                    manual_factor_mask,
+                    "avg_risk_score",
+                ] = score / sum(story_weights.values())
+
+        columns_to_drop = [
+            column
+            for column in result.columns
+            if column.endswith("__manual")
+        ] + ["_override_key"]
+
+        return result.drop(
+            columns=columns_to_drop,
+            errors="ignore",
+        )
+
+    def apply_story_overrides_to_article_rows(
+        base_data: pd.DataFrame,
+        changes: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Show a saved story edit on every constituent article immediately."""
+        result = base_data.copy()
+
+        if (
+            changes is None
+            or changes.empty
+            or "story_id" not in result.columns
+            or "story_id" not in changes.columns
+        ):
+            return result
+
+        result["_override_key"] = (
+            result["story_id"]
+            .apply(normalize_story_id)
+            .apply(lambda value: f"story::{value}" if value else "")
+        )
+
+        history = changes.copy()
+        history["_override_key"] = (
+            history["story_id"]
+            .apply(normalize_story_id)
+            .apply(lambda value: f"story::{value}" if value else "")
+        )
+
+        latest = _collapse_override_history(
+            history,
+            "_override_key",
+            list(ARTICLE_OVERRIDE_MAP.keys()),
+        )
+
+        if latest.empty:
+            return result.drop(columns=["_override_key"], errors="ignore")
+
+        result = result.merge(
+            latest,
+            on="_override_key",
+            how="left",
+            suffixes=("", "__story_manual"),
+        )
+
+        factor_mask = pd.Series(False, index=result.index)
+
+        for update_column, base_column in ARTICLE_OVERRIDE_MAP.items():
+            manual_column = f"{update_column}__story_manual"
+            if manual_column not in result.columns:
+                continue
+
+            if update_column == "Predicted_Risks_Upd":
+                values = result[manual_column].apply(
+                    lambda value: (
+                        clean_single_risk(value)
+                        if not _blank_override_value(value)
+                        else pd.NA
+                    )
+                )
+                valid = values.notna()
+            else:
+                values = pd.to_numeric(
+                    result[manual_column],
+                    errors="coerce",
+                )
+                valid = values.notna()
+                factor_mask = factor_mask | valid
+
+            if update_column not in result.columns:
+                result[update_column] = pd.NA
+            if base_column not in result.columns:
+                result[base_column] = pd.NA
+
+            result.loc[valid, update_column] = values.loc[valid]
+            result.loc[valid, base_column] = values.loc[valid]
+
+        if factor_mask.any():
+            weights = {
+                "Recency": 0.15,
+                "Source_Accuracy": 0.10,
+                "Impact_Score": 0.35,
+                "Acceleration_value": 0.25,
+                "Location": 0.05,
+                "Industry_Risk": 0.05,
+                "Frequency_Score": 0.05,
+            }
+            score = pd.Series(0.0, index=result.index[factor_mask])
+            for column, weight in weights.items():
+                score = score + (
+                    pd.to_numeric(
+                        result.loc[factor_mask, column],
+                        errors="coerce",
+                    ).fillna(0.0)
+                    * weight
+                )
+            result.loc[factor_mask, "Risk_Score"] = (
+                score / sum(weights.values())
+            )
+
+        return result.drop(
+            columns=[
+                column
+                for column in result.columns
+                if column.endswith("__story_manual")
+            ]
+            + ["_override_key"],
+            errors="ignore",
+        )
+
+    def clear_review_session_state():
+        for key in (
+            "articles",
+            "change_log",
+            "story_log",
+        ):
+            st.session_state.pop(
+                key,
+                None,
+            )
     @st.cache_data
     def load_subtopic_to_main_label_map(auto_path: str = "Model_training/topics_BERT_auto.json") -> dict[int, str]:
         try:
@@ -5204,103 +6080,92 @@ if selection == "Article Risk Review":
                         continue
         return sub_to_main
 
-    required_keys = {'Title', 'Content'}
-    if 'articles' not in st.session_state:
-        usecols = ['Title', 'Content', 'Link', 'Published', 'University Label', 'Predicted_Risks_new', 'Recency', 'Source_Accuracy',
-                  'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Topic', 'Probability', 'Assigned_how']
+    if "articles" not in st.session_state:
         try:
             results_df = load_csv_gz_from_gcs(
-                'latest/topics/BERTopic_Streamlit.csv.gz',
-                'pipeline/resources/BERTopic_Streamlit.csv.gz')
-            st.session_state.articles = results_df.copy()
-            #results_df = get_csv_from_release(OWNER, REPO, TAG, ASSET)
-        except Exception as e:
-            st.error(f"Failed to load BERTopic results: {e}")
+                "latest/topics/BERTopic_Streamlit.csv.gz",
+                "pipeline/resources/BERTopic_Streamlit.csv.gz",
+            )
+
+            article_changes = load_override_log(
+                ARTICLE_CHANGES_BLOB,
+                change_log_path,
+            )
+
+            st.session_state.change_log = (
+                article_changes
+            )
+
+            st.session_state.articles = (
+                apply_latest_overrides(
+                    base_data=results_df,
+                    changes=article_changes,
+                    item_type="article",
+                )
+            )
+
+        except Exception as error:
+            st.error(
+                "Failed to load BERTopic results "
+                f"and manual overrides: {error}"
+            )
             st.stop()
-        numeric_cols = ['Recency', 'Source_Accuracy', 'Impact_Score', 'Acceleration_value', 'Location', 'Industry_Risk', 'Frequency_Score', 'Risk_Score', 'Probability', 'Assigned_how']
-        use_changes = Path('Model_training/BERTopic_changes.csv').is_file() and Path('Model_training/BERTopic_changes.csv').stat().st_size > 0
-        changes_df = None
 
-        if use_changes:
-            try:
-                changes_df = pd.read_csv('Model_training/BERTopic_changes.csv')
-                def norm(s: pd.Series) -> pd.Series:
-                    return s.astype(str).str.replace(r'\s+', ' ', regex = True).str.strip()
-                for df in (changes_df, results_df):
-                    if 'Link' in df.columns:
-                        df['Link'] = df['Link'].astype(str).str.strip()
-                        df['Title'] = norm(df['Title'])
-                        df['Content'] = norm(df['Content'])
-                if 'Reviewed' not in changes_df.columns:
-                    changes_df['Reviewed'] = 0
-                    changes_df['Reviewed'] = pd.to_numeric(changes_df['Reviewed'], errors='coerce').fillna(0).astype(int)
+    stories = load_csv_gz_from_gcs(
+        "latest/dashboard/dashboard_stories.csv.gz",
+        "pipeline/resources/dashboard_stories.csv.gz",
+    )
 
+    stories = stories[
+        ~stories["canonical_title"]
+        .str.match(
+            r"^Story \d+",
+            na=False,
+        )
+    ].copy()
 
-                if not changes_df.empty and required_keys.issubset(changes_df.columns):
-                    if 'Changed_at' in changes_df.columns:
-                        changes_df['Changed_at'] = pd.to_datetime(changes_df['Changed_at'], errors = 'coerce')
-                    if 'Reviewed' not in changes_df.columns:
-                        changes_df['Reviewed'] = 0
-                    if 'Reviewed_at' not in changes_df.columns:
-                        changes_df['Reviewed_at'] = pd.NaT
+    story_changes = load_override_log(
+        STORY_CHANGES_BLOB,
+        story_change_log,
+    )
 
-                    join_keys = ['Link'] if 'Link' in results_df.columns and 'Link' in changes_df.columns else ['Title','Link']
-                    review_cols = list({*join_keys, 'Reviewed', 'Reviewed_at', 'Changed_at'})
-                    agg = {'Reviewed':'max','Reviewed_at':'max','Changed_at':'max'}
-                    review_map = (changes_df[review_cols].dropna(subset=join_keys).groupby(join_keys, as_index = False).agg(agg)
-                                 .rename(columns = {'Changed_at': 'Last_changed_at'}))
-                else:
-                    changes_df = None
-            except Exception as e:
-                changes_df = None
-        if changes_df is not None:
-            base = results_df.drop_duplicates(subset = join_keys, keep = 'last')
-            merged_df = base.merge(review_map, on = join_keys, how = 'left')
-            merged_df['Reviewed'] = merged_df['Reviewed'].fillna(0).astype(int)
-            st.session_state.articles = merged_df
-        else:
-            tmp = results_df.copy()
-            tmp['Reviewed'] = 0
-            tmp['Reviewed_at'] = pd.NaT
-            tmp['Last_changed_at'] = pd.NaT
-            st.session_state.articles = tmp
-    stories = get_csv_from_repo(OWNER, REPO, 'pipeline/resources/dashboard_stories.csv.gz')
-    stories = stories[~stories['canonical_title'].str.match(r'^Story \d+', na=False)]
-    
-    dropdown = get_csv_from_repo(OWNER, REPO, 'pipeline/resources/dashboard_dropdown.csv.gz')
-    change_log_path = Path('Model_training') / 'BERTopic_changes.csv'
-    change_log_path.parent.mkdir(parents=True, exist_ok = True)
-    if "change_log" not in st.session_state:
-        if change_log_path.exists():
-            st.session_state.change_log = pd.read_csv(change_log_path)
-            for col, default in [('Reviewed', 0), ('Reviewed_at', pd.NaT)]:
-                if col not in st.session_state.change_log.columns:
-                    st.session_state.change_log[col] = default
-        else:
-            base_cols = list(st.session_state.articles.columns)
-            new_cols = ['Recency_Upd', 'Acceleration_value_Upd', 'Source_Accuracy_Upd',
-                    'Impact_Score_Upd', 'Location_Upd', 'Industry_Risk_Upd', 'Frequency_Score_Upd',
-                    'Change reason']
-            st.session_state.change_log = pd.DataFrame(columns = base_cols + new_cols)
-            st.session_state.change_log.to_csv(change_log_path, index = False)
-    story_change_log = Path('Model_training') / 'Story_changes.csv'
-    story_change_log.parent.mkdir(parents = True, exist_ok = True)
-    if "story_log" not in st.session_state:
-        if story_change_log.exists():
-            st.session_state.story_log = pd.read_csv(story_change_log)
-            for col, default in [('Reviewed', 0), ('Reviewed_at', pd.NaT)]:
-                if col not in st.session_state.story_log.columns:
-                    st.session_state.story_log[col] = default
-        else:
-            base_cols = list(stories.columns)
-            new_cols = ['Recency_Upd', 'Acceleration_value_Upd', 'Source_Accuracy_Upd',
-                    'Impact_Score_Upd', 'Location_Upd', 'Industry_Risk_Upd', 'Frequency_Score_Upd',
-                    'Change reason']
-            st.session_state.story_log = pd.DataFrame(columns = base_cols + new_cols)
-            st.session_state.story_log.to_csv(story_change_log, index = False)
-    for c in numeric_cols:
-        if c in st.session_state.articles.columns:
-            st.session_state.articles[c] = pd.to_numeric(st.session_state.articles[c], errors = 'coerce')
+    st.session_state.story_log = (
+        story_changes
+    )
+
+    stories = apply_latest_overrides(
+        base_data=stories,
+        changes=story_changes,
+        item_type="story",
+    )
+
+    dropdown = load_csv_gz_from_gcs(
+        "latest/dashboard/dashboard_dropdown.csv.gz",
+        "pipeline/resources/dashboard_dropdown.csv.gz",
+    )
+
+    # Apply article edits first and story edits second so the story view
+    # immediately shows the same approved values as the story card.
+    dropdown = apply_latest_overrides(
+        base_data=dropdown,
+        changes=st.session_state.change_log,
+        item_type="article",
+    )
+    dropdown = apply_story_overrides_to_article_rows(
+        dropdown,
+        story_changes,
+    )
+
+    for column in numeric_cols:
+        if column in st.session_state.articles.columns:
+            st.session_state.articles[
+                column
+            ] = pd.to_numeric(
+                st.session_state.articles[
+                    column
+                ],
+                errors="coerce",
+            )
 
     
     #canonical_stories =get_csv_from_repo(OWNER, REPO, 'Model_training/Canonical_Stories_with_Summaries.csv')
@@ -5320,7 +6185,18 @@ if selection == "Article Risk Review":
     stories_timeline['Title'] = stories_timeline['canonical_title']
     stories_timeline['Content'] = stories_timeline['summary']
     stories_timeline['Link'] = None
-    stories_timeline['Reviewed'] = pd.NA
+    if "Reviewed" not in stories_timeline.columns:
+        stories_timeline["Reviewed"] = 0
+    else:
+        stories_timeline["Reviewed"] = (
+            pd.to_numeric(
+                stories_timeline["Reviewed"],
+                errors="coerce",
+            )
+            .fillna(0)
+            .astype(int)
+        )
+
     stories_timeline['risk_label'] = stories_timeline.get('risk_label', None)
 
     ##adding to push changes to the Github repo
@@ -5350,6 +6226,15 @@ if selection == "Article Risk Review":
             raise RuntimeError(f"GitHub push failed: {r_put.status_code} {r_put.text}")
         return r_put.json()
     st.title("Article Risk Review Portal")
+
+    saved_notice = st.session_state.pop(
+        "review_save_notice",
+        None,
+    )
+
+    if saved_notice:
+        st.success(saved_notice)
+
     #give me a filter to filter articles by date range
     st.sidebar.header("Filter Articles")
     start_date = st.sidebar.date_input("Start Date", datetime.now() - timedelta(days=30))
@@ -5361,7 +6246,7 @@ if selection == "Article Risk Review":
     # Load articles and risks
 
 
-    update_cols = ['Recency_Upd', 'Acceleration_value_Upd', 'Source_Accuracy_Upd',
+    update_cols = ['Predicted_Risks_Upd', 'Recency_Upd', 'Acceleration_value_Upd', 'Source_Accuracy_Upd',
                     'Impact_Score_Upd', 'Location_Upd', 'Industry_Risk_Upd', 'Frequency_Score_Upd',
                     'Change reason']
     for col in update_cols:
@@ -5712,53 +6597,103 @@ if selection == "Article Risk Review":
                         reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{story['story_id']}")
                         submitted =  st.form_submit_button("Update Risk Labels")
                         if submitted:
-                            #st.write("This feature is not yet available since this is a story made up of several articles. It will be available within the next couple of days.")
-                            full_story_df = pd.read_csv(story_change_log)
-                            mask = ((full_story_df['canonical_title'] == story['Title']))
-                            if mask.any():
-                                base_row = full_story_df.loc[mask].sort_values('Changed_at').iloc[-1].to_dict()
-                            else:
-                                base_row = story.copy()
-                                if hasattr(base_row, 'to_dict'):
-                                    base_row = base_row.to_dict()
-
-                            base_row['Predicted_Risks_Upd'] = selected_risks
-                            base_row['Recency_Upd'] = upd_recency_value
-                            base_row['Acceleration_value_Upd'] = upd_acceleration_value
-                            base_row['Source_Accuracy_Upd'] = upd_source_accuracy
-                            base_row['Impact_Score_Upd'] = upd_impact_score
-                            base_row['Location_Upd'] = upd_location
-                            base_row['Industry_Risk_Upd'] = upd_industry_risk
-                            base_row['Frequency_Score_Upd'] = upd_frequency_score
-                            base_row['Change reason'] = reason
-                            base_row['Changed_at'] = pd.Timestamp.utcnow()
-                            base_row['Reviewed'] = 1
-                            base_row['Reviewed_at'] = pd.Timestamp.utcnow()
-
-                            st.session_state.story_log = pd.concat(
-                                [st.session_state.story_log, pd.DataFrame([base_row])],
-                                ignore_index=True
+                            base_row = story.to_dict()
+                            base_row[
+                                "Predicted_Risks_Upd"
+                            ] = (
+                                selected_risks[0]
+                                if selected_risks
+                                else "No Risk"
                             )
-                            expected_cols = set(st.session_state.story_log.columns)
-                            row_cols = set(base_row.keys())
-                            
-                            if row_cols != expected_cols:
-                                st.error(f"Schema mismatch. Refusing to save.\nMissing: {expected_cols - row_cols}")
-                                st.stop()
+                            base_row[
+                                "Recency_Upd"
+                            ] = upd_recency_value
+                            base_row[
+                                "Acceleration_value_Upd"
+                            ] = upd_acceleration_value
+                            base_row[
+                                "Source_Accuracy_Upd"
+                            ] = upd_source_accuracy
+                            base_row[
+                                "Impact_Score_Upd"
+                            ] = upd_impact_score
+                            base_row[
+                                "Location_Upd"
+                            ] = upd_location
+                            base_row[
+                                "Industry_Risk_Upd"
+                            ] = upd_industry_risk
+                            base_row[
+                                "Frequency_Score_Upd"
+                            ] = upd_frequency_score
+                            base_row[
+                                "Change reason"
+                            ] = reason
+                            base_row[
+                                "Changed_at"
+                            ] = pd.Timestamp.now(
+                                tz="UTC"
+                            )
+                            base_row["Reviewed"] = 1
+                            base_row[
+                                "Reviewed_at"
+                            ] = pd.Timestamp.now(
+                                tz="UTC"
+                            )
 
-                            st.session_state.story_log.to_csv(story_change_log, index = False)
                             try:
-                                resp = push_file_to_github(story_change_log, repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                          dest_path = 'Model_training/Story_changes.csv', branch = 'main')
-                                changes = pd.read_csv('Model_training/Story_changes.csv')
-                                res = pd.read_csv('BERTopic_results.csv')
-                                Change_timestamp = 'Changed_at'
-                                changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
+                                st.session_state.story_log = (
+                                    append_override_row(
+                                        row=base_row,
+                                        blob_path=(
+                                            STORY_CHANGES_BLOB
+                                        ),
+                                        local_path=(
+                                            story_change_log
+                                        ),
+                                    )
+                                )
 
+                                try:
+                                    push_file_to_github(
+                                        story_change_log,
+                                        repo=(
+                                            "ERSRisk/"
+                                            "tulane-sentiment-app-clean"
+                                        ),
+                                        dest_path=(
+                                            "Model_training/"
+                                            "Story_changes.csv"
+                                        ),
+                                        branch="main",
+                                    )
 
-                                st.success('Saved changes')
-                            except Exception as e:
-                                st.error(f"Github failed to push: {e}")
+                                except Exception as github_error:
+                                    st.warning(
+                                        "The change is saved "
+                                        "permanently in GCS, but "
+                                        "the GitHub audit mirror "
+                                        "could not be updated: "
+                                        f"{github_error}"
+                                    )
+
+                                clear_review_session_state()
+
+                                st.session_state[
+                                    "review_save_notice"
+                                ] = (
+                                    "Story changes saved "
+                                    "permanently."
+                                )
+
+                                st.rerun()
+
+                            except Exception as error:
+                                st.error(
+                                    "The story change could "
+                                    "not be saved to GCS: "
+                                    f"{error}"
+                                )
             continue
         
         row_id = hash(article.get('Link', article.get('Title')))
@@ -5857,28 +6792,78 @@ if selection == "Article Risk Review":
                             row_id = hash(article.get('Link'))
                             if st.button("Mark as reviewed", key=f"mark_{row_id}"):
                                 new_row = article.to_dict()
-                                new_row['Reviewed'] = 1
-                                new_row['Reviewed_at'] = pd.Timestamp.utcnow()
-                                new_row['Changed_at'] = new_row.get('Changed_at', pd.Timestamp.utcnow())
-                                st.session_state.change_log = pd.concat(
-                                    [st.session_state.change_log, pd.DataFrame([new_row])],
-                                    ignore_index=True
+                                for override_field in ARTICLE_OVERRIDE_MAP:
+                                    new_row[override_field] = pd.NA
+                                new_row["Change reason"] = pd.NA
+                                new_row["Reviewed"] = 1
+                                new_row[
+                                    "Reviewed_at"
+                                ] = pd.Timestamp.now(
+                                    tz="UTC"
                                 )
-                                st.session_state.change_log.to_csv(change_log_path, index=False)
-                                st.success("Marked reviewed ✅")
+                                new_row[
+                                    "Changed_at"
+                                ] = pd.Timestamp.now(
+                                    tz="UTC"
+                                )
+
+                                st.session_state.change_log = (
+                                    append_override_row(
+                                        row=new_row,
+                                        blob_path=(
+                                            ARTICLE_CHANGES_BLOB
+                                        ),
+                                        local_path=(
+                                            change_log_path
+                                        ),
+                                    )
+                                )
+
+                                clear_review_session_state()
+
+                                st.session_state[
+                                    "review_save_notice"
+                                ] = (
+                                    "Article marked as "
+                                    "reviewed permanently."
+                                )
+
                                 st.rerun()
                         else:
                             if st.button("Unmark reviewed", key=f"unmark_{row_id}"):
                                 new_row = article.to_dict()
-                                new_row['Reviewed'] = 0
-                                new_row['Reviewed_at'] = pd.NaT
-                                new_row['Changed_at'] = new_row.get('Changed_at', pd.Timestamp.utcnow())
-                                st.session_state.change_log = pd.concat(
-                                    [st.session_state.change_log, pd.DataFrame([new_row])],
-                                    ignore_index=True
+                                for override_field in ARTICLE_OVERRIDE_MAP:
+                                    new_row[override_field] = pd.NA
+                                new_row["Change reason"] = pd.NA
+                                new_row["Reviewed"] = 0
+                                new_row["Reviewed_at"] = pd.NaT
+                                new_row[
+                                    "Changed_at"
+                                ] = pd.Timestamp.now(
+                                    tz="UTC"
                                 )
-                                st.session_state.change_log.to_csv(change_log_path, index=False)
-                                st.info("Review mark removed")
+
+                                st.session_state.change_log = (
+                                    append_override_row(
+                                        row=new_row,
+                                        blob_path=(
+                                            ARTICLE_CHANGES_BLOB
+                                        ),
+                                        local_path=(
+                                            change_log_path
+                                        ),
+                                    )
+                                )
+
+                                clear_review_session_state()
+
+                                st.session_state[
+                                    "review_save_notice"
+                                ] = (
+                                    "Article review mark "
+                                    "removed permanently."
+                                )
+
                                 st.rerun()
                     with c2:
                         if st.button('Hide this topic', key = f'hide_topic_{tid}_{row_id}'):
@@ -5978,41 +6963,107 @@ if selection == "Article Risk Review":
                                 reason = st.text_area("Reason for changes", placeholder="Explain the changes made to the risk labels.", key=f"reason_{row_id}")
                                 submitted =  st.form_submit_button("Update Risk Labels")
                                 if submitted:
-                                    new_row = article.copy()
-                                    new_row = new_row.to_dict()
-    
-                                    new_row['Predicted_Risks_Upd'] = selected_risks
-                                    new_row['Recency_Upd'] = upd_recency_value
-                                    new_row['Acceleration_value_Upd'] = upd_acceleration_value
-                                    new_row['Source_Accuracy_Upd'] = upd_source_accuracy
-                                    new_row['Impact_Score_Upd']= upd_impact_score 
-                                    new_row['Location_Upd']= upd_location 
-                                    new_row['Industry_Risk_Upd'] = upd_industry_risk 
-                                    new_row['Frequency_Score_Upd']= upd_frequency_score
-                                    new_row['Change reason'] = reason
-                                    new_row['Changed_at'] = pd.Timestamp.utcnow().isoformat(timespec = 'seconds')
-                                    new_row['Changed_at'] = pd.to_datetime(new_row['Changed_at'], errors = 'coerce')
-                                    new_row['Reviewed'] = 1
-                                    new_row['Reviewed_at'] = pd.Timestamp.utcnow()
-    
-                                    st.session_state.change_log = pd.concat(
-                                        [st.session_state.change_log, pd.DataFrame([new_row])],
-                                        ignore_index = True
+                                    new_row = article.to_dict()
+
+                                    new_row[
+                                        "Predicted_Risks_Upd"
+                                    ] = (
+                                        selected_risks[0]
+                                        if selected_risks
+                                        else "No Risk"
                                     )
-    
-                                    st.session_state.change_log.to_csv(change_log_path, index = False)
+                                    new_row[
+                                        "Recency_Upd"
+                                    ] = upd_recency_value
+                                    new_row[
+                                        "Acceleration_value_Upd"
+                                    ] = upd_acceleration_value
+                                    new_row[
+                                        "Source_Accuracy_Upd"
+                                    ] = upd_source_accuracy
+                                    new_row[
+                                        "Impact_Score_Upd"
+                                    ] = upd_impact_score
+                                    new_row[
+                                        "Location_Upd"
+                                    ] = upd_location
+                                    new_row[
+                                        "Industry_Risk_Upd"
+                                    ] = upd_industry_risk
+                                    new_row[
+                                        "Frequency_Score_Upd"
+                                    ] = upd_frequency_score
+                                    new_row[
+                                        "Change reason"
+                                    ] = reason
+                                    new_row[
+                                        "Changed_at"
+                                    ] = pd.Timestamp.now(
+                                        tz="UTC"
+                                    )
+                                    new_row["Reviewed"] = 1
+                                    new_row[
+                                        "Reviewed_at"
+                                    ] = pd.Timestamp.now(
+                                        tz="UTC"
+                                    )
+
                                     try:
-                                        resp = push_file_to_github(change_log_path, repo = 'ERSRisk/tulane-sentiment-app-clean',
-                                                                  dest_path = 'Model_training/BERTopic_changes.csv', branch = 'main')
-                                        changes = pd.read_csv('Model_training/BERTopic_changes.csv')
-                                        res = pd.read_csv('BERTopic_results.csv')
-                                        Change_timestamp = 'Changed_at'
-                                        changes_sorted = changes.sort_values(Change_timestamp).drop_duplicates(['Title', 'Content'], keep = 'last')
-   
-    
-                                        st.success('Saved changes')
-                                    except Exception as e:
-                                        st.error(f"Github failed to push: {e}")
+                                        st.session_state.change_log = (
+                                            append_override_row(
+                                                row=new_row,
+                                                blob_path=(
+                                                    ARTICLE_CHANGES_BLOB
+                                                ),
+                                                local_path=(
+                                                    change_log_path
+                                                ),
+                                            )
+                                        )
+
+                                        try:
+                                            push_file_to_github(
+                                                change_log_path,
+                                                repo=(
+                                                    "ERSRisk/"
+                                                    "tulane-sentiment-app-clean"
+                                                ),
+                                                dest_path=(
+                                                    "Model_training/"
+                                                    "BERTopic_changes.csv"
+                                                ),
+                                                branch="main",
+                                            )
+
+                                        except Exception as github_error:
+                                            st.warning(
+                                                "The change is saved "
+                                                "permanently in GCS, "
+                                                "but the GitHub audit "
+                                                "mirror could not be "
+                                                "updated: "
+                                                f"{github_error}"
+                                            )
+
+                                        clear_review_session_state()
+
+                                        st.session_state[
+                                            "review_save_notice"
+                                        ] = (
+                                            "Article risk and "
+                                            "factor changes saved "
+                                            "permanently."
+                                        )
+
+                                        st.rerun()
+
+                                    except Exception as error:
+                                        st.error(
+                                            "The article change "
+                                            "could not be saved "
+                                            "to GCS: "
+                                            f"{error}"
+                                        )
    
 if selection == "Risk/Event Detector":
     import streamlit as st
