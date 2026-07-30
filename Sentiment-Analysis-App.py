@@ -2931,6 +2931,350 @@ Items:
                 ascending=False,
             )
         )
+        # =====================================================
+        # Recent headlines
+        # =====================================================
+
+        st.markdown(
+            "### Recent Headlines"
+        )
+
+        headline_df = (
+            risk_events.copy()
+        )
+
+        date_col = (
+            "Published_utc"
+            if (
+                "Published_utc"
+                in headline_df.columns
+            )
+            else "Window"
+        )
+
+        if date_col in headline_df.columns:
+            headline_df[
+                date_col
+            ] = pd.to_datetime(
+                headline_df[
+                    date_col
+                ],
+                errors="coerce",
+            )
+
+        headline_dedup_columns = [
+            column
+            for column in [
+                "Title",
+                "Link",
+            ]
+            if column
+            in headline_df.columns
+        ]
+
+        recent_headlines = (
+            headline_df
+            .dropna(
+                subset=["Title"]
+            )
+            .sort_values(
+                date_col,
+                ascending=False,
+            )
+        )
+
+        if headline_dedup_columns:
+            recent_headlines = (
+                recent_headlines
+                .drop_duplicates(
+                    subset=(
+                        headline_dedup_columns
+                    )
+                )
+            )
+
+        recent_headlines = (
+            recent_headlines
+            .head(
+                max_items
+            )
+        )
+
+        if recent_headlines.empty:
+            st.caption(
+                "No recent headlines are "
+                "available for the selected risk."
+            )
+
+        else:
+            for _, headline in (
+                recent_headlines.iterrows()
+            ):
+                headline_title = str(
+                    headline.get(
+                        "Title",
+                        "Untitled headline",
+                    )
+                )
+
+                with st.expander(
+                    headline_title[:180],
+                    expanded=False,
+                ):
+                    if pd.notna(
+                        headline.get(
+                            date_col
+                        )
+                    ):
+                        headline_date = (
+                            pd.to_datetime(
+                                headline.get(
+                                    date_col
+                                ),
+                                errors="coerce",
+                            )
+                        )
+
+                        if pd.notna(
+                            headline_date
+                        ):
+                            st.caption(
+                                (
+                                    "Published: "
+                                    f"{headline_date:%B %d, %Y}"
+                                )
+                            )
+
+                    source = headline.get(
+                        "Source",
+                        headline.get(
+                            "source",
+                            headline.get(
+                                "canonical_source",
+                                None,
+                            ),
+                        ),
+                    )
+
+                    if (
+                        pd.notna(source)
+                        and str(
+                            source
+                        ).strip()
+                    ):
+                        st.caption(
+                            f"Source: {source}"
+                        )
+
+                    content = (
+                        headline.get(
+                            "Content"
+                        )
+                    )
+
+                    if (
+                        pd.notna(content)
+                        and str(
+                            content
+                        ).strip()
+                    ):
+                        content_text = str(
+                            content
+                        )
+
+                        st.write(
+                            content_text[:700]
+                            + (
+                                "..."
+                                if len(
+                                    content_text
+                                ) > 700
+                                else ""
+                            )
+                        )
+
+                    link = str(
+                        headline.get(
+                            "Link",
+                            "",
+                        )
+                    ).strip()
+
+                    if link.startswith(
+                        "http"
+                    ):
+                        st.markdown(
+                            (
+                                "[Read original "
+                                f"article]({link})"
+                            )
+                        )
+
+                    else:
+                        st.caption(
+                            "Original article "
+                            "link unavailable."
+                        )
+
+        # =====================================================
+        # Key drivers
+        # =====================================================
+
+        st.markdown(
+            "### Why This Risk Is Showing Up"
+        )
+
+        driver_cols = [
+            "Acceleration_value",
+            "Recency",
+            "Source_Accuracy",
+            "Impact_Score",
+            "Location",
+            "Industry_Risk",
+            "Frequency_Score",
+        ]
+
+        driver_map = {
+            "Acceleration_value":
+            "Momentum",
+            "Recency":
+            "Recency",
+            "Impact_Score":
+            "Impact",
+            "Industry_Risk":
+            "Higher-Ed Relevance",
+            "Location":
+            "Location Relevance",
+            "Frequency_Score":
+            "Event Frequency",
+            "Source_Accuracy":
+            "Source Reliability",
+        }
+
+        available_driver_cols = [
+            column
+            for column in driver_cols
+            if column
+            in risk_events.columns
+        ]
+
+        if (
+            available_driver_cols
+            and not risk_events.empty
+        ):
+            for column in (
+                available_driver_cols
+            ):
+                risk_events[
+                    column
+                ] = pd.to_numeric(
+                    risk_events[
+                        column
+                    ],
+                    errors="coerce",
+                )
+
+            driver_summary = (
+                risk_events[
+                    available_driver_cols
+                ]
+                .mean()
+                .reset_index()
+                .rename(
+                    columns={
+                        "index":
+                        "technical_driver",
+                        0:
+                        "contribution",
+                    }
+                )
+            )
+
+            driver_summary[
+                "driver"
+            ] = (
+                driver_summary[
+                    "technical_driver"
+                ]
+                .map(
+                    driver_map
+                )
+            )
+
+            driver_summary[
+                "contribution"
+            ] = (
+                driver_summary[
+                    "contribution"
+                ]
+                .round(2)
+            )
+
+            driver_summary[
+                "level"
+            ] = driver_summary[
+                "contribution"
+            ].apply(
+                lambda value: (
+                    "High"
+                    if value >= 4
+                    else (
+                        "Moderate"
+                        if value >= 2.5
+                        else "Low"
+                    )
+                )
+            )
+
+            driver_summary = (
+                driver_summary[
+                    [
+                        "driver",
+                        "level",
+                        "contribution",
+                        "technical_driver",
+                    ]
+                ]
+                .sort_values(
+                    "contribution",
+                    ascending=False,
+                )
+            )
+
+            driver_summary = (
+                driver_summary.rename(
+                    columns={
+                        "driver":
+                        "Driver",
+                        "level":
+                        "Level",
+                        "contribution":
+                        "Average Score",
+                        "technical_driver":
+                        "Technical Field",
+                    }
+                )
+            )
+
+            st.dataframe(
+                driver_summary,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Average Score":
+                    st.column_config.NumberColumn(
+                        format="%.2f"
+                    )
+                },
+            )
+
+        else:
+            st.caption(
+                "No driver data is available "
+                "for the selected risk."
+            )
+
+        st.divider()
 
         # =====================================================
         # Most Relevant Recent Stories
@@ -3215,782 +3559,11 @@ Items:
 
         st.divider()
 
-        # =====================================================
-        # Key drivers
-        # =====================================================
+        
 
-        st.markdown(
-            "### Why This Risk Is Showing Up"
-        )
+        
 
-        driver_cols = [
-            "Acceleration_value",
-            "Recency",
-            "Source_Accuracy",
-            "Impact_Score",
-            "Location",
-            "Industry_Risk",
-            "Frequency_Score",
-        ]
-
-        driver_map = {
-            "Acceleration_value":
-            "Momentum",
-            "Recency":
-            "Recency",
-            "Impact_Score":
-            "Impact",
-            "Industry_Risk":
-            "Higher-Ed Relevance",
-            "Location":
-            "Location Relevance",
-            "Frequency_Score":
-            "Event Frequency",
-            "Source_Accuracy":
-            "Source Reliability",
-        }
-
-        available_driver_cols = [
-            column
-            for column in driver_cols
-            if column
-            in risk_events.columns
-        ]
-
-        if (
-            available_driver_cols
-            and not risk_events.empty
-        ):
-            for column in (
-                available_driver_cols
-            ):
-                risk_events[
-                    column
-                ] = pd.to_numeric(
-                    risk_events[
-                        column
-                    ],
-                    errors="coerce",
-                )
-
-            driver_summary = (
-                risk_events[
-                    available_driver_cols
-                ]
-                .mean()
-                .reset_index()
-                .rename(
-                    columns={
-                        "index":
-                        "technical_driver",
-                        0:
-                        "contribution",
-                    }
-                )
-            )
-
-            driver_summary[
-                "driver"
-            ] = (
-                driver_summary[
-                    "technical_driver"
-                ]
-                .map(
-                    driver_map
-                )
-            )
-
-            driver_summary[
-                "contribution"
-            ] = (
-                driver_summary[
-                    "contribution"
-                ]
-                .round(2)
-            )
-
-            driver_summary[
-                "level"
-            ] = driver_summary[
-                "contribution"
-            ].apply(
-                lambda value: (
-                    "High"
-                    if value >= 4
-                    else (
-                        "Moderate"
-                        if value >= 2.5
-                        else "Low"
-                    )
-                )
-            )
-
-            driver_summary = (
-                driver_summary[
-                    [
-                        "driver",
-                        "level",
-                        "contribution",
-                        "technical_driver",
-                    ]
-                ]
-                .sort_values(
-                    "contribution",
-                    ascending=False,
-                )
-            )
-
-            driver_summary = (
-                driver_summary.rename(
-                    columns={
-                        "driver":
-                        "Driver",
-                        "level":
-                        "Level",
-                        "contribution":
-                        "Average Score",
-                        "technical_driver":
-                        "Technical Field",
-                    }
-                )
-            )
-
-            st.dataframe(
-                driver_summary,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Average Score":
-                    st.column_config.NumberColumn(
-                        format="%.2f"
-                    )
-                },
-            )
-
-        else:
-            st.caption(
-                "No driver data is available "
-                "for the selected risk."
-            )
-
-        st.divider()
-
-        # =====================================================
-        # Top events driving signal
-        # =====================================================
-
-        st.markdown(
-            "### Top Events Driving Signal"
-        )
-
-        if risk_events.empty:
-            st.caption(
-                "No events were found for this "
-                "risk category using the selected filters."
-            )
-
-        else:
-            if (
-                "Published_utc"
-                in risk_events.columns
-            ):
-                risk_events[
-                    "Published_utc"
-                ] = pd.to_datetime(
-                    risk_events[
-                        "Published_utc"
-                    ],
-                    errors="coerce",
-                )
-
-            else:
-                risk_events[
-                    "Published_utc"
-                ] = pd.NaT
-
-            risk_events[
-                "Event_Label_Group"
-            ] = risk_events.apply(
-                lambda row: clean_event_label(
-                    row.get(
-                        "Event_Label"
-                    ),
-                    row.get(
-                        "Title"
-                    ),
-                ),
-                axis=1,
-            )
-
-            grouped_events = (
-                risk_events
-                .groupby(
-                    "Event_Label_Group",
-                    dropna=False,
-                )
-                .agg(
-                    Raw_Event_Label=(
-                        "Event_Label",
-                        "first",
-                    ),
-                    Event_Severity=(
-                        "Event_Severity",
-                        "max",
-                    ),
-                    Article_Count=(
-                        "Title",
-                        "nunique",
-                    ),
-                    Latest_Date=(
-                        "Published_utc",
-                        "max",
-                    ),
-                    Sample_Title=(
-                        "Title",
-                        "first",
-                    ),
-                    Sample_Content=(
-                        "Content",
-                        "first",
-                    ),
-                    Sample_Link=(
-                        "Link",
-                        "first",
-                    ),
-                )
-                .reset_index()
-                .sort_values(
-                    "Event_Severity",
-                    ascending=False,
-                )
-            )
-
-            for _, event in (
-                grouped_events.iterrows()
-            ):
-                event_label = event.get(
-                    "Event_Label_Group"
-                )
-
-                sev = (
-                    float(
-                        event[
-                            "Event_Severity"
-                        ]
-                    )
-                    if pd.notna(
-                        event[
-                            "Event_Severity"
-                        ]
-                    )
-                    else 0
-                )
-
-                sev_tag = (
-                    severity_bucket(
-                        sev
-                    )
-                )
-
-                with st.expander(
-                    (
-                        f"{event_label} — "
-                        f"Severity {sev:.2f} "
-                        f"({sev_tag})"
-                    ),
-                    expanded=False,
-                ):
-                    article_count = int(
-                        event[
-                            "Article_Count"
-                        ]
-                    )
-
-                    st.caption(
-                        (
-                            f"{article_count} "
-                            "related article(s)"
-                        )
-                    )
-
-                    sample_title = (
-                        event.get(
-                            "Sample_Title"
-                        )
-                    )
-
-                    if (
-                        pd.notna(
-                            sample_title
-                        )
-                        and str(
-                            sample_title
-                        ).strip()
-                    ):
-                        st.markdown(
-                            (
-                                "**Representative headline:** "
-                                f"{sample_title}"
-                            )
-                        )
-
-                    sample_content = (
-                        event.get(
-                            "Sample_Content"
-                        )
-                    )
-
-                    if (
-                        pd.notna(
-                            sample_content
-                        )
-                        and str(
-                            sample_content
-                        ).strip()
-                    ):
-                        content_text = str(
-                            sample_content
-                        )
-
-                        preview = (
-                            content_text[:700]
-                        )
-
-                        st.write(
-                            preview
-                            + (
-                                "..."
-                                if len(
-                                    content_text
-                                ) > 700
-                                else ""
-                            )
-                        )
-
-                    sample_link = str(
-                        event.get(
-                            "Sample_Link",
-                            "",
-                        )
-                    ).strip()
-
-                    if sample_link.startswith(
-                        "http"
-                    ):
-                        st.markdown(
-                            (
-                                "[Read representative "
-                                f"article]({sample_link})"
-                            )
-                        )
-
-                    else:
-                        st.caption(
-                            "No representative "
-                            "article link is available."
-                        )
-
-                    raw_event_label = (
-                        event.get(
-                            "Raw_Event_Label"
-                        )
-                    )
-
-                    missing_raw_label = (
-                        pd.isna(
-                            raw_event_label
-                        )
-                        or str(
-                            raw_event_label
-                        )
-                        .strip()
-                        .lower()
-                        in [
-                            "",
-                            "nan",
-                            "none",
-                        ]
-                    )
-
-                    if missing_raw_label:
-                        related = (
-                            risk_events[
-                                risk_events[
-                                    "Title"
-                                ]
-                                == sample_title
-                            ]
-                            .copy()
-                        )
-
-                    else:
-                        related = (
-                            risk_events[
-                                risk_events[
-                                    "Event_Label"
-                                ]
-                                == raw_event_label
-                            ]
-                            .copy()
-                        )
-
-                    st.markdown(
-                        "**Related articles**"
-                    )
-
-                    related_dedup_columns = [
-                        column
-                        for column in [
-                            "Title",
-                            "Link",
-                        ]
-                        if column
-                        in related.columns
-                    ]
-
-                    if related_dedup_columns:
-                        related = (
-                            related
-                            .drop_duplicates(
-                                subset=(
-                                    related_dedup_columns
-                                )
-                            )
-                        )
-
-                    for _, article_row in (
-                        related
-                        .head(
-                            max_items
-                        )
-                        .iterrows()
-                    ):
-                        title = (
-                            article_row.get(
-                                "Title"
-                            )
-                        )
-
-                        if (
-                            pd.isna(title)
-                            or not str(
-                                title
-                            ).strip()
-                        ):
-                            continue
-
-                        published = (
-                            article_row.get(
-                                "Published_utc"
-                            )
-                        )
-
-                        link = str(
-                            article_row.get(
-                                "Link",
-                                "",
-                            )
-                        ).strip()
-
-                        source = (
-                            article_row.get(
-                                "Source",
-                                article_row.get(
-                                    "source",
-                                    article_row.get(
-                                        "canonical_source",
-                                        (
-                                            "Unknown "
-                                            "source"
-                                        ),
-                                    ),
-                                ),
-                            )
-                        )
-
-                        with st.container(
-                            border=True
-                        ):
-                            if link.startswith(
-                                "http"
-                            ):
-                                st.markdown(
-                                    f"**[{title}]({link})**"
-                                )
-
-                            else:
-                                st.markdown(
-                                    f"**{title}**"
-                                )
-
-                            meta = []
-
-                            if (
-                                pd.notna(source)
-                                and str(
-                                    source
-                                ).strip()
-                            ):
-                                meta.append(
-                                    str(source)
-                                )
-
-                            if pd.notna(
-                                published
-                            ):
-                                published_value = (
-                                    pd.to_datetime(
-                                        published,
-                                        errors="coerce",
-                                    )
-                                )
-
-                                if pd.notna(
-                                    published_value
-                                ):
-                                    meta.append(
-                                        (
-                                            "Published: "
-                                            f"{published_value:%B %d, %Y}"
-                                        )
-                                    )
-
-                            if meta:
-                                st.caption(
-                                    " | ".join(
-                                        meta
-                                    )
-                                )
-
-                            content = (
-                                article_row.get(
-                                    "Content"
-                                )
-                            )
-
-                            if (
-                                pd.notna(
-                                    content
-                                )
-                                and str(
-                                    content
-                                ).strip()
-                            ):
-                                content_text = (
-                                    str(content)
-                                )
-
-                                content_preview = (
-                                    content_text[
-                                        :450
-                                    ]
-                                )
-
-                                st.write(
-                                    content_preview
-                                    + (
-                                        "..."
-                                        if len(
-                                            content_text
-                                        ) > 450
-                                        else ""
-                                    )
-                                )
-
-                            if not link.startswith(
-                                "http"
-                            ):
-                                st.caption(
-                                    "Original article "
-                                    "link unavailable."
-                                )
-
-        st.divider()
-
-        # =====================================================
-        # Recent headlines
-        # =====================================================
-
-        st.markdown(
-            "### Recent Headlines"
-        )
-
-        headline_df = (
-            risk_events.copy()
-        )
-
-        date_col = (
-            "Published_utc"
-            if (
-                "Published_utc"
-                in headline_df.columns
-            )
-            else "Window"
-        )
-
-        if date_col in headline_df.columns:
-            headline_df[
-                date_col
-            ] = pd.to_datetime(
-                headline_df[
-                    date_col
-                ],
-                errors="coerce",
-            )
-
-        headline_dedup_columns = [
-            column
-            for column in [
-                "Title",
-                "Link",
-            ]
-            if column
-            in headline_df.columns
-        ]
-
-        recent_headlines = (
-            headline_df
-            .dropna(
-                subset=["Title"]
-            )
-            .sort_values(
-                date_col,
-                ascending=False,
-            )
-        )
-
-        if headline_dedup_columns:
-            recent_headlines = (
-                recent_headlines
-                .drop_duplicates(
-                    subset=(
-                        headline_dedup_columns
-                    )
-                )
-            )
-
-        recent_headlines = (
-            recent_headlines
-            .head(
-                max_items
-            )
-        )
-
-        if recent_headlines.empty:
-            st.caption(
-                "No recent headlines are "
-                "available for the selected risk."
-            )
-
-        else:
-            for _, headline in (
-                recent_headlines.iterrows()
-            ):
-                headline_title = str(
-                    headline.get(
-                        "Title",
-                        "Untitled headline",
-                    )
-                )
-
-                with st.expander(
-                    headline_title[:180],
-                    expanded=False,
-                ):
-                    if pd.notna(
-                        headline.get(
-                            date_col
-                        )
-                    ):
-                        headline_date = (
-                            pd.to_datetime(
-                                headline.get(
-                                    date_col
-                                ),
-                                errors="coerce",
-                            )
-                        )
-
-                        if pd.notna(
-                            headline_date
-                        ):
-                            st.caption(
-                                (
-                                    "Published: "
-                                    f"{headline_date:%B %d, %Y}"
-                                )
-                            )
-
-                    source = headline.get(
-                        "Source",
-                        headline.get(
-                            "source",
-                            headline.get(
-                                "canonical_source",
-                                None,
-                            ),
-                        ),
-                    )
-
-                    if (
-                        pd.notna(source)
-                        and str(
-                            source
-                        ).strip()
-                    ):
-                        st.caption(
-                            f"Source: {source}"
-                        )
-
-                    content = (
-                        headline.get(
-                            "Content"
-                        )
-                    )
-
-                    if (
-                        pd.notna(content)
-                        and str(
-                            content
-                        ).strip()
-                    ):
-                        content_text = str(
-                            content
-                        )
-
-                        st.write(
-                            content_text[:700]
-                            + (
-                                "..."
-                                if len(
-                                    content_text
-                                ) > 700
-                                else ""
-                            )
-                        )
-
-                    link = str(
-                        headline.get(
-                            "Link",
-                            "",
-                        )
-                    ).strip()
-
-                    if link.startswith(
-                        "http"
-                    ):
-                        st.markdown(
-                            (
-                                "[Read original "
-                                f"article]({link})"
-                            )
-                        )
-
-                    else:
-                        st.caption(
-                            "Original article "
-                            "link unavailable."
-                        )
+        
     
     
     
