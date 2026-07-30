@@ -6295,13 +6295,15 @@ if selection == "Article Risk Review":
     start_date = pd.to_datetime(start_date).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     end_date = (pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)).tz_localize(ZoneInfo("America/Chicago")).tz_convert('UTC')
     filtered_df['Published'] = pd.to_datetime(filtered_df['Published'], errors = 'coerce', utc = True)
-    stories_mask = filtered_df['item_type'] == 'story'
-    articles_mask = (
-        (filtered_df['item_type'] == 'article') &
-        (filtered_df['Published'].between(start_date, end_date, inclusive='both'))
+    date_mask = filtered_df["Published"].between(
+        start_date,
+        end_date,
+        inclusive="both",
     )
     
-    filtered_df = filtered_df[stories_mask | articles_mask]
+    filtered_df = filtered_df[
+        date_mask
+    ].copy()
     filtered_df = filtered_df.sort_values('Published', ascending = False, na_position = 'last')
     filtered_df = filtered_df.reset_index(drop = True)
 
